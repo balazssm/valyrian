@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valyrian — Minecraft Server</title>
+<link rel="icon" type="image/x-icon" href="server-logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --r:#c0151a;--r2:#e8252b;--r3:#ff4a50;--r4:#7a0c0f;
+  --w:#f5f0eb;--w2:#d4cec7;--w3:#a09890;
+  --b:#0b0b0b;--b2:#141414;--b3:#1e1e1e;--b4:#282828;
+  --online:#22c55e;--offline:#ef4444;
+  --gold:#f59e0b;--purple:#a78bfa;--blue:#38bdf8;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--b);color:var(--w);font-family:'Crimson Pro',Georgia,serif;font-size:18px;line-height:1.7;overflow-x:hidden;}
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--b);}
+::-webkit-scrollbar-thumb{background:var(--r4);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--r);}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0.9rem 3rem;background:rgba(11,11,11,0.97);border-bottom:1px solid rgba(192,21,26,0.3);backdrop-filter:blur(8px);}
+.nav-brand{display:flex;align-items:center;gap:0.7rem;text-decoration:none;}
+.nav-logo-img{width:34px;height:34px;border-radius:5px;object-fit:cover;border:1px solid rgba(192,21,26,0.5);}
+.nav-name{font-family:'Cinzel',serif;font-size:1rem;font-weight:900;color:var(--w);letter-spacing:0.25em;}
+.nav-name span{color:var(--r2);}
+.nav-links{display:flex;align-items:center;gap:2rem;list-style:none;}
+.nav-links a{font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.22em;color:var(--w3);text-decoration:none;text-transform:uppercase;transition:color 0.2s;}
+.nav-links a:hover{color:var(--r3);}
+.nav-discord{display:flex;align-items:center;gap:0.5rem;background:rgba(88,101,242,0.15);border:1px solid rgba(88,101,242,0.4);border-radius:4px;padding:0.35rem 0.9rem;font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.18em;color:#8891f5!important;text-decoration:none;text-transform:uppercase;transition:all 0.2s;}
+.nav-discord:hover{background:rgba(88,101,242,0.28)!important;border-color:rgba(88,101,242,0.7)!important;color:#adb5ff!important;}
+.nav-auth-btn{display:flex;align-items:center;gap:0.5rem;background:rgba(192,21,26,0.15);border:1px solid rgba(192,21,26,0.4);border-radius:4px;padding:0.35rem 0.9rem;font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.18em;color:var(--r3)!important;text-decoration:none;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.nav-auth-btn:hover{background:rgba(192,21,26,0.28)!important;border-color:rgba(192,21,26,0.7)!important;}
+.nav-user-area{display:flex;align-items:center;gap:0.8rem;cursor:pointer;position:relative;}
+.nav-user-avatar{width:32px;height:32px;border-radius:6px;border:1px solid rgba(192,21,26,0.5);overflow:hidden;}
+.nav-user-avatar img{width:100%;height:100%;object-fit:cover;}
+.nav-user-name{font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.18em;color:var(--w2);}
+.nav-user-rank{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.15em;color:var(--r3);text-transform:uppercase;}
+.nav-user-dropdown{position:absolute;top:calc(100% + 0.75rem);right:0;background:var(--b2);border:1px solid rgba(192,21,26,0.3);border-radius:6px;min-width:180px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.6);opacity:0;pointer-events:none;transform:translateY(-6px);transition:all 0.2s;z-index:200;}
+.nav-user-dropdown.open{opacity:1;pointer-events:all;transform:translateY(0);}
+.nav-dropdown-item{display:flex;align-items:center;gap:0.6rem;padding:0.7rem 1rem;font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.18em;color:var(--w3);cursor:pointer;text-transform:uppercase;transition:all 0.15s;border:none;background:none;width:100%;text-align:left;}
+.nav-dropdown-item:hover{background:rgba(192,21,26,0.1);color:var(--w);}
+.nav-dropdown-item.danger:hover{background:rgba(239,68,68,0.1);color:#f87171;}
+.nav-dropdown-sep{height:1px;background:rgba(192,21,26,0.15);margin:0.25rem 0;}
+
+/* MAINTENANCE */
+.maintenance-bar{position:fixed;top:0;left:0;right:0;z-index:200;background:linear-gradient(90deg,#7a4f00,#c07800,#7a4f00);background-size:200% 100%;animation:mshift 4s linear infinite;padding:0.55rem 2rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:0.75rem;}
+@keyframes mshift{0%{background-position:0% 0%;}100%{background-position:200% 0%;}}
+.maintenance-bar span{font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.22em;color:#ffe8a0;text-transform:uppercase;}
+.maintenance-bar a{font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.18em;color:#fff3cc;text-decoration:underline;text-underline-offset:3px;text-transform:uppercase;}
+body.has-maintenance nav{top:38px;}
+body.has-maintenance .hero{padding-top:calc(6rem + 38px);}
+
+/* PAGES */
+.page{display:none;}
+.page.active{display:block;}
+
+/* HERO */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% -5%,rgba(192,21,26,0.28) 0%,transparent 65%),radial-gradient(ellipse 45% 35% at 5% 95%,rgba(192,21,26,0.18) 0%,transparent 55%),#0b0b0b;z-index:0;}
+.hero-lines{position:absolute;inset:0;z-index:0;overflow:hidden;}
+.hero-lines::before{content:'';position:absolute;left:50%;transform:translateX(-50%);top:0;width:1px;height:100%;background:linear-gradient(to bottom,transparent,rgba(192,21,26,0.35),transparent);}
+.particles{position:absolute;inset:0;z-index:1;overflow:hidden;}
+.particle{position:absolute;border-radius:50%;animation:pfloat linear infinite;}
+@keyframes pfloat{0%{transform:translateY(100vh);opacity:0;}10%{opacity:.8;}90%{opacity:.8;}100%{transform:translateY(-8vh);opacity:0;}}
+.hero-content{position:relative;z-index:2;max-width:860px;}
+.hero-eyebrow{font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.45em;color:rgba(192,21,26,0.7);text-transform:uppercase;margin-bottom:1.25rem;}
+.logo-area{margin-bottom:1.25rem;}
+.logo-ring{width:114px;height:114px;border-radius:14px;overflow:hidden;margin:0 auto;}
+.logo-ring img{width:100%;height:100%;object-fit:cover;}
+.hero-title{font-family:'Cinzel',serif;font-size:clamp(3.8rem,12vw,8rem);font-weight:900;line-height:1;letter-spacing:0.04em;margin-bottom:0.4rem;color:var(--w);animation:hglow 3.5s ease-in-out infinite alternate;}
+@keyframes hglow{from{text-shadow:0 0 40px rgba(192,21,26,0.4),0 0 80px rgba(192,21,26,0.15);}to{text-shadow:0 0 80px rgba(232,37,43,0.7),0 0 160px rgba(192,21,26,0.3);}}
+.hero-accent{color:var(--r2);}
+.hero-div{width:240px;height:1px;margin:0.8rem auto;position:relative;}
+.hero-div::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,var(--r),var(--w2),var(--r),transparent);}
+.hero-div::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:6px;height:6px;background:var(--r2);border-radius:50%;}
+.hero-sub{font-size:1.1rem;color:var(--w3);font-style:italic;margin-bottom:2.5rem;}
+.status-card{display:inline-flex;align-items:center;gap:1.5rem;background:rgba(192,21,26,0.07);border:1px solid rgba(192,21,26,0.3);border-radius:4px;padding:1rem 2rem;margin-bottom:2rem;flex-wrap:wrap;justify-content:center;}
+.sdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.sdot.online{background:var(--online);animation:sdp 2s ease-in-out infinite;}
+.sdot.offline{background:var(--offline);}
+.sdot.loading{background:var(--w3);}
+.sdot.maintenance{background:#f59e0b;animation:sdpm 1.5s ease-in-out infinite;}
+@keyframes sdp{0%,100%{box-shadow:0 0 0 3px rgba(34,197,94,.2);}50%{box-shadow:0 0 0 7px rgba(34,197,94,.04);}}
+@keyframes sdpm{0%,100%{box-shadow:0 0 0 3px rgba(245,158,11,.25);}50%{box-shadow:0 0 0 7px rgba(245,158,11,.05);}}
+.slabel{font-family:'Cinzel',serif;font-size:12px;letter-spacing:0.15em;}
+.ssep{width:1px;height:24px;background:rgba(192,21,26,0.3);}
+.snum{font-family:'Cinzel',serif;font-size:21px;color:var(--w);}
+.snum small{font-size:10px;color:var(--w3);display:block;letter-spacing:0.1em;font-family:'Crimson Pro',serif;}
+.ip-block{display:flex;align-items:stretch;border:1px solid rgba(192,21,26,0.4);border-radius:4px;overflow:hidden;max-width:430px;margin:0 auto 1.5rem;}
+.ip-text{flex:1;background:rgba(192,21,26,0.06);padding:0.75rem 1.25rem;font-family:'Cinzel',serif;font-size:1rem;letter-spacing:0.1em;color:var(--w);display:flex;align-items:center;}
+.ip-copy{background:var(--r);border:none;color:var(--w);font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.18em;padding:0.75rem 1.5rem;cursor:pointer;transition:background 0.2s;white-space:nowrap;}
+.ip-copy:hover{background:var(--r2);}
+.hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem;}
+.hero-login-btn{display:inline-flex;align-items:center;gap:0.6rem;background:rgba(192,21,26,0.15);border:1px solid rgba(192,21,26,0.5);border-radius:4px;padding:0.7rem 1.75rem;font-family:'Cinzel',serif;font-size:12px;letter-spacing:0.2em;color:var(--r3);text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.hero-login-btn:hover{background:rgba(192,21,26,0.3);border-color:rgba(192,21,26,0.8);}
+.discord-hero-btn{display:inline-flex;align-items:center;gap:0.6rem;background:rgba(88,101,242,0.12);border:1px solid rgba(88,101,242,0.45);border-radius:4px;padding:0.7rem 1.75rem;font-family:'Cinzel',serif;font-size:12px;letter-spacing:0.2em;color:#8891f5;text-decoration:none;text-transform:uppercase;transition:all 0.2s;}
+.discord-hero-btn:hover{background:rgba(88,101,242,0.25);border-color:rgba(88,101,242,0.7);color:#c0c5ff;}
+
+/* SECTIONS */
+section{padding:5rem 2rem;}
+.container{max-width:1100px;margin:0 auto;}
+.stag{font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.42em;color:var(--r2);text-transform:uppercase;margin-bottom:0.7rem;display:block;}
+.stitle{font-family:'Cinzel',serif;font-size:clamp(1.8rem,4vw,2.7rem);font-weight:600;color:var(--w);margin-bottom:0.9rem;line-height:1.2;}
+.ssub{color:var(--w3);font-style:italic;max-width:520px;margin-bottom:3rem;}
+.sdiv{width:72px;height:2px;margin-bottom:2rem;border-radius:1px;background:linear-gradient(90deg,var(--r),transparent);}
+.about-bg{background:var(--b2);}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;}
+.stats-wrap{display:grid;grid-template-columns:1fr 1fr;gap:2px;border-radius:6px;overflow:hidden;border:1px solid rgba(192,21,26,0.25);background:rgba(192,21,26,0.15);}
+.sbox{background:var(--b2);padding:1.5rem;text-align:center;}
+.sbox .n{font-family:'Cinzel',serif;font-size:2rem;font-weight:600;display:block;color:var(--r3);}
+.sbox .l{font-size:10px;letter-spacing:0.18em;color:var(--w3);text-transform:uppercase;font-family:'Cinzel',serif;}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;}
+.fc{border-radius:8px;padding:1.75rem;border:1px solid rgba(255,255,255,0.07);background:var(--b3);position:relative;overflow:hidden;transition:transform 0.25s,border-color 0.25s;}
+.fc:hover{transform:translateY(-4px);border-color:rgba(192,21,26,0.4);}
+.fc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--r4),var(--r2),transparent);}
+.fc-icon{font-size:2rem;margin-bottom:0.75rem;display:block;}
+.fc-title{font-family:'Cinzel',serif;font-size:1rem;color:var(--r3);margin-bottom:0.4rem;letter-spacing:0.04em;}
+.fc:nth-child(even) .fc-title{color:var(--w2);}
+.fc-desc{font-size:0.93rem;color:var(--w3);line-height:1.7;}
+.team-bg{background:var(--b2);}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;}
+.team-card{background:var(--b3);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:1.75rem 1.5rem;text-align:center;position:relative;overflow:hidden;transition:border-color 0.25s,transform 0.25s;}
+.team-card:hover{border-color:rgba(192,21,26,0.35);transform:translateY(-3px);}
+.team-avatar{width:56px;height:96px;border-radius:10px;background:var(--b4);border:1px solid rgba(192,21,26,0.3);margin:0 auto 1rem;overflow:hidden;}
+.team-avatar img{width:100%;height:100%;object-fit:cover;}
+.team-name{font-family:'Cinzel',serif;font-size:0.95rem;font-weight:600;color:var(--w);letter-spacing:0.06em;margin-bottom:0.2rem;}
+.team-role{font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--r3);margin-bottom:0.6rem;}
+.team-role.dev{color:var(--blue);}
+.team-desc{font-size:1rem;color:var(--w3);line-height:1.6;font-style:italic;}
+.whitelist-bg{background:var(--b);}
+.whitelist-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(192,21,26,0.1);border:1px solid rgba(192,21,26,0.35);border-radius:3px;padding:0.35rem 0.85rem;font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.2em;color:var(--r3);text-transform:uppercase;margin-bottom:1.5rem;}
+.whitelist-badge .wdot{width:6px;height:6px;border-radius:50%;background:var(--r3);flex-shrink:0;}
+.whitelist-box{background:var(--b3);border:1px solid rgba(192,21,26,0.25);border-radius:8px;padding:2.5rem;display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start;}
+.wl-info h3{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--w);margin-bottom:0.75rem;letter-spacing:0.04em;}
+.wl-info p{color:var(--w3);font-size:0.95rem;margin-bottom:0.75rem;}
+.wl-steps{display:flex;flex-direction:column;gap:0.9rem;}
+.wl-step{display:flex;gap:1rem;align-items:flex-start;}
+.wl-num{font-family:'Cinzel',serif;font-size:11px;font-weight:900;color:var(--r3);background:rgba(192,21,26,0.12);border:1px solid rgba(192,21,26,0.3);border-radius:3px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.wl-step-text{font-size:0.9rem;color:var(--w3);line-height:1.5;}
+.wl-step-text strong{color:var(--w);font-weight:400;}
+.wl-discord-btn{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(88,101,242,0.15);border:1px solid rgba(88,101,242,0.45);border-radius:4px;padding:0.65rem 1.4rem;font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.18em;color:#8891f5;text-decoration:none;text-transform:uppercase;transition:all 0.2s;margin-top:1.25rem;}
+.wl-discord-btn:hover{background:rgba(88,101,242,0.28);border-color:rgba(88,101,242,0.7);}
+.join-bg{background:var(--b2);}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1.5rem;}
+.step{padding:1.5rem;border-radius:8px;border:1px solid rgba(255,255,255,0.05);background:var(--b3);position:relative;}
+.step::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--r4),transparent);}
+.step-n{font-family:'Cinzel',serif;font-size:2.8rem;font-weight:900;line-height:1;margin-bottom:0.6rem;-webkit-text-stroke:1px var(--r2);color:transparent;}
+.step:nth-child(even) .step-n{-webkit-text-stroke:1px rgba(245,240,235,.3);}
+.step-title{font-family:'Cinzel',serif;font-size:0.95rem;color:var(--w);margin-bottom:0.4rem;letter-spacing:0.04em;}
+.step-desc{font-size:0.9rem;color:var(--w3);line-height:1.7;}
+.step code{font-family:'Courier New',monospace;font-size:0.84rem;background:rgba(192,21,26,.12);border:1px solid rgba(192,21,26,.25);padding:0.1em 0.4em;border-radius:3px;color:var(--r3);}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity 0.65s ease,transform 0.65s ease;}
+.reveal.visible{opacity:1;transform:none;}
+.corner-tl,.corner-br{position:absolute;width:40px;height:40px;z-index:3;}
+.corner-tl{top:1.5rem;left:1.5rem;border-top:1px solid rgba(192,21,26,.5);border-left:1px solid rgba(192,21,26,.5);}
+.corner-br{bottom:1.5rem;right:1.5rem;border-bottom:1px solid rgba(192,21,26,.5);border-right:1px solid rgba(192,21,26,.5);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--b2);border:1px solid rgba(192,21,26,0.35);border-radius:10px;padding:2.5rem;width:100%;max-width:420px;position:relative;transform:translateY(20px);transition:transform 0.3s;box-shadow:0 0 80px rgba(192,21,26,0.15);}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--w3);cursor:pointer;font-size:1.2rem;transition:color 0.2s;}
+.modal-close:hover{color:var(--w);}
+.modal-logo{text-align:center;margin-bottom:1.5rem;}
+.modal-logo-img{width:52px;height:52px;border-radius:8px;border:1px solid rgba(192,21,26,0.4);}
+.modal-title{font-family:'Cinzel',serif;font-size:1.3rem;font-weight:600;color:var(--w);text-align:center;margin-bottom:0.3rem;letter-spacing:0.05em;}
+.modal-sub{font-size:0.88rem;color:var(--w3);text-align:center;font-style:italic;margin-bottom:1.75rem;}
+.modal-tabs{display:flex;border-bottom:1px solid rgba(192,21,26,0.2);margin-bottom:1.75rem;}
+.modal-tab{flex:1;background:none;border:none;padding:0.65rem;font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.2em;color:var(--w3);cursor:pointer;text-transform:uppercase;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;}
+.modal-tab.active{color:var(--r3);border-bottom-color:var(--r2);}
+.form-group{margin-bottom:1.25rem;}
+.form-label{display:block;font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.22em;color:var(--w3);text-transform:uppercase;margin-bottom:0.5rem;}
+.form-input{width:100%;background:var(--b3);border:1px solid rgba(192,21,26,0.25);border-radius:4px;padding:0.7rem 1rem;color:var(--w);font-family:'Crimson Pro',serif;font-size:1rem;outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:rgba(192,21,26,0.6);}
+.form-input::placeholder{color:var(--w3);font-style:italic;}
+.form-btn{width:100%;background:var(--r);border:none;color:var(--w);font-family:'Cinzel',serif;font-size:12px;letter-spacing:0.22em;padding:0.85rem;border-radius:4px;cursor:pointer;text-transform:uppercase;transition:background 0.2s;margin-top:0.5rem;}
+.form-btn:hover{background:var(--r2);}
+.form-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.form-err{font-size:0.85rem;color:#ef4444;text-align:center;margin-top:0.75rem;font-style:italic;min-height:1.2em;}
+.form-ok{font-size:0.85rem;color:var(--online);text-align:center;margin-top:0.75rem;font-style:italic;min-height:1.2em;}
+.form-divider{display:flex;align-items:center;gap:1rem;margin:1.25rem 0;}
+.form-divider::before,.form-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.08);}
+.form-divider span{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;color:var(--w3);text-transform:uppercase;}
+.discord-login-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:0.6rem;background:rgba(88,101,242,0.15);border:1px solid rgba(88,101,242,0.4);border-radius:4px;padding:0.75rem;font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.18em;color:#8891f5;cursor:pointer;text-transform:uppercase;transition:all 0.2s;}
+.discord-login-btn:hover{background:rgba(88,101,242,0.28);border-color:rgba(88,101,242,0.7);}
+
+/* PROFILE */
+#profile-page{min-height:100vh;background:var(--b);padding-top:80px;}
+.profile-header{background:var(--b2);border-bottom:1px solid rgba(192,21,26,0.2);padding:3rem 2rem 0;}
+.profile-header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:flex-end;gap:2rem;}
+.profile-skin-wrap{position:relative;flex-shrink:0;}
+.profile-skin{width:80px;height:140px;border-radius:10px;border:2px solid rgba(192,21,26,0.4);overflow:hidden;background:var(--b3);}
+.profile-skin img{width:100%;height:100%;object-fit:cover;}
+.profile-skin-online{position:absolute;bottom:6px;right:6px;width:10px;height:10px;border-radius:50%;background:var(--online);border:2px solid var(--b2);animation:sdp 2s ease-in-out infinite;}
+.profile-info{flex:1;padding-bottom:1.5rem;}
+.profile-rank-badge{display:inline-flex;align-items:center;gap:0.4rem;padding:0.25rem 0.75rem;border-radius:3px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:0.6rem;}
+.profile-rank-badge.owner,.profile-rank-badge.admin{background:rgba(192,21,26,0.15);border:1px solid rgba(192,21,26,0.4);color:var(--r3);}
+.profile-rank-badge.mod{background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.35);color:var(--purple);}
+.profile-rank-badge.dev{background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.35);color:var(--blue);}
+.profile-rank-badge.vip{background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);color:var(--gold);}
+.profile-rank-badge.player{background:rgba(160,152,144,0.12);border:1px solid rgba(160,152,144,0.3);color:var(--w3);}
+.profile-rank-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.profile-username{font-family:'Cinzel',serif;font-size:2.2rem;font-weight:900;color:var(--w);letter-spacing:0.06em;margin-bottom:0.3rem;}
+.profile-bio{font-size:0.95rem;color:var(--w3);font-style:italic;}
+.profile-tabs{display:flex;gap:0;border-top:1px solid rgba(192,21,26,0.15);margin-top:1.5rem;}
+.profile-tab{background:none;border:none;padding:0.9rem 1.5rem;font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.22em;color:var(--w3);cursor:pointer;text-transform:uppercase;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;position:relative;top:1px;}
+.profile-tab.active{color:var(--r3);border-bottom-color:var(--r2);}
+.profile-tab:hover:not(.active){color:var(--w2);}
+.profile-body{max-width:1100px;margin:0 auto;padding:2.5rem 2rem;}
+.profile-section{display:none;}
+.profile-section.active{display:block;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;}
+.stat-card{background:var(--b3);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:1.25rem;text-align:center;position:relative;overflow:hidden;transition:border-color 0.25s;}
+.stat-card:hover{border-color:rgba(192,21,26,0.3);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--r4),var(--r2),transparent);}
+.stat-val{font-family:'Cinzel',serif;font-size:1.8rem;font-weight:600;color:var(--r3);display:block;}
+.stat-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.2em;color:var(--w3);text-transform:uppercase;margin-top:0.2rem;}
+.stat-icon{font-size:1.5rem;margin-bottom:0.5rem;display:block;}
+.activity-feed{display:flex;flex-direction:column;gap:0.75rem;}
+.activity-item{display:flex;align-items:center;gap:1rem;background:var(--b3);border:1px solid rgba(255,255,255,0.05);border-radius:6px;padding:0.9rem 1.25rem;}
+.activity-icon{width:34px;height:34px;border-radius:6px;background:rgba(192,21,26,0.12);border:1px solid rgba(192,21,26,0.25);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.activity-text{flex:1;font-size:0.9rem;color:var(--w2);}
+.activity-time{font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.12em;color:var(--w3);white-space:nowrap;}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.settings-box{background:var(--b3);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:1.75rem;}
+.settings-box h3{font-family:'Cinzel',serif;font-size:1rem;color:var(--w);letter-spacing:0.06em;margin-bottom:1.25rem;}
+.settings-box .form-group{margin-bottom:1rem;}
+.settings-save{background:var(--r);border:none;color:var(--w);font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.2em;padding:0.65rem 1.5rem;border-radius:4px;cursor:pointer;text-transform:uppercase;transition:background 0.2s;margin-top:0.5rem;}
+.settings-save:hover{background:var(--r2);}
+.whitelist-status-box{background:var(--b3);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:1.75rem;display:flex;align-items:center;gap:1.25rem;}
+.wl-status-icon{width:44px;height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+.wl-status-icon.approved{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);}
+.wl-status-icon.pending{background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);}
+.wl-status-icon.none,.wl-status-icon.rejected{background:rgba(160,152,144,0.1);border:1px solid rgba(160,152,144,0.2);}
+.wl-status-text h4{font-family:'Cinzel',serif;font-size:1rem;color:var(--w);letter-spacing:0.04em;margin-bottom:0.2rem;}
+.wl-status-text p{font-size:0.88rem;color:var(--w3);font-style:italic;}
+.logout-btn{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:4px;padding:0.5rem 1.25rem;font-family:'Cinzel',serif;font-size:11px;letter-spacing:0.18em;color:#f87171;cursor:pointer;text-transform:uppercase;transition:all 0.2s;}
+.logout-btn:hover{background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.5);}
+
+/* LOADING SPINNER */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.2);border-top-color:var(--w);border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* FOOTER */
+footer{background:var(--b);border-top:1px solid rgba(192,21,26,.2);padding:3rem 2rem;text-align:center;}
+.footer-top{display:flex;align-items:center;justify-content:center;gap:0.75rem;margin-bottom:0.3rem;}
+.fl-img{width:40px;height:40px;border-radius:7px;object-fit:cover;border:1px solid rgba(192,21,26,.4);}
+.footer-brand{font-family:'Cinzel',serif;font-size:1.5rem;font-weight:900;letter-spacing:0.22em;color:var(--w);}
+.footer-brand span{color:var(--r2);}
+.footer-div{width:50px;height:1px;background:linear-gradient(90deg,transparent,rgba(192,21,26,.5),transparent);margin:1.2rem auto;}
+.footer-links{display:flex;align-items:center;justify-content:center;gap:1.75rem;margin-bottom:1.25rem;flex-wrap:wrap;}
+.footer-links a{font-family:'Cinzel',serif;font-size:10px;letter-spacing:0.2em;color:var(--w3);text-decoration:none;text-transform:uppercase;transition:color 0.2s;}
+.footer-links a:hover{color:var(--w2);}
+.footer-discord-link{display:inline-flex;align-items:center;gap:0.4rem;color:#7983f5!important;}
+.footer-txt{color:var(--w3);font-size:0.88rem;font-style:italic;}
+#toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(16px);background:var(--r);color:var(--w);font-family:'Cinzel',serif;font-size:12px;letter-spacing:0.18em;padding:0.6rem 1.75rem;border-radius:3px;opacity:0;transition:all 0.3s;pointer-events:none;z-index:999;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media(max-width:768px){
+  .about-grid,.whitelist-box,.settings-grid{grid-template-columns:1fr;gap:2rem;}
+  nav{padding:0.9rem 1.25rem;}
+  .nav-links li:nth-child(-n+5){display:none;}
+  .corner-tl,.corner-br{display:none;}
+  .profile-header-inner{flex-direction:column;align-items:flex-start;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body class="has-maintenance">
+
+<!-- A backend URL-t itt állítsd be -->
+<script>
+  // Ha lokálisan futtatod: http://localhost:3000
+  // Ha Railway/Render-en van: https://a-te-app.railway.app
+  var API = 'http://localhost:3000/api';
+</script>
+
+<div class="maintenance-bar" id="maint-bar">
+  <span>⚙ Karbantartás folyamatban — Csatlakozni egyelőre nem lehet</span>
+  <a href="https://discord.gg/s7Abx6mMym" target="_blank" rel="noopener">Frissítések a Discordon</a>
+</div>
+
+<nav>
+  <a href="#" class="nav-brand" onclick="showPage('home');return false;">
+    <img class="nav-logo-img" src="server-logo.png" alt="Valyrian Logo">
+    <span class="nav-name">VAL<span>Y</span>RIAN</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about" onclick="navHome('about');return false;">Rólunk</a></li>
+    <li><a href="#features" onclick="navHome('features');return false;">Játékmódok</a></li>
+    <li><a href="#team" onclick="navHome('team');return false;">Csapatunk</a></li>
+    <li><a href="#whitelist" onclick="navHome('whitelist');return false;">Whitelist</a></li>
+    <li><a href="#join" onclick="navHome('join');return false;">Csatlakozás</a></li>
+    <li>
+      <a href="https://discord.gg/s7Abx6mMym" target="_blank" rel="noopener" class="nav-discord">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.114 18.1.132 18.113a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+        Discord
+      </a>
+    </li>
+    <li id="nav-login-li">
+      <button class="nav-auth-btn" onclick="openModal()">⚔ Bejelentkezés</button>
+    </li>
+    <li id="nav-user-li" style="display:none;">
+      <div class="nav-user-area" id="nav-user-area" onclick="toggleDropdown(event)">
+        <div class="nav-user-avatar"><img id="nav-avatar-img" src="" alt=""></div>
+        <div>
+          <div class="nav-user-name" id="nav-username-label">-</div>
+          <div class="nav-user-rank" id="nav-rank-label">-</div>
+        </div>
+        <div class="nav-user-dropdown" id="nav-dropdown">
+          <button class="nav-dropdown-item" onclick="goProfile(event)">👤 Profilom</button>
+          <button class="nav-dropdown-item" onclick="goSettings(event)">⚙ Beállítások</button>
+          <div class="nav-dropdown-sep"></div>
+          <button class="nav-dropdown-item danger" onclick="logout()">🚪 Kijelentkezés</button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</nav>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-logo"><img class="modal-logo-img" src="server-logo.png" alt=""></div>
+    <h2 class="modal-title">VAL<span style="color:var(--r2)">Y</span>RIAN</h2>
+    <p class="modal-sub">Üdvözlünk! Jelentkezz be a folytatáshoz.</p>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tab-login" onclick="switchTab('login')">Bejelentkezés</button>
+      <button class="modal-tab" id="tab-register" onclick="switchTab('register')">Regisztráció</button>
+    </div>
+    <div id="form-login">
+      <div class="form-group">
+        <label class="form-label">Minecraft Nick</label>
+        <input class="form-input" type="text" id="login-user" placeholder="pl. Notch" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Jelszó</label>
+        <input class="form-input" type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="form-btn" id="login-btn" onclick="doLogin()">Bejelentkezés</button>
+      <div class="form-err" id="login-err"></div>
+      <div class="form-divider"><span>vagy</span></div>
+      <button class="discord-login-btn" onclick="showToast('Discord bejelentkezés hamarosan!')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.114 18.1.132 18.113a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+        Folytatás Discorddal
+      </button>
+    </div>
+    <div id="form-register" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Minecraft Nick</label>
+        <input class="form-input" type="text" id="reg-user" placeholder="pl. Notch">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail cím</label>
+        <input class="form-input" type="email" id="reg-email" placeholder="te@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Jelszó</label>
+        <input class="form-input" type="password" id="reg-pass" placeholder="Min. 6 karakter">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Jelszó megerősítése</label>
+        <input class="form-input" type="password" id="reg-pass2" placeholder="••••••••" onkeydown="if(event.key==='Enter')doRegister()">
+      </div>
+      <button class="form-btn" id="reg-btn" onclick="doRegister()">Fiók létrehozása</button>
+      <div class="form-err" id="reg-err"></div>
+      <div class="form-ok" id="reg-ok"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HOME PAGE -->
+<div id="home-page" class="page active">
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-lines"></div>
+    <div class="particles" id="pts"></div>
+    <div class="corner-tl"></div>
+    <div class="corner-br"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Magyar Minecraft Szerver</p>
+      <div class="logo-area"><div class="logo-ring"><img src="server-logo.png" alt="Valyrian Logo"></div></div>
+      <h1 class="hero-title">VAL<span class="hero-accent">Y</span>RIAN</h1>
+      <div class="hero-div"></div>
+      <p class="hero-sub">Ahol a legendák születnek és az épületek örökkévalók.</p>
+      <div class="status-card">
+        <div class="sdot loading" id="sdot"></div>
+        <span class="slabel" id="slbl" style="color:var(--w3)">ELLENŐRZÉS...</span>
+        <div class="ssep"></div>
+        <div class="snum"><span id="scnt">—</span><small>ONLINE JÁTÉKOS</small></div>
+        <div class="ssep"></div>
+        <div class="snum"><span id="smx">—</span><small>MAX SLOT</small></div>
+      </div>
+      <div class="ip-block">
+        <span class="ip-text">play.valyrian.hu</span>
+        <button class="ip-copy" onclick="copyIP()">MÁSOLÁS</button>
+      </div>
+      <div class="hero-btns">
+        <button class="hero-login-btn" id="hero-login-btn" onclick="openModal()">⚔ Bejelentkezés / Regisztráció</button>
+        <a href="https://discord.gg/s7Abx6mMym" target="_blank" rel="noopener" class="discord-hero-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.114 18.1.132 18.113a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+          Csatlakozz a Discordhoz
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="about-bg">
+    <div class="container">
+      <div class="about-grid reveal">
+        <div>
+          <span class="stag">Rólunk</span>
+          <h2 class="stitle">Egy világ, amely vár rád</h2>
+          <div class="sdiv"></div>
+          <p style="color:var(--w)">A Valyrian egy gondosan épített, magyar Minecraft szerver, ahol a kaland és a közösség találkozik.</p>
+          <p style="color:var(--w);margin-top:1rem">Akár egyedül építkezel, akár barátokkal kalandozol, akár a PvP arénaiban próbálod ki magad – itt mindent megtalálsz.</p>
+        </div>
+        <div class="stats-wrap">
+          <div class="sbox"><span class="n">99%</span><span class="l">Uptime</span></div>
+          <div class="sbox"><span class="n">1.8x</span><span class="l">Verzió</span></div>
+          <div class="sbox"><span class="n">0ms</span><span class="l">Ping</span></div>
+          <div class="sbox"><span class="n">24/7</span><span class="l">Online</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="container">
+      <span class="stag reveal">Játékmódok &amp; Funkciók</span>
+      <h2 class="stitle reveal">Minden, ami kell</h2>
+      <p class="ssub reveal">Egy teljes értékű szerver élmény, minden korosztálynak.</p>
+      <div class="fg reveal">
+        <div class="fc"><span class="fc-icon">⚔</span><h3 class="fc-title">Practice</h3><p class="fc-desc">Mérd össze tudásodat másokkal az arénában. Ranglisták, egyedi tárgyak és arénák várnak.</p></div>
+        <div class="fc"><span class="fc-icon">🛡</span><h3 class="fc-title">Anti-Cheat</h3><p class="fc-desc">Fejlett védelem minden csalás ellen. Fair play garantált, aktív moderátor csapattal.</p></div>
+        <div class="fc"><span class="fc-icon">⚡</span><h3 class="fc-title">Hamarosan!</h3><p class="fc-desc">Folyamatosan fejlesztünk — új módok és tartalmak érkeznek hamarosan.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="team" class="team-bg">
+    <div class="container">
+      <span class="stag reveal">Csapatunk</span>
+      <h2 class="stitle reveal">Az emberek a szerver mögött</h2>
+      <p class="ssub reveal">Dedikált csapatunk gondoskodik arról, hogy minden nap a legjobb élményt kapd.</p>
+      <div class="team-grid reveal">
+        <div class="team-card"><div class="team-avatar"><img src="https://visage.surgeplay.com/full/200/bxrko" alt="artemis"></div><div class="team-name">artemis</div><div class="team-role admin">Tulajdonos</div><div class="team-desc">A szerver alapítója és fő fejlesztője.</div></div>
+        <div class="team-card"><div class="team-avatar"><img src="https://visage.surgeplay.com/full/200/EnvyZen" alt="Miroldows"></div><div class="team-name">Miroldows</div><div class="team-role admin">Tulajdonos</div><div class="team-desc">Közösség menedzselés, bármivel fordulj hozzá!</div></div>
+        <div class="team-card"><div class="team-avatar"><img src="https://visage.surgeplay.com/full/200/diordesigner" alt="diordesigner"></div><div class="team-name">diordesigner</div><div class="team-role dev">Fejlesztő</div><div class="team-desc">Plugin fejlesztés, szerver optimalizálás.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="whitelist" class="whitelist-bg">
+    <div class="container">
+      <span class="stag reveal">Hozzáférés</span>
+      <h2 class="stitle reveal">Whitelist</h2>
+      <div class="sdiv reveal"></div>
+      <div class="whitelist-box reveal">
+        <div class="wl-info">
+          <div class="whitelist-badge"><div class="wdot"></div>Whitelist aktív</div>
+          <h3>Miért van whitelist?</h3>
+          <p>A szerver fejlesztés alatt áll, csak beengedett játékosok csatlakozhatnak.</p>
+          <p>A felvétel ingyenes — a Discord szerveren kell jelentkezni.</p>
+          <a href="https://discord.gg/s7Abx6mMym" target="_blank" rel="noopener" class="wl-discord-btn">Jelentkezés a Discordon</a>
+        </div>
+        <div>
+          <h3 style="font-family:'Cinzel',serif;font-size:1rem;color:var(--w);margin-bottom:1rem;">Hogyan kerülj fel?</h3>
+          <div class="wl-steps">
+            <div class="wl-step"><div class="wl-num">1</div><div class="wl-step-text">Csatlakozz a <strong>Discord szerverünkhöz</strong>.</div></div>
+            <div class="wl-step"><div class="wl-num">2</div><div class="wl-step-text">Keresd a <strong>#teszter-jelentkezés</strong> csatornát.</div></div>
+            <div class="wl-step"><div class="wl-num">3</div><div class="wl-step-text">Töltsd ki a formot: <strong>Minecraft neved</strong> és bemutatkozás.</div></div>
+            <div class="wl-step"><div class="wl-num">4</div><div class="wl-step-text">Csapatunk <strong>48 órán belül</strong> értesít.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="join" class="join-bg">
+    <div class="container">
+      <span class="stag reveal">Csatlakozás</span>
+      <h2 class="stitle reveal">Hogyan csatlakozz?</h2>
+      <div class="sdiv reveal"></div>
+      <div class="steps reveal">
+        <div class="step"><div class="step-n">01</div><h3 class="step-title">Indítsd el a Minecraftot</h3><p class="step-desc">Java Edition, <code>1.8.8.x</code> verzió.</p></div>
+        <div class="step"><div class="step-n">02</div><h3 class="step-title">Multiplayer menü</h3><p class="step-desc"><code>Multiplayer</code> → <code>Add Server</code></p></div>
+        <div class="step"><div class="step-n">03</div><h3 class="step-title">Add meg a szervert</h3><p class="step-desc">IP: <code>play.valyrian.hu</code></p></div>
+        <div class="step"><div class="step-n">04</div><h3 class="step-title">Csatlakozz!</h3><p class="step-desc"><code>Done</code> → <code>Join Server</code>. Üdvözlünk!</p></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-top"><img class="fl-img" src="server-logo.png" alt=""><span class="footer-brand">VAL<span>Y</span>RIAN</span></div>
+    <div class="footer-div"></div>
+    <div class="footer-links">
+      <a href="#about">Rólunk</a><a href="#features">Játékmódok</a><a href="#team">Csapatunk</a><a href="#whitelist">Whitelist</a>
+      <a href="https://discord.gg/s7Abx6mMym" target="_blank" class="footer-discord-link">Discord</a>
+    </div>
+    <p class="footer-txt">Nem hivatalos Minecraft szerver — nem áll kapcsolatban a Mojang Studios-szal.</p>
+    <p class="footer-txt" style="margin-top:0.4rem;font-size:0.8rem;">© 2026 Valyrian Minecraft Server</p>
+  </footer>
+</div>
+
+<!-- PROFILE PAGE -->
+<div id="profile-page" class="page">
+  <div class="profile-header">
+    <div class="profile-header-inner">
+      <div class="profile-skin-wrap">
+        <div class="profile-skin"><img id="profile-skin-img" src="" alt="Skin"></div>
+        <div class="profile-skin-online"></div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-rank-badge player" id="profile-rank-badge">
+          <div class="profile-rank-dot"></div>
+          <span id="profile-rank-text">Játékos</span>
+        </div>
+        <div class="profile-username" id="profile-username">-</div>
+        <div class="profile-bio" id="profile-bio">Még nem adtál meg bemutatkozást.</div>
+      </div>
+      <div style="padding-bottom:1.5rem;margin-left:auto;">
+        <button class="logout-btn" onclick="logout()">🚪 Kijelentkezés</button>
+      </div>
+    </div>
+    <div style="max-width:1100px;margin:0 auto;padding:0 2rem;">
+      <div style="width:80px;display:inline-block;"></div>
+      <div class="profile-tabs" style="display:inline-flex;">
+        <button class="profile-tab active" data-tab="stats" onclick="openProfileTab('stats')">📊 Statisztikák</button>
+        <button class="profile-tab" data-tab="activity" onclick="openProfileTab('activity')">📋 Aktivitás</button>
+        <button class="profile-tab" data-tab="settings" onclick="openProfileTab('settings')">⚙ Beállítások</button>
+      </div>
+    </div>
+  </div>
+  <div class="profile-body">
+    <div class="profile-section active" id="tab-stats">
+      <div class="stats-grid">
+        <div class="stat-card"><span class="stat-icon">⚔</span><span class="stat-val" id="stat-kills">—</span><span class="stat-lbl">Ölések</span></div>
+        <div class="stat-card"><span class="stat-icon">💀</span><span class="stat-val" id="stat-deaths">—</span><span class="stat-lbl">Halálok</span></div>
+        <div class="stat-card"><span class="stat-icon">🏆</span><span class="stat-val" id="stat-kd">—</span><span class="stat-lbl">K/D arány</span></div>
+        <div class="stat-card"><span class="stat-icon">⏱</span><span class="stat-val" id="stat-playtime">—</span><span class="stat-lbl">Játékidő</span></div>
+        <div class="stat-card"><span class="stat-icon">🥊</span><span class="stat-val" id="stat-wins">—</span><span class="stat-lbl">Győzelmek</span></div>
+        <div class="stat-card"><span class="stat-icon">💰</span><span class="stat-val" id="stat-coins">—</span><span class="stat-lbl">Érmék</span></div>
+      </div>
+      <div class="whitelist-status-box">
+        <div class="wl-status-icon none" id="wl-icon"><span id="wl-icon-emoji">❔</span></div>
+        <div class="wl-status-text"><h4>Whitelist státusz</h4><p id="wl-status-desc">Betöltés...</p></div>
+      </div>
+    </div>
+    <div class="profile-section" id="tab-activity">
+      <div class="activity-feed" id="activity-feed"><p style="color:var(--w3);font-style:italic;">Betöltés...</p></div>
+    </div>
+    <div class="profile-section" id="tab-settings">
+      <div class="settings-grid">
+        <div class="settings-box">
+          <h3>Profil szerkesztése</h3>
+          <div class="form-group"><label class="form-label">Bemutatkozás</label><input class="form-input" type="text" id="set-bio" placeholder="Írj magadról pár szót..."></div>
+          <div class="form-group"><label class="form-label">E-mail cím</label><input class="form-input" type="email" id="set-email" placeholder="te@email.com"></div>
+          <button class="settings-save" onclick="saveProfile()">Mentés</button>
+          <div class="form-ok" id="set-ok" style="text-align:left;margin-top:0.5rem;"></div>
+        </div>
+        <div class="settings-box">
+          <h3>Jelszó módosítása</h3>
+          <div class="form-group"><label class="form-label">Jelenlegi jelszó</label><input class="form-input" type="password" id="set-oldpass" placeholder="••••••••"></div>
+          <div class="form-group"><label class="form-label">Új jelszó</label><input class="form-input" type="password" id="set-newpass" placeholder="Min. 6 karakter"></div>
+          <div class="form-group"><label class="form-label">Megerősítés</label><input class="form-input" type="password" id="set-newpass2" placeholder="••••••••"></div>
+          <button class="settings-save" onclick="changePassword()">Módosítás</button>
+          <div class="form-err" id="pass-err" style="text-align:left;margin-top:0.5rem;"></div>
+          <div class="form-ok" id="pass-ok" style="text-align:left;margin-top:0.5rem;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast">Másolva!</div>
+
+<script>
+// ── TOKEN KEZELÉS ──
+var TOKEN_KEY = 'valyrian_token';
+var currentUser = null;
+
+function getToken(){ return localStorage.getItem(TOKEN_KEY); }
+function setToken(t){ localStorage.setItem(TOKEN_KEY, t); }
+function clearToken(){ localStorage.removeItem(TOKEN_KEY); }
+
+// ── API HÍVÁS HELPER ──
+async function api(method, path, body, auth) {
+  var opts = {
+    method: method,
+    headers: { 'Content-Type': 'application/json' }
+  };
+  if (auth) opts.headers['Authorization'] = 'Bearer ' + getToken();
+  if (body) opts.body = JSON.stringify(body);
+  var res = await fetch(API + path, opts);
+  var data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Hiba történt.');
+  return data;
+}
+
+// ── INIT ──
+async function init() {
+  buildParticles();
+  initReveal();
+  checkStatus();
+  setInterval(checkStatus, 60000);
+  // Automatikus bejelentkezés token alapján
+  var token = getToken();
+  if (token) {
+    try {
+      var user = await api('GET', '/auth/me', null, true);
+      currentUser = user;
+      updateNavUser(user);
+    } catch(e) {
+      clearToken();
+    }
+  }
+  // Dropdown bezárás kattintásra
+  document.addEventListener('click', function(e) {
+    var d = document.getElementById('nav-dropdown');
+    var area = document.getElementById('nav-user-area');
+    if (d && area && !area.contains(e.target)) d.classList.remove('open');
+  });
+}
+
+// ── OLDAL VÁLTÁS ──
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById(p + '-page').classList.add('active');
+  window.scrollTo(0, 0);
+  if (p === 'profile' && currentUser) loadProfile();
+}
+function navHome(section) {
+  showPage('home');
+  setTimeout(function() {
+    var el = document.getElementById(section);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }, 50);
+}
+
+// ── DROPDOWN ──
+function toggleDropdown(e) {
+  e.stopPropagation();
+  document.getElementById('nav-dropdown').classList.toggle('open');
+}
+function goProfile(e) {
+  e.stopPropagation();
+  document.getElementById('nav-dropdown').classList.remove('open');
+  showPage('profile');
+}
+function goSettings(e) {
+  e.stopPropagation();
+  document.getElementById('nav-dropdown').classList.remove('open');
+  openProfileTab('settings');
+}
+
+// ── MODAL ──
+function openModal(){ document.getElementById('modal-overlay').classList.add('open'); }
+function closeModal(){ document.getElementById('modal-overlay').classList.remove('open'); }
+function switchTab(t) {
+  document.getElementById('form-login').style.display = t === 'login' ? '' : 'none';
+  document.getElementById('form-register').style.display = t === 'register' ? '' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', t === 'login');
+  document.getElementById('tab-register').classList.toggle('active', t === 'register');
+  document.getElementById('login-err').textContent = '';
+  document.getElementById('reg-err').textContent = '';
+  document.getElementById('reg-ok').textContent = '';
+}
+
+// ── BEJELENTKEZÉS ──
+async function doLogin() {
+  var u = document.getElementById('login-user').value.trim();
+  var p = document.getElementById('login-pass').value;
+  var err = document.getElementById('login-err');
+  var btn = document.getElementById('login-btn');
+  err.textContent = '';
+  if (!u || !p) { err.textContent = 'Kérlek töltsd ki az összes mezőt!'; return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Betöltés...';
+  try {
+    var data = await api('POST', '/auth/login', { username: u, password: p });
+    setToken(data.token);
+    currentUser = data.user;
+    updateNavUser(data.user);
+    closeModal();
+    showToast('Üdvözlünk, ' + data.user.username + '!');
+  } catch(e) {
+    err.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Bejelentkezés';
+  }
+}
+
+// ── REGISZTRÁCIÓ ──
+async function doRegister() {
+  var u = document.getElementById('reg-user').value.trim();
+  var e = document.getElementById('reg-email').value.trim();
+  var p = document.getElementById('reg-pass').value;
+  var p2 = document.getElementById('reg-pass2').value;
+  var err = document.getElementById('reg-err');
+  var ok = document.getElementById('reg-ok');
+  var btn = document.getElementById('reg-btn');
+  err.textContent = ''; ok.textContent = '';
+  if (!u || !e || !p || !p2) { err.textContent = 'Kérlek töltsd ki az összes mezőt!'; return; }
+  if (p.length < 6) { err.textContent = 'A jelszónak legalább 6 karakter kell!'; return; }
+  if (p !== p2) { err.textContent = 'A két jelszó nem egyezik!'; return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Regisztráció...';
+  try {
+    var data = await api('POST', '/auth/register', { username: u, email: e, password: p });
+    setToken(data.token);
+    currentUser = data.user;
+    updateNavUser(data.user);
+    ok.textContent = 'Sikeres regisztráció!';
+    setTimeout(function(){ closeModal(); showToast('Üdvözlünk, ' + data.user.username + '!'); }, 800);
+  } catch(e2) {
+    err.textContent = e2.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Fiók létrehozása';
+  }
+}
+
+function updateNavUser(u) {
+  document.getElementById('nav-login-li').style.display = 'none';
+  document.getElementById('nav-user-li').style.display = '';
+  document.getElementById('nav-username-label').textContent = u.username;
+  document.getElementById('nav-rank-label').textContent = rankLabel(u.rank);
+  document.getElementById('nav-avatar-img').src = 'https://visage.surgeplay.com/bust/64/' + u.username;
+  var hb = document.getElementById('hero-login-btn');
+  if (hb) hb.style.display = 'none';
+}
+
+function logout() {
+  clearToken();
+  currentUser = null;
+  document.getElementById('nav-login-li').style.display = '';
+  document.getElementById('nav-user-li').style.display = 'none';
+  document.getElementById('nav-dropdown').classList.remove('open');
+  var hb = document.getElementById('hero-login-btn');
+  if (hb) hb.style.display = '';
+  showPage('home');
+  showToast('Sikeresen kijelentkeztél.');
+}
+
+// ── PROFIL ──
+async function loadProfile() {
+  if (!currentUser) return;
+  // Fresh adatok az API-ból
+  try {
+    var u = await api('GET', '/auth/me', null, true);
+    currentUser = u;
+  } catch(e) {}
+  var u = currentUser;
+
+  document.getElementById('profile-skin-img').src = 'https://visage.surgeplay.com/full/256/' + u.username;
+  document.getElementById('profile-username').textContent = u.username;
+  document.getElementById('profile-bio').textContent = u.bio || 'Még nem adtál meg bemutatkozást.';
+
+  var badge = document.getElementById('profile-rank-badge');
+  badge.className = 'profile-rank-badge ' + (u.rank || 'player');
+  document.getElementById('profile-rank-text').textContent = rankLabel(u.rank);
+
+  var s = u.stats || {};
+  document.getElementById('stat-kills').textContent = s.kills || 0;
+  document.getElementById('stat-deaths').textContent = s.deaths || 0;
+  var kd = s.deaths > 0 ? (s.kills / s.deaths).toFixed(2) : (s.kills > 0 ? '∞' : '0.00');
+  document.getElementById('stat-kd').textContent = kd;
+  var pt = s.playtime || 0;
+  document.getElementById('stat-playtime').textContent = pt >= 60 ? Math.floor(pt/60) + ' ó ' + (pt%60) + ' p' : pt + ' p';
+  document.getElementById('stat-wins').textContent = s.wins || 0;
+  document.getElementById('stat-coins').textContent = s.coins || 0;
+
+  // Whitelist
+  var wlMap = {
+    approved: { cls: 'approved', emoji: '✅', text: 'Whitelistre kerültél! Csatlakozhatsz a szerverhez.' },
+    pending:  { cls: 'pending',  emoji: '⏳', text: 'Whitelist kérelmed elbírálás alatt áll.' },
+    rejected: { cls: 'rejected', emoji: '❌', text: 'Whitelist kérelmed elutasítva. Írj a Discordon.' },
+    none:     { cls: 'none',     emoji: '❔', text: 'Még nem jelentkeztél whitelistra.' }
+  };
+  var wl = wlMap[u.whitelist] || wlMap.none;
+  document.getElementById('wl-icon').className = 'wl-status-icon ' + wl.cls;
+  document.getElementById('wl-icon-emoji').textContent = wl.emoji;
+  document.getElementById('wl-status-desc').textContent = wl.text;
+
+  // Aktivitás
+  var feed = document.getElementById('activity-feed');
+  feed.innerHTML = '';
+  var acts = u.activity || [];
+  if (!acts.length) { feed.innerHTML = '<p style="color:var(--w3);font-style:italic;">Nincs megjeleníthető aktivitás.</p>'; }
+  else acts.forEach(function(a) {
+    var timeStr = a.time ? new Date(a.time).toLocaleString('hu-HU') : '';
+    var item = document.createElement('div');
+    item.className = 'activity-item';
+    item.innerHTML = '<div class="activity-icon">' + (a.icon||'⚡') + '</div><div class="activity-text">' + a.text + '</div><div class="activity-time">' + timeStr + '</div>';
+    feed.appendChild(item);
+  });
+
+  // Settings prefill
+  document.getElementById('set-bio').value = u.bio || '';
+  document.getElementById('set-email').value = u.email || '';
+}
+
+function openProfileTab(t) {
+  showPage('profile');
+  document.querySelectorAll('.profile-tab').forEach(function(el){ el.classList.toggle('active', el.dataset.tab === t); });
+  document.querySelectorAll('.profile-section').forEach(function(el){ el.classList.remove('active'); });
+  var sec = document.getElementById('tab-' + t);
+  if (sec) sec.classList.add('active');
+}
+
+async function saveProfile() {
+  var bio = document.getElementById('set-bio').value.trim();
+  var email = document.getElementById('set-email').value.trim();
+  var ok = document.getElementById('set-ok');
+  ok.textContent = '';
+  try {
+    await api('PUT', '/user/profile', { bio, email }, true);
+    currentUser.bio = bio;
+    currentUser.email = email;
+    document.getElementById('profile-bio').textContent = bio || 'Még nem adtál meg bemutatkozást.';
+    ok.textContent = '✓ Profil mentve!';
+    setTimeout(function(){ ok.textContent = ''; }, 2500);
+  } catch(e) {
+    ok.style.color = '#ef4444';
+    ok.textContent = e.message;
+  }
+}
+
+async function changePassword() {
+  var op = document.getElementById('set-oldpass').value;
+  var np = document.getElementById('set-newpass').value;
+  var np2 = document.getElementById('set-newpass2').value;
+  var err = document.getElementById('pass-err');
+  var ok = document.getElementById('pass-ok');
+  err.textContent = ''; ok.textContent = '';
+  if (!op || !np || !np2) { err.textContent = 'Töltsd ki az összes mezőt!'; return; }
+  if (np.length < 6) { err.textContent = 'Az új jelszónak min. 6 karakter kell!'; return; }
+  if (np !== np2) { err.textContent = 'A két jelszó nem egyezik!'; return; }
+  try {
+    await api('PUT', '/user/password', { oldPassword: op, newPassword: np }, true);
+    ok.textContent = '✓ Jelszó módosítva!';
+    document.getElementById('set-oldpass').value = '';
+    document.getElementById('set-newpass').value = '';
+    document.getElementById('set-newpass2').value = '';
+    setTimeout(function(){ ok.textContent = ''; }, 2500);
+  } catch(e) {
+    err.textContent = e.message;
+  }
+}
+
+// ── HELPERS ──
+function rankLabel(r) {
+  return { owner:'Tulajdonos', admin:'Admin', mod:'Moderátor', dev:'Fejlesztő', vip:'VIP', player:'Játékos' }[r] || 'Játékos';
+}
+
+var IP = 'play.valyrian.hu';
+function copyIP() {
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(IP).then(function(){ showToast('IP másolva!'); });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = IP; ta.style.cssText = 'position:fixed;opacity:0;';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); showToast('IP másolva!'); } catch(e) {}
+    document.body.removeChild(ta);
+  }
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2400);
+}
+
+function buildParticles() {
+  var cols = ['rgba(192,21,26,0.7)','rgba(220,30,36,0.5)','rgba(245,240,235,0.4)','rgba(192,21,26,0.4)','rgba(255,255,255,0.25)'];
+  var c = document.getElementById('pts');
+  if (!c) return;
+  for (var i = 0; i < 30; i++) {
+    var d = document.createElement('div'); var sz = Math.random() * 3.5 + 1.5;
+    d.className = 'particle';
+    d.style.cssText = 'left:' + Math.random()*100 + '%;width:' + sz + 'px;height:' + sz + 'px;background:' + cols[Math.floor(Math.random()*cols.length)] + ';animation-duration:' + (Math.random()*14+9) + 's;animation-delay:' + (Math.random()*14) + 's;';
+    c.appendChild(d);
+  }
+}
+
+function checkStatus() {
+  var dot = document.getElementById('sdot');
+  var lbl = document.getElementById('slbl');
+  var cnt = document.getElementById('scnt');
+  var mx  = document.getElementById('smx');
+  if (!dot) return;
+  if (document.getElementById('maint-bar')) {
+    dot.className = 'sdot maintenance'; lbl.textContent = 'KARBANTARTÁS'; lbl.style.color = '#f59e0b'; cnt.textContent = '—'; mx.textContent = '—'; return;
+  }
+  fetch('https://api.mcsrvstat.us/3/' + IP)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if (d.online) { dot.className = 'sdot online'; lbl.textContent = 'SZERVER ONLINE'; lbl.style.color = '#22c55e'; cnt.textContent = (d.players&&d.players.online!=null)?d.players.online:'0'; mx.textContent = (d.players&&d.players.max)?d.players.max:'—'; }
+      else { dot.className = 'sdot offline'; lbl.textContent = 'SZERVER OFFLINE'; lbl.style.color = '#ef4444'; cnt.textContent = '0'; mx.textContent = '—'; }
+    }).catch(function(){ dot.className = 'sdot offline'; lbl.textContent = 'NEM ELÉRHETŐ'; lbl.style.color = 'var(--w3)'; });
+}
+
+function initReveal() {
+  var obs = new IntersectionObserver(function(entries){ entries.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } }); }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(function(el){ obs.observe(el); });
+}
+
+init();
+</script>
+</body>
+</html>
