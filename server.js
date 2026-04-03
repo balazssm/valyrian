@@ -33,6 +33,10 @@ app.use('/api/user', require('./routes/user'));
 app.use('/api/mc', require('./routes/minecraft'));
 app.use('/api/admin', require('./routes/admin'));
 
+// ── ADMIN OLDAL KISZOLGÁLÁSA ──
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
 // ── HEALTH CHECK ──
 app.get('/api/health', (req, res) => {
   res.json({
