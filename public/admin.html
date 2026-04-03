@@ -1,54 +1,107 @@
-<div id="admin-panel" style="display:none;">
-  <h2>Admin Vezérlőpult</h2>
-  <table border="1" id="user-table">
-    <thead>
-      <tr>
-        <th>Név</th>
-        <th>Rang</th>
-        <th>Művelet</th>
-      </tr>
-    </thead>
-    <tbody id="user-list"></tbody>
-  </table>
-</div>
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <style>
+        body { background-color: #1a1a1a; color: white; font-family: sans-serif; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #444; padding: 12px; text-align: left; }
+        th { background-color: #333; }
+        select { background: #444; color: white; padding: 5px; border: none; }
+        .error-msg { color: #ff5555; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Admin Vezérlőpult</h2>
+    <div id="status-message">Betöltés...</div>
 
-<script>
-async function loadUsers() {
-  const res = await fetch('/api/admin/users', {
-    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-  });
-  const users = await res.json();
-  const list = document.getElementById('user-list');
-  list.innerHTML = '';
+    <div id="admin-panel" style="display:none;">
+        <table id="user-table">
+            <thead>
+                <tr>
+                    <th>Név</th>
+                    <th>Rang</th>
+                    <th>Művelet</th>
+                </tr>
+            </thead>
+            <tbody id="user-list"></tbody>
+        </table>
+    </div>
 
-  users.forEach(user => {
-    list.innerHTML += `
-      <tr>
-        <td>${user.username}</td>
-        <td><strong>${user.rank}</strong></td>
-        <td>
-          <select onchange="updateRank('${user._id}', this.value)">
-            <option value="player" ${user.rank === 'player' ? 'selected' : ''}>Player</option>
-            <option value="vip" ${user.rank === 'vip' ? 'selected' : ''}>VIP</option>
-            <option value="mod" ${user.rank === 'mod' ? 'selected' : ''}>Mod</option>
-            <option value="admin" ${user.rank === 'admin' ? 'selected' : ''}>Admin</option>
-            <option value="owner" ${user.rank === 'owner' ? 'selected' : ''}>Owner</option>
-          </select>
-        </td>
-      </tr>
-    `;
-  });
-}
+    <script>
+        async function loadUsers() {
+            const status = document.getElementById('status-message');
+            const token = localStorage.getItem('token');
 
-async function updateRank(userId, newRank) {
-  await fetch(`/api/admin/users/${userId}/rank`, {
-    method: 'PUT',
-    headers: { 
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('token')}`
-    },
-    body: JSON.stringify({ rank: newRank })
-  });
-  alert('Rang frissítve!');
-}
-</script>
+            if (!token) {
+                status.innerHTML = '<span class="error-msg">Hiba: Nem vagy bejelentkezve!</span>';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/users', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.status === 403) {
+                    status.innerHTML = '<span class="error-msg">Hiba: Nincs Admin/Owner jogod! (403)</span>';
+                    return;
+                }
+
+                if (!res.ok) throw new Error('Szerver hiba');
+
+                const users = await res.json();
+                const list = document.getElementById('user-list');
+                list.innerHTML = '';
+
+                users.forEach(user => {
+                    list.innerHTML += `
+                        <tr>
+                            <td>${user.username}</td>
+                            <td><strong>${user.rank}</strong></td>
+                            <td>
+                                <select onchange="updateRank('${user._id}', this.value)">
+                                    <option value="player" ${user.rank === 'player' ? 'selected' : ''}>Player</option>
+                                    <option value="vip" ${user.rank === 'vip' ? 'selected' : ''}>VIP</option>
+                                    <option value="mod" ${user.rank === 'mod' ? 'selected' : ''}>Mod</option>
+                                    <option value="admin" ${user.rank === 'admin' ? 'selected' : ''}>Admin</option>
+                                    <option value="owner" ${user.rank === 'owner' ? 'selected' : ''}>Owner</option>
+                                </select>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                status.style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'block';
+
+            } catch (err) {
+                status.innerHTML = '<span class="error-msg">Hiba történt az adatok lekérésekor!</span>';
+                console.error(err);
+            }
+        }
+
+        async function updateRank(userId, newRank) {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/admin/users/${userId}/rank`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ rank: newRank })
+            });
+
+            if (res.ok) {
+                alert('Rang sikeresen frissítve!');
+            } else {
+                alert('Hiba a mentés során!');
+            }
+        }
+
+        // AZONNALI INDÍTÁS
+        loadUsers();
+    </script>
+</body>
+</html>
