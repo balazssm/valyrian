@@ -60,12 +60,13 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-// Automatikus limit az aktivitás loghoz (ne hizzon az adatbázis végtelenül)
-userSchema.pre('save', function(next) {
-  if (this.activity.length > 20) {
+// Automatikus limit az aktivitás loghoz
+// Modern async megoldás - így NEM dob 'next is not a function' hibát
+userSchema.pre('save', async function() {
+  // Csak akkor vágjuk le, ha változott az aktivitás és túl hosszú
+  if (this.isModified('activity') && this.activity.length > 20) {
     this.activity = this.activity.slice(-20);
   }
-  next();
 });
 
 module.exports = mongoose.model('User', userSchema);
