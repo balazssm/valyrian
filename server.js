@@ -31,6 +31,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
 app.use('/api/mc', require('./routes/minecraft'));
+app.use('/api/admin', require('./routes/admin'));
 
 // ── HEALTH CHECK ──
 app.get('/api/health', (req, res) => {
