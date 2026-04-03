@@ -6,16 +6,16 @@ const path = require('path');
 
 const app = express();
 
-// ── MIDDLEWARE JAVÍTÁS (CORS) ──
-// Minden domainről érkező kérést engedélyezünk, és kezeljük az OPTIONS kéréseket
-app.use(cors()); 
+// ── ATOMBIZTOS CORS BEÁLLÍTÁS ──
+app.use(cors()); // Alapértelmezett minden engedélyezése
 
 app.use((req, res, next) => {
+  // Manuálisan is hozzáadjuk a fejlécet minden válaszhoz
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-plugin-key");
   
-  // Ha a böngésző csak ellenőriz (preflight), azonnal vágjuk rá, hogy OK
+  // A preflight (OPTIONS) kérésekre azonnal OK-val válaszolunk
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
@@ -41,18 +41,20 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ── SPA FALLBACK (Regex javítva Node v22-höz) ──
+// ── SPA FALLBACK (Node v22 kompatibilis) ──
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ── MONGODB ──
+// ── MONGODB CSATLAKOZÁS ÉS INDÍTÁS ──
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB csatlakozva');
     const PORT = process.env.PORT || 3000;
-    // A '0.0.0.0' segít a Rendernek a hálózati elérésben
-    app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Szerver fut a ${PORT} porton`));
+    // A '0.0.0.0' megadása fontos Render-en a külső eléréshez
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Szerver fut a ${PORT} porton`);
+    });
   })
   .catch(err => {
     console.error('❌ MongoDB hiba:', err.message);
