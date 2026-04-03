@@ -29,8 +29,8 @@ const userSchema = new mongoose.Schema({
     default: '',
     maxlength: 200
   },
-  // Whitelist
-  whitelist: {
+  // Whitelist állapot kezelése (Egységesítve az admin felülettel)
+  whitelistStatus: {
     type: String,
     enum: ['none', 'pending', 'approved', 'rejected'],
     default: 'none'
@@ -44,7 +44,7 @@ const userSchema = new mongoose.Schema({
     coins:    { type: Number, default: 0 },
     streak:   { type: Number, default: 0 }
   },
-  // Aktivitás log (max 20 bejegyzés)
+  // Aktivitás log (max 20 bejegyzés tárolására)
   activity: [{
     icon:    { type: String },
     text:    { type: String },
@@ -58,6 +58,14 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+});
+
+// Automatikus limit az aktivitás loghoz (ne hizzon az adatbázis végtelenül)
+userSchema.pre('save', function(next) {
+  if (this.activity.length > 20) {
+    this.activity = this.activity.slice(-20);
+  }
+  next();
 });
 
 module.exports = mongoose.model('User', userSchema);
