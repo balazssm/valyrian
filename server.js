@@ -32,7 +32,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // ── SPA FALLBACK ──
-app.get('*', (req, res) => {
+app.get('(.*)', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
