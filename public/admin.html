@@ -32,7 +32,7 @@
     <script>
         async function loadUsers() {
             const status = document.getElementById('status-message');
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('valyrian_token');
 
             if (!token) {
                 status.innerHTML = '<span class="error-msg">Hiba: Nem vagy bejelentkezve!</span>';
@@ -83,7 +83,7 @@
         }
 
         async function updateRank(userId, newRank) {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('valyrian_token');
             const res = await fetch(`/api/admin/users/${userId}/rank`, {
                 method: 'PUT',
                 headers: { 
