@@ -33,7 +33,7 @@ app.get('/api/health', (req, res) => {
 
 // ── SPA FALLBACK ──
 app.get('/:any*', (req, res) => {
-});  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // ── MONGODB ──
