@@ -1,0 +1,54 @@
+<div id="admin-panel" style="display:none;">
+  <h2>Admin Vezérlőpult</h2>
+  <table border="1" id="user-table">
+    <thead>
+      <tr>
+        <th>Név</th>
+        <th>Rang</th>
+        <th>Művelet</th>
+      </tr>
+    </thead>
+    <tbody id="user-list"></tbody>
+  </table>
+</div>
+
+<script>
+async function loadUsers() {
+  const res = await fetch('/api/admin/users', {
+    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+  });
+  const users = await res.json();
+  const list = document.getElementById('user-list');
+  list.innerHTML = '';
+
+  users.forEach(user => {
+    list.innerHTML += `
+      <tr>
+        <td>${user.username}</td>
+        <td><strong>${user.rank}</strong></td>
+        <td>
+          <select onchange="updateRank('${user._id}', this.value)">
+            <option value="player" ${user.rank === 'player' ? 'selected' : ''}>Player</option>
+            <option value="vip" ${user.rank === 'vip' ? 'selected' : ''}>VIP</option>
+            <option value="mod" ${user.rank === 'mod' ? 'selected' : ''}>Mod</option>
+            <option value="admin" ${user.rank === 'admin' ? 'selected' : ''}>Admin</option>
+            <option value="owner" ${user.rank === 'owner' ? 'selected' : ''}>Owner</option>
+          </select>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+async function updateRank(userId, newRank) {
+  await fetch(`/api/admin/users/${userId}/rank`, {
+    method: 'PUT',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
+    body: JSON.stringify({ rank: newRank })
+  });
+  alert('Rang frissítve!');
+}
+</script>
