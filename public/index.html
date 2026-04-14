@@ -7,6 +7,7 @@
 <link rel="icon" type="image/x-icon" href="/img/server-logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
+  
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
   --accent:#0ea5e9;
@@ -67,6 +68,68 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .nav-dropdown-item:hover{background:var(--surface);color:var(--text);}
 .nav-dropdown-item.danger:hover{background:rgba(244,63,94,0.07);color:#f87171;}
 .nav-dropdown-sep{height:1px;background:var(--border);margin:0.18rem 0;}
+/* NAV SEARCH BOX */
+.nav-search-item {
+    display: flex;
+    align-items: center;
+    margin: 0 0.5rem;
+}
+
+.nav-search-wrap {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.15rem 0.5rem;
+    transition: all 0.14s;
+}
+
+.nav-search-wrap:focus-within {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--accent-border);
+    box-shadow: 0 0 10px rgba(14, 165, 233, 0.1);
+}
+
+.nav-search-wrap input {
+    background: transparent;
+    border: none;
+    color: var(--text2);
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    width: 85px; /* Alaphelyzetben keskeny, hogy ne tolja el a menüt */
+    outline: none;
+    padding: 0.25rem;
+    text-transform: uppercase;
+    transition: width 0.2s;
+}
+
+/* Ha belekattintasz, kicsit kiszélesedik */
+.nav-search-wrap input:focus {
+    width: 120px;
+}
+
+.nav-search-btn {
+    background: transparent;
+    border: none;
+    color: var(--text3);
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 0 2px;
+    display: flex;
+    align-items: center;
+    transition: color 0.14s;
+}
+
+.nav-search-btn:hover {
+    color: var(--accent2);
+}
+
+/* Mobilos elrejtés, ha túl sok a menüpont */
+@media (max-width: 1100px) {
+    .nav-search-item { display: none; }
+}
 
 /* MAINTENANCE */
 .maintenance-bar{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(251,146,60,0.1);border-bottom:1px solid rgba(251,146,60,0.22);padding:0.42rem 2rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:0.6rem;}
@@ -354,6 +417,12 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.25rem 
     <li><a href="#whitelist" onclick="navHome('whitelist');return false;">Whitelist</a></li>
     <li><a href="#join" onclick="navHome('join');return false;">Csatlakozás</a></li>
     <li><a href="https://discord.gg/s7Abx6mMym" target="_blank" rel="noopener" class="nav-discord"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.114 18.1.132 18.113a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>Discord</a></li>
+    <li class="nav-search-item">
+      <div class="nav-search-wrap">
+        <input type="text" id="nav-search-input" placeholder="Játékos...">
+        <button onclick="searchPlayer()" class="nav-search-btn">🔍</button>
+      </div>
+    </li>
     <li id="nav-login-li"><button class="nav-auth-btn" onclick="openModal()">Bejelentkezés</button></li>
     <li id="nav-user-li" style="display:none;">
       <div class="nav-user-area" id="nav-user-area" onclick="toggleDropdown(event)">
@@ -840,7 +909,51 @@ function initReveal() {
     }, { threshold: 0.07 });
     document.querySelectorAll('.reveal').forEach(function (el) { obs.observe(el); });
 }
+async function searchPlayer() {
+    const input = document.getElementById('nav-search-input');
+    const name = input.value.trim();
+    if (!name) return;
 
+    try {
+        // Lekérjük a statokat a neptune-ból
+        const r = await fetch('/api/stats/' + name);
+        const s = await r.json();
+
+        if (!r.ok) {
+            showToast("Nincs ilyen játékos a Neptune-ban!");
+            return;
+        }
+
+        // Átváltunk a profil oldalra
+        showPage('profile');
+
+        // Átírjuk a profil adatait a keresett játékoséra
+        document.getElementById('profile-username').textContent = name;
+        document.getElementById('profile-skin-img').src = 'https://visage.surgeplay.com/full/256/' + name;
+        document.getElementById('profile-bio').textContent = "Játékos statisztikáinak megtekintése.";
+        
+        // Statok beírása
+        document.getElementById('stat-kills').textContent = s.kills;
+        document.getElementById('stat-deaths').textContent = s.deaths;
+        document.getElementById('stat-kd').textContent = s.kd;
+        document.getElementById('stat-wins').textContent = s.wins;
+        document.getElementById('stat-coins').textContent = s.coins;
+        document.getElementById('stat-playtime').textContent = "—";
+
+        // Ha nem a sajátunk, ne látszódjon a beállítások fül
+        const isOwn = currentUser && currentUser.username.toLowerCase() === name.toLowerCase();
+        document.querySelector('[data-tab="settings"]').style.display = isOwn ? '' : 'none';
+        
+        input.value = ''; // Ürítés
+    } catch (e) {
+        showToast("Hiba történt a keresés során.");
+    }
+}
+
+// Enter gombra is keressen
+document.getElementById('nav-search-input')?.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') searchPlayer();
+});
 init();
 </script>
 </body>
