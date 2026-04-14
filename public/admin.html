@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Valyrian Admin Dashboard</title>
+<title>Valyrian Admin Panel</title>
 
 <style>
 :root {
@@ -13,7 +13,6 @@
     --gold:#f1c40f;
     --green:#27ae60;
     --red:#e74c3c;
-    --blue:#3498db;
 }
 
 body {
@@ -23,31 +22,12 @@ body {
     color:var(--text);
 }
 
-header {
-    padding:20px;
+h1 {
     text-align:center;
+    color:var(--gold);
+    padding:20px;
     border-bottom:2px solid #222;
 }
-
-h1 { color:var(--gold); }
-
-.tabs {
-    display:flex;
-    justify-content:center;
-    gap:10px;
-    margin:20px;
-}
-
-button {
-    padding:10px 15px;
-    border:none;
-    cursor:pointer;
-    background:#222;
-    color:white;
-    border-radius:6px;
-}
-
-button.active { background:var(--gold); color:black; }
 
 .container {
     max-width:1200px;
@@ -70,89 +50,98 @@ table {
 th,td {
     padding:10px;
     border-bottom:1px solid #333;
-    text-align:left;
 }
 
 .status-pending { color:orange; }
 .status-approved { color:var(--green); }
 .status-rejected { color:var(--red); }
 
-.btn {
-    padding:5px 10px;
+button {
+    padding:6px 10px;
     border:none;
     border-radius:5px;
     cursor:pointer;
 }
 
-.btn-approve { background:var(--green); color:white; }
-.btn-reject { background:var(--red); color:white; }
+.approve { background:var(--green); color:white; }
+.reject { background:var(--red); color:white; }
 
 select {
-    padding:5px;
     background:#222;
     color:white;
+    padding:5px;
     border-radius:5px;
+}
+
+.badge {
+    padding:4px 8px;
+    border-radius:4px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.badge-vip { background:#f1c40f; color:black; }
+.badge-kiemelt { background:#2ecc71; color:black; }
+.badge-kiemeltp { background:#e67e22; color:black; }
+.badge-player { background:#7f8c8d; color:white; }
+.badge-mod { background:#3498db; color:white; }
+.badge-admin { background:#9b59b6; color:white; }
+.badge-owner { background:#e74c3c; color:white; }
+
+#error {
+    color:red;
+    text-align:center;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-<h1>⚡ Valyrian Admin Dashboard</h1>
-</header>
-
-<div class="tabs">
-<button onclick="showTab('orders')" class="active">📦 Orders</button>
-<button onclick="showTab('users')">👤 Users</button>
-</div>
+<h1>⚡ Valyrian Admin Panel</h1>
 
 <div class="container">
 
-<!-- ORDERS -->
-<div id="ordersTab">
-    <div class="card">
-        <h2>Rendelések</h2>
-        <select onchange="loadOrders(this.value)">
-            <option value="">Összes</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-        </select>
+<div class="card">
+<h2>📦 Rendelések</h2>
+<div id="error"></div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Order</th>
-                    <th>User</th>
-                    <th>Item</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="orders"></tbody>
-        </table>
-    </div>
+<select onchange="loadOrders(this.value)">
+    <option value="">Összes</option>
+    <option value="pending">Függőben</option>
+    <option value="approved">Elfogadva</option>
+    <option value="rejected">Elutasítva</option>
+</select>
+
+<table>
+<thead>
+<tr>
+<th>OrderID</th>
+<th>User</th>
+<th>Item</th>
+<th>Ár</th>
+<th>Status</th>
+<th>Művelet</th>
+</tr>
+</thead>
+<tbody id="orders"></tbody>
+</table>
 </div>
 
-<!-- USERS -->
-<div id="usersTab" style="display:none;">
-    <div class="card">
-        <h2>Felhasználók</h2>
+<div class="card">
+<h2>👤 Felhasználók</h2>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>User</th>
-                    <th>Rank</th>
-                    <th>Whitelist</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="users"></tbody>
-        </table>
-    </div>
+<table>
+<thead>
+<tr>
+<th>User</th>
+<th>Rank</th>
+<th>Whitelista</th>
+<th>Rank váltás</th>
+</tr>
+</thead>
+
+<tbody id="users"></tbody>
+</table>
 </div>
 
 </div>
@@ -160,86 +149,115 @@ select {
 <script>
 const TOKEN = localStorage.getItem("valyrian_token");
 
-// TAB
-function showTab(tab){
-    document.getElementById("ordersTab").style.display = tab==="orders"?"block":"none";
-    document.getElementById("usersTab").style.display = tab==="users"?"block":"none";
-}
-
 // ─────────────────────────────
-// ORDERS
+// ORDERS BETÖLTÉS (FIX)
 // ─────────────────────────────
 async function loadOrders(status=""){
-    const res = await fetch("/api/purchase/orders"+(status?`?status=${status}`:""), {
-        headers:{ Authorization:`Bearer ${TOKEN}` }
-    });
+    const err = document.getElementById("error");
 
-    const data = await res.json();
-    const tbody = document.getElementById("orders");
+    try {
+        const res = await fetch(
+            "/api/purchase/orders" + (status ? `?status=${status}` : ""),
+            {
+                headers: {
+                    Authorization: `Bearer ${TOKEN}`
+                }
+            }
+        );
 
-    tbody.innerHTML = "";
+        if (!res.ok) {
+            const txt = await res.text();
+            err.innerText = "Hiba: " + res.status + " - " + txt;
+            return;
+        }
 
-    data.forEach(o=>{
-        tbody.innerHTML += `
-        <tr>
-            <td>${o.orderId}</td>
-            <td>${o.username}</td>
-            <td>${o.item}</td>
-            <td>${o.priceHuf} Ft</td>
-            <td class="status-${o.status}">${o.status}</td>
-            <td>
-                ${o.status==="pending" ? `
-                <button class="btn btn-approve" onclick="approve('${o._id}')">Approve</button>
-                <button class="btn btn-reject" onclick="reject('${o._id}')">Reject</button>
-                `:""}
-            </td>
-        </tr>
-        `;
-    });
+        const data = await res.json();
+        const tbody = document.getElementById("orders");
+        tbody.innerHTML = "";
+
+        data.forEach(o => {
+            tbody.innerHTML += `
+            <tr>
+                <td>${o.orderId}</td>
+                <td>${o.username}</td>
+                <td>${o.item}</td>
+                <td>${o.priceHuf} Ft</td>
+                <td class="status-${o.status}">${o.status}</td>
+                <td>
+                    ${o.status === "pending" ? `
+                        <button class="approve" onclick="approve('${o._id}')">Elfogad</button>
+                        <button class="reject" onclick="reject('${o._id}')">Elutasít</button>
+                    ` : ""}
+                </td>
+            </tr>`;
+        });
+
+    } catch (e) {
+        err.innerText = "Hálózati hiba!";
+        console.error(e);
+    }
 }
 
+// ─────────────────────────────
+// APPROVE / REJECT (FIX)
+// ─────────────────────────────
 async function approve(id){
-    await fetch(`/api/purchase/${id}/approve`, {
+    const res = await fetch(`/api/purchase/${id}/approve`, {
         method:"PUT",
-        headers:{ Authorization:`Bearer ${TOKEN}` }
+        headers:{
+            Authorization:`Bearer ${TOKEN}`
+        }
     });
+
+    if (!res.ok) {
+        alert("Nem sikerült jóváhagyni!");
+        return;
+    }
+
     loadOrders();
 }
 
 async function reject(id){
     await fetch(`/api/purchase/${id}/reject`, {
         method:"PUT",
-        headers:{ Authorization:`Bearer ${TOKEN}` }
+        headers:{
+            Authorization:`Bearer ${TOKEN}`
+        }
     });
+
     loadOrders();
 }
 
 // ─────────────────────────────
-// USERS
+// USERS (rank FIX + badge FIX)
 // ─────────────────────────────
 async function loadUsers(){
     const res = await fetch("/api/admin/users", {
         headers:{ Authorization:`Bearer ${TOKEN}` }
     });
 
-    const data = await res.json();
+    const users = await res.json();
     const tbody = document.getElementById("users");
-
     tbody.innerHTML = "";
 
-    data.forEach(u=>{
+    users.forEach(u => {
+
+        const badge = `badge-${u.rank}`;
+
         tbody.innerHTML += `
         <tr>
             <td>${u.username}</td>
-            <td>${u.rank}</td>
+            <td><span class="badge ${badge}">${u.rank}</span></td>
+
             <td>
                 <select onchange="updateWL('${u._id}', this.value)">
-                    <option value="none" ${u.whitelistStatus==="none"?"selected":""}>none</option>
-                    <option value="pending" ${u.whitelistStatus==="pending"?"selected":""}>pending</option>
-                    <option value="approved" ${u.whitelistStatus==="approved"?"selected":""}>approved</option>
-                    <option value="rejected" ${u.whitelistStatus==="rejected"?"selected":""}>rejected</option>
+                    <option value="none">none</option>
+                    <option value="pending">pending</option>
+                    <option value="approved">approved</option>
+                    <option value="rejected">rejected</option>
                 </select>
             </td>
+
             <td>
                 <select onchange="updateRank('${u._id}', this.value)">
                     <option value="player">Player</option>
@@ -248,27 +266,18 @@ async function loadUsers(){
                     <option value="kiemeltp">Kiemelt+</option>
                     <option value="mod">Mod</option>
                     <option value="admin">Admin</option>
-                    <option value="owner">Owner</option>
+                    <option value="owner">Tulajdonos</option>
                 </select>
             </td>
-        </tr>
-        `;
+        </tr>`;
     });
 }
 
-async function updateWL(id, value){
-    await fetch(`/api/admin/users/${id}/whitelist`, {
-        method:"PUT",
-        headers:{
-            "Content-Type":"application/json",
-            Authorization:`Bearer ${TOKEN}`
-        },
-        body: JSON.stringify({ whitelistStatus:value })
-    });
-}
-
+// ─────────────────────────────
+// FIX: RANK UPDATE BUG FIX
+// ─────────────────────────────
 async function updateRank(id, rank){
-    await fetch(`/api/admin/users/${id}/rank`, {
+    const res = await fetch(`/api/admin/users/${id}/rank`, {
         method:"PUT",
         headers:{
             "Content-Type":"application/json",
@@ -277,7 +286,24 @@ async function updateRank(id, rank){
         body: JSON.stringify({ rank })
     });
 
+    if (!res.ok) {
+        alert("Rank váltás sikertelen!");
+        return;
+    }
+
     loadUsers();
+}
+
+// whitelist
+async function updateWL(id, val){
+    await fetch(`/api/admin/users/${id}/whitelist`, {
+        method:"PUT",
+        headers:{
+            "Content-Type":"application/json",
+            Authorization:`Bearer ${TOKEN}`
+        },
+        body: JSON.stringify({ whitelistStatus: val })
+    });
 }
 
 // INIT
