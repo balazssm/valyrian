@@ -666,7 +666,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.25rem 
 var TOKEN_KEY = 'valyrian_token', currentUser = null;
 var API = '/api'; 
 
-// --- 1. ALAPKEZELŐK (API & TOKEN) ---
+// --- 1. ALAPKEZELŐK ---
 function getToken() { return localStorage.getItem(TOKEN_KEY); }
 function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
 function clearToken() { localStorage.removeItem(TOKEN_KEY); }
@@ -693,9 +693,7 @@ function openModal() {
     switchTab('login'); 
 }
 
-function closeModal() { 
-    document.getElementById('modal-overlay').classList.remove('open'); 
-}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
 
 function switchTab(t) {
     document.getElementById('form-login').style.display = t === 'login' ? 'block' : 'none';
@@ -704,25 +702,22 @@ function switchTab(t) {
     document.getElementById('tab-register').classList.toggle('active', t === 'register');
 }
 
-// --- 3. PROFIL FÜLEK KEZELÉSE ---
+// --- 3. PROFIL FÜLEK ---
 function openProfileTab(tabName) {
     document.querySelectorAll('.profile-section').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.profile-tab').forEach(el => el.classList.remove('active'));
-
     var targetTab = document.getElementById('tab-' + tabName);
     if (targetTab) targetTab.classList.add('active');
-
     var targetBtn = document.querySelector(`.profile-tab[data-tab="${tabName}"]`);
     if (targetBtn) targetBtn.classList.add('active');
 }
 
-// --- 4. AUTHENTIKÁCIÓ (LOGIN, REG, LOGOUT) ---
+// --- 4. AUTH (LOGIN, REG) ---
 async function doLogin() {
     var u = document.getElementById('login-user').value.trim(), 
         p = document.getElementById('login-pass').value, 
         err = document.getElementById('login-err'), 
         btn = document.getElementById('login-btn');
-    
     err.textContent = ''; if (!u || !p) { err.textContent = 'Mezők kitöltése kötelező!'; return; }
     btn.disabled = true;
     try {
@@ -734,13 +729,9 @@ async function doLogin() {
 }
 
 async function doRegister() {
-    var u = document.getElementById('reg-user').value.trim(),
-        e = document.getElementById('reg-email').value.trim(),
-        p = document.getElementById('reg-pass').value,
-        p2 = document.getElementById('reg-pass2').value,
-        err = document.getElementById('reg-err'),
-        ok = document.getElementById('reg-ok');
-
+    var u = document.getElementById('reg-user').value.trim(), e = document.getElementById('reg-email').value.trim(),
+        p = document.getElementById('reg-pass').value, p2 = document.getElementById('reg-pass2').value,
+        err = document.getElementById('reg-err'), ok = document.getElementById('reg-ok');
     if (!u || !e || !p || !p2) { err.textContent = 'Minden mező kötelező!'; return; }
     if (p !== p2) { err.textContent = 'A jelszavak nem egyeznek!'; return; }
     try {
@@ -750,10 +741,7 @@ async function doRegister() {
     } catch (err_msg) { err.textContent = err_msg.message; }
 }
 
-function logout() {
-    clearToken(); currentUser = null;
-    location.reload();
-}
+function logout() { clearToken(); currentUser = null; location.reload(); }
 
 function updateNavUser(u) {
     document.getElementById('nav-login-li').style.display = 'none';
@@ -763,16 +751,14 @@ function updateNavUser(u) {
     document.getElementById('nav-avatar-img').src = 'https://visage.surgeplay.com/bust/64/' + u.username;
 }
 
-// --- 5. PROFIL ÉS KERESÉS FUNKCIÓK ---
+// --- 5. PROFIL ÉS KERESÉS (WHITELIST JAVÍTVA) ---
 async function loadProfile() {
     if (!currentUser) return;
     try { currentUser = await api('GET', '/auth/me', null, true); } catch (e) {}
-    
     fillProfileUI(currentUser);
     togglePrivateElements(true);
     openProfileTab('stats');
     fetchStats(currentUser.username);
-
     document.getElementById('set-bio').value = currentUser.bio || '';
     document.getElementById('set-email').value = currentUser.email || '';
 }
@@ -785,18 +771,28 @@ async function searchPlayer() {
         var r = await fetch(API + '/stats/' + name);
         var s = await r.json();
         if (!r.ok) { showToast("Nincs ilyen játékos!"); return; }
-
         showPage('profile');
         fillProfileUI({ username: name, bio: s.bio, rank: s.rank });
         updateStatsUI(s);
-        updateWhitelistUI(s.whitelist);
+        updateWhitelistUI(s.whitelistStatus); // JAVÍTVA: whitelistStatus-t küldünk
         updateActivityUI(s.activity);
-
         var isOwn = currentUser && currentUser.username.toLowerCase() === name.toLowerCase();
         togglePrivateElements(isOwn);
         openProfileTab('stats');
         input.value = ''; 
     } catch (e) { showToast("Hiba történt!"); }
+}
+
+async function fetchStats(name) {
+    try {
+        var res = await fetch(API + '/stats/' + name);
+        var s = await res.json();
+        if (res.ok) {
+            updateStatsUI(s);
+            updateWhitelistUI(s.whitelistStatus); // JAVÍTVA: whitelistStatus-t küldünk
+            updateActivityUI(s.activity);
+        }
+    } catch (e) {}
 }
 
 function fillProfileUI(u) {
@@ -806,18 +802,6 @@ function fillProfileUI(u) {
     var badge = document.getElementById('profile-rank-badge');
     if (badge) badge.className = 'profile-rank-badge ' + (u.rank || 'player');
     document.getElementById('profile-rank-text').textContent = rankLabel(u.rank);
-}
-
-async function fetchStats(name) {
-    try {
-        var res = await fetch(API + '/stats/' + name);
-        var s = await res.json();
-        if (res.ok) {
-            updateStatsUI(s);
-            updateWhitelistUI(s.whitelist);
-            updateActivityUI(s.activity);
-        }
-    } catch (e) {}
 }
 
 function togglePrivateElements(show) {
@@ -837,7 +821,12 @@ function updateStatsUI(s) {
 }
 
 function updateWhitelistUI(status) {
-    var wm = { approved: { cls: 'approved', emoji: '✅', text: 'Whitelistre került!' }, pending: { cls: 'pending', emoji: '⏳', text: 'Elbírálás alatt.' }, rejected: { cls: 'rejected', emoji: '❌', text: 'Elutasítva.' }, none: { cls: 'none', emoji: '❔', text: 'Nincs kérelem.' } };
+    var wm = { 
+        approved: { cls: 'approved', emoji: '✅', text: 'Whitelistre került!' }, 
+        pending: { cls: 'pending', emoji: '⏳', text: 'Elbírálás alatt.' }, 
+        rejected: { cls: 'rejected', emoji: '❌', text: 'Elutasítva.' }, 
+        none: { cls: 'none', emoji: '❔', text: 'Nincs kérelem.' } 
+    };
     var wl = wm[status] || wm.none;
     var icon = document.getElementById('wl-icon'), emoji = document.getElementById('wl-icon-emoji'), desc = document.getElementById('wl-status-desc');
     if(icon) { icon.className = 'wl-status-icon ' + wl.cls; emoji.textContent = wl.emoji; desc.textContent = wl.text; }
@@ -860,7 +849,7 @@ function updateActivityUI(acts) {
     });
 }
 
-// --- 7. EGYÉB SEGÉDFÜGGVÉNYEK ---
+// --- 7. EGYÉB ---
 var IP = 'play.valyrian.hu';
 function checkStatus() {
     var dot = document.getElementById('sdot'), lbl = document.getElementById('slbl'), cnt = document.getElementById('scnt'), mx = document.getElementById('smx');
@@ -869,10 +858,7 @@ function checkStatus() {
         if (d.online) {
             dot.className = 'sdot online'; lbl.textContent = 'Online';
             cnt.textContent = d.players.online; mx.textContent = d.players.max;
-        } else {
-            dot.className = 'sdot offline'; lbl.textContent = 'Offline';
-            cnt.textContent = '0'; mx.textContent = '—';
-        }
+        } else { dot.className = 'sdot offline'; lbl.textContent = 'Offline'; cnt.textContent = '0'; mx.textContent = '—'; }
     }).catch(() => { dot.className = 'sdot offline'; });
 }
 
@@ -890,20 +876,10 @@ async function saveProfile() {
     } catch (e) { showToast(e.message); }
 }
 
-async function changePassword() {
-    var oldP = document.getElementById('set-oldpass').value, newP = document.getElementById('set-newpass').value, newP2 = document.getElementById('set-newpass2').value, err = document.getElementById('pass-err'), ok = document.getElementById('pass-ok');
-    if(newP !== newP2) { err.textContent = 'Nem egyezik!'; return; }
-    try {
-        await api('PUT', '/user/password', { oldPassword: oldP, newPassword: newP }, true);
-        ok.textContent = '✓ Kész!';
-    } catch (e) { err.textContent = e.message; }
-}
-
-// --- 8. INICIALIZÁLÁS ---
+// --- 8. INIT ---
 async function init() {
     checkStatus();
     setInterval(checkStatus, 60000);
-    
     var t = getToken();
     if (t) {
         try {
@@ -911,12 +887,10 @@ async function init() {
             updateNavUser(currentUser);
         } catch (e) { clearToken(); }
     }
-    
     document.addEventListener('click', function(e) {
         var dd = document.getElementById('nav-dropdown'), area = document.getElementById('nav-user-area');
         if (dd && area && !area.contains(e.target)) dd.classList.remove('open');
     });
-
     document.getElementById('nav-search-input')?.addEventListener('keypress', e => { if (e.key === 'Enter') searchPlayer(); });
 }
 
