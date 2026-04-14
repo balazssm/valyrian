@@ -663,32 +663,14 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.25rem 
 
 <div id="toast">Másolva!</div>
 <script>
-// --- 1. KONFIGURÁCIÓ ÉS GLOBÁLIS VÁLTOZÓK ---
+// --- 1. KONFIG ÉS GLOBÁLISOK ---
 const API_URL = '/api';
 const TOKEN_KEY = 'valyrian_token';
 let currentUser = null;
 
-// --- 2. ALAPVETŐ SEGÉDFÜGGVÉNYEK ---
-function getToken() { return localStorage.getItem(TOKEN_KEY); }
-function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
-function clearToken() { localStorage.removeItem(TOKEN_KEY); }
-
-async function api(method, path, body, auth) {
-    const options = {
-        method: method,
-        headers: { 'Content-Type': 'application/json' }
-    };
-    if (auth) options.headers['Authorization'] = 'Bearer ' + getToken();
-    if (body) options.body = JSON.stringify(body);
-
-    const res = await fetch(API_URL + path, options);
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Hiba történt a kérés során.');
-    return data;
-}
-
-// --- 3. OLDALKEZELÉS ÉS NAVIGÁCIÓ ---
+// --- 2. OLDALVÁLTÓ (Ez javítja a fekete képernyőt) ---
 function showPage(pageId) {
+    console.log("Oldalváltás:", pageId);
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const target = document.getElementById(pageId + '-page');
     if (target) {
@@ -697,6 +679,7 @@ function showPage(pageId) {
     }
 }
 
+// Navigáció a kezdőlapon belül (pl. Rólunk, Csapat)
 function navHome(sectionId) {
     showPage('home');
     setTimeout(() => {
@@ -705,7 +688,27 @@ function navHome(sectionId) {
     }, 100);
 }
 
-// --- 4. MODAL ÉS BEJELENTKEZÉS KEZELÉSE ---
+// --- 3. SZERVER STÁTUSZ ---
+async function checkStatus() {
+    try {
+        const res = await fetch('https://api.mcsrvstat.us/3/play.valyrian.hu');
+        const d = await res.json();
+        const dot = document.getElementById('sdot'), lbl = document.getElementById('slbl');
+        const cnt = document.getElementById('scnt'), mx = document.getElementById('smx');
+
+        if (d.online) {
+            if(dot) dot.className = 'sdot online';
+            if(lbl) { lbl.textContent = 'Online'; lbl.style.color = '#10b981'; }
+            if(cnt) cnt.textContent = d.players.online;
+            if(mx) mx.textContent = d.players.max;
+        } else {
+            if(dot) dot.className = 'sdot offline';
+            if(lbl) { lbl.textContent = 'Offline'; lbl.style.color = '#ef4444'; }
+        }
+    } catch (e) { console.warn("Státusz hiba"); }
+}
+
+// --- 4. AUTH & USER ---
 function openModal() { document.getElementById('modal-overlay').classList.add('open'); }
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
 
@@ -716,93 +719,20 @@ function switchTab(tab) {
     document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
 }
 
-async function doLogin() {
-    const user = document.getElementById('login-user').value.trim();
-    const pass = document.getElementById('login-pass').value;
-    const err = document.getElementById('login-err');
-    const btn = document.getElementById('login-btn');
-
-    if (!user || !pass) return err.textContent = 'Tölts ki minden mezőt!';
-    
-    try {
-        btn.disabled = true;
-        const data = await api('POST', '/auth/login', { username: user, password: pass });
-        setToken(data.token);
-        location.reload();
-    } catch (e) {
-        err.textContent = e.message;
-        btn.disabled = false;
-    }
-}
-
-// --- 5. SZERVER STÁTUSZ (play.valyrian.hu) ---
-async function checkStatus() {
-    try {
-        const res = await fetch('https://api.mcsrvstat.us/3/play.valyrian.hu');
-        const d = await res.json();
-        const dot = document.getElementById('sdot');
-        const lbl = document.getElementById('slbl');
-        const cnt = document.getElementById('scnt');
-        const mx = document.getElementById('smx');
-
-        if (d.online) {
-            dot.className = 'sdot online';
-            lbl.textContent = 'Online';
-            lbl.style.color = '#10b981';
-            cnt.textContent = d.players.online;
-            mx.textContent = d.players.max;
-        } else {
-            dot.className = 'sdot offline';
-            lbl.textContent = 'Offline';
-            lbl.style.color = '#ef4444';
-            cnt.textContent = '0';
-        }
-    } catch (e) { console.error("Szerver státusz hiba."); }
-}
-
-// --- 6. PROFIL ÉS KERESÉS ---
-function rankLabel(r) {
-    const labels = { owner: 'Tulajdonos', admin: 'Admin', dev: 'Fejlesztő', kiemeltplus: 'Kiemelt+', player: 'Játékos' };
-    return labels[r] || 'Játékos';
-}
-
-async function searchPlayer() {
-    const input = document.getElementById('nav-search-input');
-    const name = input.value.trim();
-    if (!name) return;
-
-    try {
-        const s = await api('GET', '/stats/' + name);
-        showPage('profile');
-        document.getElementById('profile-username').textContent = name;
-        document.getElementById('profile-rank-text').textContent = rankLabel(s.rank);
-        document.getElementById('profile-rank-badge').className = 'profile-rank-badge ' + (s.rank || 'player');
-        document.getElementById('profile-skin-img').src = `https://visage.surgeplay.com/full/256/${name}`;
-        
-        document.getElementById('stat-kills').textContent = s.kills || 0;
-        document.getElementById('stat-deaths').textContent = s.deaths || 0;
-        document.getElementById('stat-coins').textContent = s.coins || 0;
-        
-        const wlDesc = document.getElementById('wl-status-desc');
-        wlDesc.textContent = s.whitelistStatus === 'approved' ? 'A játékos szerepel a várólistán.' : 'Nincs a várólistán.';
-        
-        input.value = '';
-    } catch (e) { showToast('Nincs ilyen játékos az adatbázisban!'); }
-}
-
-// --- 7. FELHASZNÁLÓI FUNKCIÓK ---
 function updateNavUser(user) {
+    if(!user) return;
     document.getElementById('nav-login-li').style.display = 'none';
     const heroBtn = document.getElementById('hero-login-btn');
-    if (heroBtn) heroBtn.style.display = 'none';
-    
+    if(heroBtn) heroBtn.style.display = 'none';
     document.getElementById('nav-user-li').style.display = 'flex';
     document.getElementById('nav-username-label').textContent = user.username;
     
     const rl = document.getElementById('nav-rank-label');
-    rl.textContent = rankLabel(user.rank);
-    rl.className = 'nav-user-rank ' + (user.rank || 'player');
-    
+    const ranks = { owner: 'Tulajdonos', admin: 'Admin', kiemeltplus: 'Kiemelt+', player: 'Játékos' };
+    if(rl) {
+        rl.textContent = ranks[user.rank] || 'Játékos';
+        rl.className = 'nav-user-rank ' + (user.rank || 'player');
+    }
     document.getElementById('nav-avatar-img').src = `https://visage.surgeplay.com/bust/64/${user.username}`;
 }
 
@@ -811,55 +741,49 @@ function toggleDropdown(e) {
     document.getElementById('nav-dropdown').classList.toggle('open');
 }
 
-function logout() {
-    clearToken();
-    location.reload();
-}
+function logout() { localStorage.removeItem(TOKEN_KEY); location.reload(); }
 
-function goProfile(e) { if(e) e.stopPropagation(); showPage('profile'); }
-
-function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-function copyIP() {
-    navigator.clipboard.writeText('play.valyrian.hu');
-    showToast('IP Cím másolva!');
-}
-
-// --- 8. INICIALIZÁLÁS ---
+// --- 5. INDÍTÁS (A lényeg) ---
 async function init() {
+    console.log("Rendszer indul...");
+    
+    // Kezdőlap kényszerítése
+    showPage('home');
     checkStatus();
     setInterval(checkStatus, 60000);
 
-    const token = getToken();
+    const token = localStorage.getItem(TOKEN_KEY);
     if (token) {
         try {
-            currentUser = await api('GET', '/auth/me', null, true);
-            updateNavUser(currentUser);
-        } catch (e) { clearToken(); }
+            const res = await fetch(API_URL + '/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
+            if (res.ok) {
+                const user = await res.json();
+                updateNavUser(user);
+            }
+        } catch (e) { localStorage.removeItem(TOKEN_KEY); }
     }
 
-    // Reveal animációk figyelése
+    // Scroll animációk
     const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) entry.target.classList.add('active');
-        });
+        entries.forEach(en => { if(en.isIntersecting) en.target.classList.add('active'); });
     }, { threshold: 0.1 });
-
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    // Kattintásra dropdown bezárása
+    // Kattintás bárhova bezárja a menüt
     document.addEventListener('click', () => {
         const dd = document.getElementById('nav-dropdown');
         if (dd) dd.classList.remove('open');
     });
 }
 
-// Indítás
+function copyIP() {
+    navigator.clipboard.writeText('play.valyrian.hu');
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// START
 init();
 </script>
 </body>
