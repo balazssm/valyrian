@@ -1,277 +1,289 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valyrian Admin - Vezérlőpult</title>
-    <style>
-        :root {
-            --primary: #c0392b;
-            --primary-hover: #e74c3c;
-            --gold: #f1c40f;
-            --bg: #0f0f0f;
-            --card: #1a1a1a;
-            --text: #e0e0e0;
-            --success: #27ae60;
-            --warning: #e67e22;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valyrian Admin Dashboard</title>
 
-        body { 
-            background-color: var(--bg); 
-            color: var(--text); 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            margin: 0;
-            padding: 20px;
-            line-height: 1.6;
-        }
+<style>
+:root {
+    --bg:#0f0f0f;
+    --card:#1a1a1a;
+    --text:#e0e0e0;
+    --gold:#f1c40f;
+    --green:#27ae60;
+    --red:#e74c3c;
+    --blue:#3498db;
+}
 
-        .container { 
-            max-width: 1100px; 
-            margin: 40px auto; 
-            padding: 20px;
-        }
+body {
+    margin:0;
+    font-family:Arial;
+    background:var(--bg);
+    color:var(--text);
+}
 
-        h2 { 
-            text-align: center; 
-            color: var(--gold); 
-            text-transform: uppercase; 
-            letter-spacing: 3px;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 15px;
-            margin-bottom: 30px;
-        }
+header {
+    padding:20px;
+    text-align:center;
+    border-bottom:2px solid #222;
+}
 
-        #status-message { 
-            text-align: center; 
-            padding: 20px; 
-            background: var(--card);
-            border-radius: 8px;
-            border: 1px solid #333;
-        }
+h1 { color:var(--gold); }
 
-        .admin-table-wrapper {
-            background: var(--card);
-            border-radius: 12px;
-            overflow-x: auto;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
-            border: 1px solid #2a2a2a;
-        }
+.tabs {
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin:20px;
+}
 
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            text-align: left;
-        }
+button {
+    padding:10px 15px;
+    border:none;
+    cursor:pointer;
+    background:#222;
+    color:white;
+    border-radius:6px;
+}
 
-        th { 
-            background-color: #242424; 
-            color: var(--gold); 
-            padding: 18px; 
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 2px solid #333;
-        }
+button.active { background:var(--gold); color:black; }
 
-        td { 
-            padding: 15px 18px; 
-            border-bottom: 1px solid #2a2a2a;
-            vertical-align: middle;
-        }
+.container {
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+}
 
-        tr:hover { background: #222; }
+.card {
+    background:var(--card);
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:20px;
+}
 
-        /* Stílusos Select Mezők */
-        select { 
-            background: #2a2a2a; 
-            color: white; 
-            padding: 8px 12px; 
-            border: 1px solid #444;
-            border-radius: 6px;
-            cursor: pointer;
-            outline: none;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
+table {
+    width:100%;
+    border-collapse:collapse;
+}
 
-        select:focus {
-            border-color: var(--gold);
-        }
+th,td {
+    padding:10px;
+    border-bottom:1px solid #333;
+    text-align:left;
+}
 
-        /* Whitelist Státusz Színek */
-        select.approved { border-left: 4px solid var(--success); color: #2ecc71; }
-        select.pending { border-left: 4px solid var(--warning); color: #f39c12; }
-        select.rejected { border-left: 4px solid var(--primary); color: #e74c3c; }
-        select.none { border-left: 4px solid #7f8c8d; color: #bdc3c7; }
+.status-pending { color:orange; }
+.status-approved { color:var(--green); }
+.status-rejected { color:var(--red); }
 
-        .badge {
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .badge-Tulajdonos { background: var(--primary); color: white; }
-        .badge-Admin { background: #8e44ad; color: white; }
-        .badge-Mod { background: #2980b9; color: white; }
-        .badge-Vip { background: var(--gold); color: black; }
-        .badge-Kiemelt { background: var(--success); color: black; }
-        .badge-Kiemelt+ { background: var(--warning); color: black; }
-        .badge-Játékos { background: #7f8c8d; color: white; }
-        
+.btn {
+    padding:5px 10px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
 
-        .error-text { color: var(--primary); font-weight: bold; }
+.btn-approve { background:var(--green); color:white; }
+.btn-reject { background:var(--red); color:white; }
 
-    </style>
+select {
+    padding:5px;
+    background:#222;
+    color:white;
+    border-radius:5px;
+}
+</style>
 </head>
+
 <body>
 
-    <div class="container">
-        <h2>Valyrian Vezérlőpult</h2>
-        
-        <div id="status-message">Kapcsolódás a tekercsekhez...</div>
+<header>
+<h1>⚡ Valyrian Admin Dashboard</h1>
+</header>
 
-        <div id="admin-panel" style="display:none;">
-            <div class="admin-table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Felhasználónév</th>
-                            <th>Rang</th>
-                            <th>Whitelist Állapot</th>
-                            <th>Jogosultság Átírása</th>
-                        </tr>
-                    </thead>
-                    <tbody id="user-list"></tbody>
-                </table>
-            </div>
-        </div>
+<div class="tabs">
+<button onclick="showTab('orders')" class="active">📦 Orders</button>
+<button onclick="showTab('users')">👤 Users</button>
+</div>
+
+<div class="container">
+
+<!-- ORDERS -->
+<div id="ordersTab">
+    <div class="card">
+        <h2>Rendelések</h2>
+        <select onchange="loadOrders(this.value)">
+            <option value="">Összes</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+        </select>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>User</th>
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="orders"></tbody>
+        </table>
     </div>
+</div>
 
-    <script>
-        const TOKEN_KEY = 'valyrian_token';
+<!-- USERS -->
+<div id="usersTab" style="display:none;">
+    <div class="card">
+        <h2>Felhasználók</h2>
 
-        // Ez a map segít a színek kezelésében a felületen
-        const wlMap = {
-            approved: { cls: 'approved', emoji: '✅' },
-            pending:  { cls: 'pending',  emoji: '⏳' },
-            rejected: { cls: 'rejected', emoji: '❌' },
-            none:     { cls: 'none',     emoji: '❔' }
-        };
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Rank</th>
+                    <th>Whitelist</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="users"></tbody>
+        </table>
+    </div>
+</div>
 
-        async function loadUsers() {
-            const statusDiv = document.getElementById('status-message');
-            const token = localStorage.getItem(TOKEN_KEY);
+</div>
 
-            if (!token) {
-                statusDiv.innerHTML = '<span class="error-text">Hiba: Nem vagy bejelentkezve!</span>';
-                return;
-            }
+<script>
+const TOKEN = localStorage.getItem("valyrian_token");
 
-            try {
-                const res = await fetch('/api/admin/users', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+// TAB
+function showTab(tab){
+    document.getElementById("ordersTab").style.display = tab==="orders"?"block":"none";
+    document.getElementById("usersTab").style.display = tab==="users"?"block":"none";
+}
 
-                if (res.status === 403) {
-                    statusDiv.innerHTML = '<span class="error-text">Nincs hatalmad ezen a területen! (403)</span>';
-                    return;
-                }
+// ─────────────────────────────
+// ORDERS
+// ─────────────────────────────
+async function loadOrders(status=""){
+    const res = await fetch("/api/purchase/orders"+(status?`?status=${status}`:""), {
+        headers:{ Authorization:`Bearer ${TOKEN}` }
+    });
 
-                if (!res.ok) throw new Error('Szerver hiba');
+    const data = await res.json();
+    const tbody = document.getElementById("orders");
 
-                const users = await res.json();
-                const list = document.getElementById('user-list');
-                list.innerHTML = '';
+    tbody.innerHTML = "";
 
-                users.forEach(user => {
-                    const currentWL = user.whitelistStatus || 'none';
-                    const wlData = wlMap[currentWL] || wlMap.none;
+    data.forEach(o=>{
+        tbody.innerHTML += `
+        <tr>
+            <td>${o.orderId}</td>
+            <td>${o.username}</td>
+            <td>${o.item}</td>
+            <td>${o.priceHuf} Ft</td>
+            <td class="status-${o.status}">${o.status}</td>
+            <td>
+                ${o.status==="pending" ? `
+                <button class="btn btn-approve" onclick="approve('${o._id}')">Approve</button>
+                <button class="btn btn-reject" onclick="reject('${o._id}')">Reject</button>
+                `:""}
+            </td>
+        </tr>
+        `;
+    });
+}
 
-                    list.innerHTML += `
-                        <tr>
-                            <td><strong>${user.username}</strong></td>
-                            <td><span class="badge badge-${user.rank}">${user.rank}</span></td>
-                            <td>
-                                <select class="${wlData.cls}" onchange="updateWhitelistStatus('${user._id}', this)">
-                                    <option value="none" ${currentWL === 'none' ? 'selected' : ''}>❔ Nincs kérelem</option>
-                                    <option value="pending" ${currentWL === 'pending' ? 'selected' : ''}>⏳ Függőben</option>
-                                    <option value="approved" ${currentWL === 'approved' ? 'selected' : ''}>✅ Elfogadva</option>
-                                    <option value="rejected" ${currentWL === 'rejected' ? 'selected' : ''}>❌ Elutasítva</option>
-                                </select>
-                            </td>
-                            <td>
-                                <select onchange="updateUserRank('${user._id}', this.value)">
-                                    <option value="Játékos" ${user.rank === 'player' ? 'selected' : ''}>Player</option>
-                                    <option value="Vip" ${user.rank === 'vip' ? 'selected' : ''}>VIP</option>
-                                    <option value="Kiemelt" ${user.rank === 'kiemelt' ? 'selected' : ''}>Kiemelt</option>
-                                    <option value="Kiemelt+" ${user.rank === 'kiemeltp' ? 'selected' : ''}>Kiemelt+</option>
-                                    <option value="Mod" ${user.rank === 'mod' ? 'selected' : ''}>Mod</option>
-                                    <option value="Admin" ${user.rank === 'admin' ? 'selected' : ''}>Admin</option>
-                                    <option value="Tulajdonos" ${user.rank === 'owner' ? 'selected' : ''}>Tulajdonos</option>
-                                </select>
-                            </td>
-                        </tr>
-                    `;
-                });
+async function approve(id){
+    await fetch(`/api/purchase/${id}/approve`, {
+        method:"PUT",
+        headers:{ Authorization:`Bearer ${TOKEN}` }
+    });
+    loadOrders();
+}
 
-                statusDiv.style.display = 'none';
-                document.getElementById('admin-panel').style.display = 'block';
+async function reject(id){
+    await fetch(`/api/purchase/${id}/reject`, {
+        method:"PUT",
+        headers:{ Authorization:`Bearer ${TOKEN}` }
+    });
+    loadOrders();
+}
 
-            } catch (err) {
-                statusDiv.innerHTML = '<span class="error-text">Hiba történt az adatok lekérésekor!</span>';
-                console.error(err);
-            }
-        }
+// ─────────────────────────────
+// USERS
+// ─────────────────────────────
+async function loadUsers(){
+    const res = await fetch("/api/admin/users", {
+        headers:{ Authorization:`Bearer ${TOKEN}` }
+    });
 
-        async function updateWhitelistStatus(userId, selectElement) {
-            const token = localStorage.getItem(TOKEN_KEY);
-            const newStatus = selectElement.value;
+    const data = await res.json();
+    const tbody = document.getElementById("users");
 
-            // Frissítjük a színt azonnal
-            selectElement.className = wlMap[newStatus].cls;
+    tbody.innerHTML = "";
 
-            try {
-                const res = await fetch(`/api/admin/users/${userId}/whitelist`, {
-                    method: 'PUT',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ whitelistStatus: newStatus })
-                });
+    data.forEach(u=>{
+        tbody.innerHTML += `
+        <tr>
+            <td>${u.username}</td>
+            <td>${u.rank}</td>
+            <td>
+                <select onchange="updateWL('${u._id}', this.value)">
+                    <option value="none" ${u.whitelistStatus==="none"?"selected":""}>none</option>
+                    <option value="pending" ${u.whitelistStatus==="pending"?"selected":""}>pending</option>
+                    <option value="approved" ${u.whitelistStatus==="approved"?"selected":""}>approved</option>
+                    <option value="rejected" ${u.whitelistStatus==="rejected"?"selected":""}>rejected</option>
+                </select>
+            </td>
+            <td>
+                <select onchange="updateRank('${u._id}', this.value)">
+                    <option value="player">Player</option>
+                    <option value="vip">VIP</option>
+                    <option value="kiemelt">Kiemelt</option>
+                    <option value="kiemeltp">Kiemelt+</option>
+                    <option value="mod">Mod</option>
+                    <option value="admin">Admin</option>
+                    <option value="owner">Owner</option>
+                </select>
+            </td>
+        </tr>
+        `;
+    });
+}
 
-                if (!res.ok) alert('Hiba történt a mentés során!');
-            } catch (err) {
-                console.error(err);
-                alert('Hálózati hiba!');
-            }
-        }
+async function updateWL(id, value){
+    await fetch(`/api/admin/users/${id}/whitelist`, {
+        method:"PUT",
+        headers:{
+            "Content-Type":"application/json",
+            Authorization:`Bearer ${TOKEN}`
+        },
+        body: JSON.stringify({ whitelistStatus:value })
+    });
+}
 
-        async function updateUserRank(userId, newRank) {
-            const token = localStorage.getItem(TOKEN_KEY);
-            try {
-                const res = await fetch(`/api/admin/users/${userId}/rank`, {
-                    method: 'PUT',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ rank: newRank })
-                });
+async function updateRank(id, rank){
+    await fetch(`/api/admin/users/${id}/rank`, {
+        method:"PUT",
+        headers:{
+            "Content-Type":"application/json",
+            Authorization:`Bearer ${TOKEN}`
+        },
+        body: JSON.stringify({ rank })
+    });
 
-                if (res.ok) {
-                    loadUsers(); // Frissítjük a táblázatot a jelvények miatt
-                } else {
-                    alert('Hiba a rang módosításakor!');
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
+    loadUsers();
+}
 
-        // Oldal indítása
-        loadUsers();
-    </script>
+// INIT
+loadOrders();
+loadUsers();
+</script>
+
 </body>
 </html>
