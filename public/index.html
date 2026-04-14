@@ -866,7 +866,7 @@ function toggleDropdown(e) { e.stopPropagation(); document.getElementById('nav-d
 function goProfile(e) { if(e) e.stopPropagation(); document.getElementById('nav-dropdown').classList.remove('open'); showPage('profile'); loadProfile(); }
 function goSettings(e) { if(e) e.stopPropagation(); document.getElementById('nav-dropdown').classList.remove('open'); showPage('profile'); loadProfile(); setTimeout(() => openProfileTab('settings'), 50); }
 function showToast(msg) { var t = document.getElementById('toast'); if(!t) return; t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2100); }
-function rankLabel(r) { return { owner: 'Tulajdonos', admin: 'Admin', mod: 'Moderátor', dev: 'Fejlesztő', vip: 'VIP', kiemelt: 'Kiemelt', kiemeltp: 'Kiemelt+', player: 'Játékos' }[r] || 'Játékos'; }
+function rankLabel(r) { return { owner: 'Tulajdonos', admin: 'Admin', mod: 'Moderátor', dev: 'Fejlesztő', vip: 'VIP', kiemelt: 'Kiemelt', kiemeltplus: 'Kiemelt+', player: 'Játékos' }[r] || 'Játékos'; }
 
 async function saveProfile() {
     var bio = document.getElementById('set-bio').value.trim(), email = document.getElementById('set-email').value.trim(), ok = document.getElementById('set-ok');
