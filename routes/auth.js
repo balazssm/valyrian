@@ -2,6 +2,20 @@ const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const mongoose = require('mongoose');
+
+// Segédfüggvény az élő rang lekéréséhez
+async function getLiveRank(username, fallbackRank) {
+    try {
+        const lpDatabase = mongoose.connection.useDb('minecraft');
+        const lpCollection = lpDatabase.collection('users');
+        const lpData = await lpCollection.findOne({ name: username.toLowerCase() });
+        return lpData ? lpData.primaryGroup : fallbackRank;
+    } catch (err) {
+        console.error("Hiba a rang lekérésekor:", err);
+        return fallbackRank;
+    }
+}
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
@@ -38,7 +52,10 @@ router.post('/register', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    res.json({ token, user: safeUser(user) });
+
+    // Regisztrációnál is lekérjük az élő rangot (ha már játszott korábban)
+    const liveRank = await getLiveRank(user.username, user.rank);
+    res.json({ token, user: safeUser(user, liveRank) });
   } catch(e) {
     console.error(e);
     res.status(500).json({ error: 'Szerver hiba.' });
@@ -58,7 +75,6 @@ router.post('/login', async (req, res) => {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ error: 'Hibás felhasználónév vagy jelszó.' });
 
-    // lastSeen frissítés
     user.lastSeen = new Date();
     await user.save();
 
@@ -67,30 +83,37 @@ router.post('/login', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    res.json({ token, user: safeUser(user) });
+
+    // Belépésnél lekérjük az élő rangot a Minecraftból
+    const liveRank = await getLiveRank(user.username, user.rank);
+    res.json({ token, user: safeUser(user, liveRank) });
   } catch(e) {
     console.error(e);
     res.status(500).json({ error: 'Szerver hiba.' });
   }
 });
 
-// GET /api/auth/me  (token alapján visszaadja a fresh adatokat)
+// GET /api/auth/me
 router.get('/me', require('../middleware/auth'), async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
     if (!user) return res.status(404).json({ error: 'Felhasználó nem található.' });
-    res.json(safeUser(user));
+    
+    // Frissítéskor is lekérjük az élő rangot
+    const liveRank = await getLiveRank(user.username, user.rank);
+    res.json(safeUser(user, liveRank));
   } catch(e) {
     res.status(500).json({ error: 'Szerver hiba.' });
   }
 });
 
-function safeUser(u) {
+// Módosított safeUser, ami elfogadja az élő rangot külső paraméterként
+function safeUser(u, liveRank) {
   return {
     id: u._id,
     username: u.username,
     email: u.email,
-    rank: u.rank,
+    rank: liveRank || u.rank, // Ha van élő rang, azt használja, különben a mentettet
     bio: u.bio,
     whitelist: u.whitelist,
     stats: u.stats,
