@@ -12,6 +12,10 @@
             --gold:#f1c40f;
             --green:#27ae60;
             --red:#e74c3c;
+            --blue:#3498db;
+            --purple:#9b59b6;
+            --orange:#e67e22;
+            --grey:#7f8c8d;
         }
         body { margin:0; font-family:Arial, sans-serif; background:var(--bg); color:var(--text); }
         h1 { text-align:center; color:var(--gold); padding:20px; border-bottom:2px solid #222; }
@@ -32,15 +36,15 @@
         
         select { background:#222; color:white; padding:8px; border-radius:5px; border: 1px solid #444; cursor: pointer; }
         
-        /* BADGE SZÍNEK - JAVÍTVA */
-        .badge { padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; text-transform: uppercase; display: inline-block; min-width: 60px; text-align: center; }
-        .badge-vip { background:#f1c40f; color:black; }
+        /* BADGE STÍLUSOK */
+        .badge { padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; text-transform: uppercase; display: inline-block; min-width: 80px; text-align: center; }
+        .badge-owner { background:var(--red); color:white; }
+        .badge-admin { background:var(--purple); color:white; }
+        .badge-mod { background:var(--blue); color:white; }
+        .badge-vip { background:var(--gold); color:black; }
         .badge-kiemelt { background:#2ecc71; color:black; }
-        .badge-kiemeltp { background:#e67e22; color:white; }
-        .badge-player { background:#7f8c8d; color:white; }
-        .badge-mod { background:#3498db; color:white; }
-        .badge-admin { background:#9b59b6; color:white; }
-        .badge-owner { background:#e74c3c; color:white; }
+        .badge-kiemeltplus { background:var(--orange); color:white; }
+        .badge-default, .badge-player { background:var(--grey); color:white; }
         
         #error-msg { color: #ff4d4d; text-align:center; margin-bottom: 15px; font-weight: bold; background: rgba(231, 76, 60, 0.1); padding: 10px; border-radius: 5px; display: none; }
     </style>
@@ -102,17 +106,14 @@
             setTimeout(() => { errorDisplay.style.display = "none"; }, 5000);
         }
 
-        // --- RENDELÉSEK ---
+        // --- RENDELÉSEK BETÖLTÉSE ---
         async function loadOrders(status = "") {
             try {
                 const res = await fetch(`/api/purchase/orders${status ? `?status=${status}` : ""}`, {
                     headers: { "Authorization": `Bearer ${TOKEN}` }
                 });
 
-                if (!res.ok) {
-                    const txt = await res.text();
-                    throw new Error(txt.includes("<!DOCTYPE") ? "Szerver hiba (HTML jött JSON helyett)" : txt);
-                }
+                if (!res.ok) throw new Error("Hiba a rendelések betöltésekor.");
 
                 const data = await res.json();
                 const tbody = document.getElementById("orders-list");
@@ -132,7 +133,7 @@
                     </tr>
                 `).join('');
             } catch (e) {
-                logError("Rendelések hiba: " + e.message);
+                logError(e.message);
             }
         }
 
@@ -147,7 +148,7 @@
             } catch (e) { console.error(e); }
         }
 
-        // --- FELHASZNÁLÓK (RANG FIXEK) ---
+        // --- FELHASZNÁLÓK BETÖLTÉSE ---
         async function loadUsers() {
             try {
                 const res = await fetch("/api/admin/users", {
@@ -160,13 +161,26 @@
                 const tbody = document.getElementById("users-list");
                 
                 tbody.innerHTML = users.map(u => {
-                    const currentRank = u.rank.toLowerCase();
-                    const badgeClass = `badge-${currentRank}`;
+                    const currentRank = u.rank ? u.rank.toLowerCase() : 'default';
+                    
+                    // Megjelenítési név és badge osztály beállítása
+                    let badgeClass = `badge-${currentRank}`;
+                    let displayText = currentRank.toUpperCase();
+
+                    if (currentRank === 'default' || currentRank === 'player') {
+                        displayText = 'JÁTÉKOS';
+                        badgeClass = 'badge-default';
+                    } else if (currentRank === 'kiemeltplus' || currentRank === 'kiemeltp') {
+                        displayText = 'KIEMELT+';
+                        badgeClass = 'badge-kiemeltplus';
+                    } else if (currentRank === 'owner') {
+                        displayText = 'TULAJDONOS';
+                    }
 
                     return `
                     <tr>
-                        <td>${u.username}</td>
-                        <td><span class="badge ${badgeClass}">${u.rank}</span></td>
+                        <td><b>${u.username}</b></td>
+                        <td><span class="badge ${badgeClass}">${displayText}</span></td>
                         <td>
                             <select onchange="updateWL('${u._id}', this.value)">
                                 <option value="none" ${u.whitelistStatus === 'none' ? 'selected' : ''}>none</option>
@@ -177,10 +191,10 @@
                         </td>
                         <td>
                             <select onchange="updateRank('${u._id}', this.value)">
-                                <option value="player" ${currentRank === 'player' ? 'selected' : ''}>Player</option>
+                                <option value="player" ${currentRank === 'player' || currentRank === 'default' ? 'selected' : ''}>Player</option>
                                 <option value="vip" ${currentRank === 'vip' ? 'selected' : ''}>VIP</option>
                                 <option value="kiemelt" ${currentRank === 'kiemelt' ? 'selected' : ''}>Kiemelt</option>
-                                <option value="kiemeltp" ${currentRank === 'kiemeltp' ? 'selected' : ''}>Kiemelt+</option>
+                                <option value="kiemeltplus" ${currentRank === 'kiemeltplus' || currentRank === 'kiemeltp' ? 'selected' : ''}>Kiemelt+</option>
                                 <option value="mod" ${currentRank === 'mod' ? 'selected' : ''}>Mod</option>
                                 <option value="admin" ${currentRank === 'admin' ? 'selected' : ''}>Admin</option>
                                 <option value="owner" ${currentRank === 'owner' ? 'selected' : ''}>Tulajdonos</option>
@@ -189,23 +203,26 @@
                     </tr>`;
                 }).join('');
             } catch (e) {
-                logError("User hiba: " + e.message);
+                logError("Hiba: " + e.message);
             }
         }
 
         async function updateRank(id, newRank) {
             try {
+                // Biztosítjuk, hogy a backend a várt kulcsot kapja meg (kiemeltp helyett kiemeltplus)
+                const safeRank = (newRank === 'player') ? 'player' : newRank;
+
                 const res = await fetch(`/api/admin/users/${id}/rank`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${TOKEN}`
                     },
-                    body: JSON.stringify({ rank: newRank }) // A select value-ja már kisbetűs
+                    body: JSON.stringify({ rank: safeRank })
                 });
 
                 if (res.ok) {
-                    loadUsers(); // Azonnal újratöltjük, hogy látszódjon a változás
+                    loadUsers(); 
                 } else {
                     alert("Sikertelen rang váltás!");
                 }
@@ -213,19 +230,21 @@
         }
 
         async function updateWL(id, val) {
-            await fetch(`/api/admin/users/${id}/whitelist`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${TOKEN}`
-                },
-                body: JSON.stringify({ whitelistStatus: val })
-            });
+            try {
+                await fetch(`/api/admin/users/${id}/whitelist`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${TOKEN}`
+                    },
+                    body: JSON.stringify({ whitelistStatus: val })
+                });
+            } catch (e) { console.error(e); }
         }
 
-        // START
+        // INDÍTÁS
         if (!TOKEN) {
-            logError("Nincs bejelentkezési token! Irány a főoldal.");
+            window.location.href = "/";
         } else {
             loadOrders();
             loadUsers();
