@@ -6,16 +6,14 @@ const path = require('path');
 
 const app = express();
 
-// ── ATOMBIZTOS CORS BEÁLLÍTÁS ──
-app.use(cors()); // Alapértelmezett minden engedélyezése
+// ── CORS BEÁLLÍTÁSOK ──
+app.use(cors());
 
 app.use((req, res, next) => {
-  // Manuálisan is hozzáadjuk a fejlécet minden válaszhoz
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-plugin-key");
   
-  // A preflight (OPTIONS) kérésekre azonnal OK-val válaszolunk
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
@@ -24,7 +22,8 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-// ── STATIKUS FRONTEND ──
+// ── STATIKUS FRONTEND KISZOLGÁLÁSA ──
+// Ez biztosítja, hogy a public mappából elérhető legyen minden (CSS, képek, JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── API ROUTES ──
@@ -34,15 +33,15 @@ app.use('/api/mc', require('./routes/minecraft'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/purchase', require('./routes/purchase'));
 
-// ── ADMIN OLDAL KISZOLGÁLÁSA ──
+// ── KIFEJEZETT OLDAL ÚTVONALAK ──
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
-// ── STORE OLDAL ──
+
 app.get('/bolt', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'store.html'));
 });
-// INDEX
+
 app.get('/fooldal', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -56,17 +55,27 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ── SPA FALLBACK (Node v22 kompatibilis) ──
+// ── API 404 HIBAKEZELŐ (A JAVÍTÁS!) ──
+// Ha az /api/... kezdetű kérést eddig nem kapta el semmi, akkor ne küldjünk HTML-t!
+app.use('/api', (req, res) => {
+  res.status(404).json({ 
+    error: 'API végpont nem található ezen a címen!',
+    path: req.originalUrl 
+  });
+});
+
+// ── SPA FALLBACK (Minden másra az index.html-t dobja) ──
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ── MONGODB CSATLAKOZÁS ÉS INDÍTÁS ──
+// ── MONGODB CSATLAKOZÁS ÉS SZERVER INDÍTÁS ──
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB csatlakozva');
     const PORT = process.env.PORT || 3000;
-    // A '0.0.0.0' megadása fontos Render-en a külső eléréshez
+    
+    // 0.0.0.0 kötelező Render/Heroku/Docker környezetben
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Szerver fut a ${PORT} porton`);
     });
