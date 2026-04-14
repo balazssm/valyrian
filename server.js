@@ -37,6 +37,10 @@ app.use('/api/admin', require('./routes/admin'));
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
+// ── STORE OLDAL ──
+app.get('/store', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'store.html'));
+});
 // ── HEALTH CHECK ──
 app.get('/api/health', (req, res) => {
   res.json({
