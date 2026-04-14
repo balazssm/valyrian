@@ -38,7 +38,7 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 // ── STORE OLDAL ──
-app.get('/store', (req, res) => {
+app.get('/bolt', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'store.html'));
 });
 // ── HEALTH CHECK ──
