@@ -41,6 +41,11 @@ app.get('/admin', (req, res) => {
 app.get('/bolt', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'store.html'));
 });
+// INDEX
+app.get('/fooldal', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // ── HEALTH CHECK ──
 app.get('/api/health', (req, res) => {
   res.json({
