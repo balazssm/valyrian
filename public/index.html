@@ -700,13 +700,11 @@ async function init() {
         if (d && a && !a.contains(e.target)) d.classList.remove('open');
     });
 
-    // Enter gombra való keresés eseménykezelője
     document.getElementById('nav-search-input')?.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') searchPlayer();
     });
 }
 
-// Oldalváltás - Tisztán csak a váltásért felel
 function showPage(p) {
     document.querySelectorAll('.page').forEach(function (e) { e.classList.remove('active'); });
     var target = document.getElementById(p + '-page');
@@ -721,7 +719,7 @@ function navHome(s) {
 
 function toggleDropdown(e) { e.stopPropagation(); document.getElementById('nav-dropdown').classList.toggle('open'); }
 
-// Saját profil megnyitása
+// SAJÁT PROFIL MEGNYITÁSA A MENÜBŐL
 function goProfile(e) { 
     if(e) e.stopPropagation(); 
     document.getElementById('nav-dropdown').classList.remove('open'); 
@@ -744,10 +742,10 @@ function switchTab(t) {
 async function doLogin() {
     var u = document.getElementById('login-user').value.trim(), p = document.getElementById('login-pass').value, err = document.getElementById('login-err'), btn = document.getElementById('login-btn');
     err.textContent = ''; if (!u || !p) { err.textContent = 'Kérlek töltsd ki az összes mezőt!'; return; }
-    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Betöltés...';
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
     try {
         var d = await api('POST', '/auth/login', { username: u, password: p });
-        setToken(d.token); currentUser = d.user; updateNavUser(d.user); closeModal(); showToast('Üdvözlünk, ' + d.user.username + '!');
+        setToken(d.token); currentUser = d.user; updateNavUser(d.user); closeModal(); showToast('Üdv, ' + d.user.username + '!');
     } catch (e) { err.textContent = e.message; } finally { btn.disabled = false; btn.textContent = 'Bejelentkezés'; }
 }
 
@@ -766,10 +764,10 @@ function logout() {
     document.getElementById('nav-user-li').style.display = 'none';
     document.getElementById('nav-dropdown').classList.remove('open');
     var h = document.getElementById('hero-login-btn'); if (h) h.style.display = '';
-    showPage('home'); showToast('Sikeresen kijelentkeztél.');
+    showPage('home'); showToast('Sikeres kijelentkezés.');
 }
 
-// SAJÁT PROFIL BETÖLTÉSE (Auth-ból frissítve)
+// SAJÁT PROFIL BETÖLTÉSE
 async function loadProfile() {
     if (!currentUser) return;
     try {
@@ -778,29 +776,29 @@ async function loadProfile() {
     } catch (e) { console.warn("Hiba a profil frissítésekor."); }
 
     var u = currentUser;
-    document.getElementById('profile-skin-img').src = 'https://visage.surgeplay.com/full/256/' + u.username;
     document.getElementById('profile-username').textContent = u.username;
+    document.getElementById('profile-skin-img').src = 'https://visage.surgeplay.com/full/256/' + u.username;
     document.getElementById('profile-bio').textContent = u.bio || 'Még nem adtál meg bemutatkozást.';
     
-    // Rang Badge és Szöveg
+    // UI elemek visszaállítása (mivel ez a SAJÁT profil)
+    const settingsTab = document.querySelector('[data-tab="settings"]');
+    if(settingsTab) settingsTab.style.display = '';
+    const logoutBtn = document.querySelector('#profile-page .logout-btn');
+    if(logoutBtn) logoutBtn.style.display = '';
+
+    // Rang Badge
     var b = document.getElementById('profile-rank-badge');
     if (b) b.className = 'profile-rank-badge ' + (u.rank || 'player');
     document.getElementById('profile-rank-text').textContent = rankLabel(u.rank);
 
-    // Saját statok lekérése
+    // Statok lekérése
     try {
         const res = await fetch(API + '/stats/' + u.username);
         const s = await res.json();
-        if (res.ok) {
-            updateStatsUI(s);
-        }
+        if (res.ok) updateStatsUI(s);
     } catch (err) { console.error("Stats hiba:", err); }
 
-    // Beállítások fül megjelenítése (mivel saját profil)
-    const settingsTab = document.querySelector('[data-tab="settings"]');
-    if(settingsTab) settingsTab.style.display = '';
-
-    // Whitelist státusz
+    // Whitelist
     var wm = { approved: { cls: 'approved', emoji: '✅', text: 'Whitelistre kerültél!' }, pending: { cls: 'pending', emoji: '⏳', text: 'Elbírálás alatt.' }, rejected: { cls: 'rejected', emoji: '❌', text: 'Elutasítva.' }, none: { cls: 'none', emoji: '❔', text: 'Nincs kérelem.' } };
     var wl = wm[u.whitelist] || wm.none;
     document.getElementById('wl-icon').className = 'wl-status-icon ' + wl.cls;
@@ -811,7 +809,7 @@ async function loadProfile() {
     document.getElementById('set-email').value = u.email || '';
 }
 
-// KERESETT JÁTÉKOS BETÖLTÉSE
+// MÁS JÁTÉKOS KERESÉSE
 async function searchPlayer() {
     const input = document.getElementById('nav-search-input');
     const name = input.value.trim();
@@ -822,18 +820,18 @@ async function searchPlayer() {
         const s = await r.json();
 
         if (!r.ok) {
-            showToast("Nincs ilyen játékos a Neptune-ban!");
+            showToast("Nincs ilyen játékos!");
             return;
         }
 
         showPage('profile');
 
-        // Adatok beírása a keresett játékoshoz
+        // Adatok beírása
         document.getElementById('profile-username').textContent = name;
         document.getElementById('profile-skin-img').src = 'https://visage.surgeplay.com/full/256/' + name;
-        document.getElementById('profile-bio').textContent = s.bio || 'Ennek a játékosnak nincs leírása.';
+        document.getElementById('profile-bio').textContent = s.bio || 'Nincs leírása.';
         
-        // Rang frissítése
+        // Rang Badge frissítése
         const badge = document.getElementById('profile-rank-badge');
         const rankText = document.getElementById('profile-rank-text');
         if (badge && rankText) {
@@ -843,18 +841,21 @@ async function searchPlayer() {
 
         updateStatsUI(s);
 
-        // Beállítások elrejtése (mivel nem a sajátunk)
+        // MODERÁCIÓ: Ha nem a sajátunk, elrejtjük a privát gombokat
         const isOwn = currentUser && currentUser.username.toLowerCase() === name.toLowerCase();
+        
         const settingsTab = document.querySelector('[data-tab="settings"]');
         if(settingsTab) settingsTab.style.display = isOwn ? '' : 'none';
         
+        const logoutBtn = document.querySelector('#profile-page .logout-btn');
+        if(logoutBtn) logoutBtn.style.display = isOwn ? '' : 'none';
+        
         input.value = ''; 
     } catch (e) {
-        showToast("Hiba történt a keresés során.");
+        showToast("Hiba történt.");
     }
 }
 
-// Segédfüggvény a statok kiírásához
 function updateStatsUI(s) {
     document.getElementById('stat-kills').textContent = s.kills || 0;
     document.getElementById('stat-deaths').textContent = s.deaths || 0;
@@ -871,7 +872,7 @@ async function saveProfile() {
     ok.textContent = ''; try {
         await api('PUT', '/user/profile', { bio, email }, true);
         currentUser.bio = bio; currentUser.email = email;
-        document.getElementById('profile-bio').textContent = bio || 'Még nem adtál meg bemutatkozást.';
+        document.getElementById('profile-bio').textContent = bio || 'Nincs bemutatkozás.';
         ok.textContent = '✓ Mentve!'; setTimeout(() => ok.textContent = '', 2000);
     } catch (e) { ok.style.color = '#f87171'; ok.textContent = e.message; }
 }
