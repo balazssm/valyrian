@@ -1,18 +1,19 @@
 /**
- * Valyrian – Vásárlási route (TELJESEN JAVÍTVA)
+ * Valyrian – Vásárlási route (RCON + ADMIN FIXED)
  */
 
 require('dotenv').config();
 const router = require('express').Router();
 const crypto = require('crypto');
 const mongoose = require('mongoose');
+const { Rcon } = require('rcon-client'); // RCON kliens betöltése
 
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 
 // ─────────────────────────────────────────────
-// Order schema & Model
+// Order Schema
 // ─────────────────────────────────────────────
 const orderSchema = new mongoose.Schema({
   orderId: { type: String, unique: true, index: true },
@@ -31,65 +32,50 @@ const orderSchema = new mongoose.Schema({
 const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
 
 // ─────────────────────────────────────────────
-// Segédfüggvények (Discord & MC)
+// Minecraft RCON Függvény
 // ─────────────────────────────────────────────
-async function sendDiscordWebhook(webhookUrl, payload) {
+async function applyMinecraftRank(username, rank) {
   try {
-    await fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+    const rcon = await Rcon.connect({
+      host: "37.27.100.83", // A szervered fix IP-je
+      port: 25575,
+      password: process.env.MC_RCON_PASSWORD
     });
+
+    // LuckPerms parancs kiadása
+    const response = await rcon.send(`lp user ${username} parent set ${rank}`);
+    console.log("RCON válasz:", response);
+
+    await rcon.end();
+    return { success: true, response };
   } catch (err) {
-    console.error("Webhook hiba:", err.message);
+    console.error("RCON hiba:", err.message);
+    return { success: false, error: err.message };
   }
 }
 
-async function applyMinecraftRank(username, rank) {
-  const pluginUrl = process.env.MC_PLUGIN_URL;
-  if (!pluginUrl) return { applied: false, reason: 'no_plugin_url' };
-
-  const res = await fetch(`${pluginUrl}/api/mc/rank`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-plugin-key': process.env.PLUGIN_SECRET
-    },
-    body: JSON.stringify({ username, rank })
-  });
-  return await res.json();
-}
-
-const TYPE_COLOR = { rank: 0x7c3aed, coins: 0xfbbf24, boost: 0x0ea5e9 };
-
 // ─────────────────────────────────────────────
-// [GET] /api/purchase/orders (AZ ADMIN PANELNEK)
+// [GET] /api/purchase/orders (Admin lista)
 // ─────────────────────────────────────────────
 router.get('/orders', auth, admin, async (req, res) => {
   try {
     const { status } = req.query;
     let filter = {};
     if (status) filter.status = status;
-
     const orders = await Order.find(filter).sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
-    res.status(500).json({ error: 'Hiba a rendelések lekérésekor' });
+    res.status(500).json({ error: 'Szerver hiba' });
   }
 });
 
 // ─────────────────────────────────────────────
-// [POST] /api/purchase/:type (VÁSÁRLÁS LÉTREHOZÁSA)
+// [POST] /api/purchase/:type (Új vásárlás)
 // ─────────────────────────────────────────────
 router.post('/:type', async (req, res) => {
   try {
-    const allowed = ['rank', 'coins', 'boost'];
     const { type } = req.params;
-
-    if (!allowed.includes(type)) return res.status(400).json({ error: 'Érvénytelen típus' });
-
     const { username, item, priceHuf, paymentRef, rankValue } = req.body;
-    if (!username || !item || !priceHuf) return res.status(400).json({ error: 'Hiányzó adatok' });
 
     const orderId = 'VAL-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex').toUpperCase();
 
@@ -98,76 +84,57 @@ router.post('/:type', async (req, res) => {
       username: username.trim(),
       item,
       itemType: type,
-      rankValue: rankValue || null,
-      priceHuf: Number(priceHuf),
-      paymentRef: paymentRef || '',
+      rankValue,
+      priceHuf,
+      paymentRef,
       status: 'pending'
     });
 
-    // Discord Webhook küldése
-    const webhook = process.env.DISCORD_PURCHASE_WEBHOOK;
-    if (webhook) {
-      sendDiscordWebhook(webhook, {
-        embeds: [{
-          title: '🛒 Új vásárlás érkezett',
-          color: TYPE_COLOR[type],
-          fields: [
-            { name: 'User', value: username, inline: true },
-            { name: 'Item', value: item, inline: true },
-            { name: 'Price', value: `${priceHuf} Ft`, inline: true },
-            { name: 'ID', value: orderId }
-          ],
-          timestamp: new Date().toISOString()
-        }]
-      });
-    }
-
     res.status(201).json({ success: true, orderId });
   } catch (err) {
-    res.status(500).json({ error: 'Szerver hiba' });
+    res.status(500).json({ error: 'Hiba' });
   }
 });
 
 // ─────────────────────────────────────────────
-// [PUT] /api/purchase/:id/approve (ELFOGADÁS)
+// [PUT] /api/purchase/:id/approve (ELFOGADÁS + RCON)
 // ─────────────────────────────────────────────
 router.put('/:id/approve', auth, admin, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ error: 'Rendelés nem található' });
-    if (order.status !== 'pending') return res.status(400).json({ error: 'Már kezelve van' });
+    if (!order) return res.status(404).json({ error: 'Nincs meg' });
+    if (order.status !== 'pending') return res.status(400).json({ error: 'Már kezelve' });
 
     order.status = 'approved';
-    order.approvedBy = req.user?.username || 'admin';
+    order.approvedBy = req.user.username;
     order.approvedAt = new Date();
     await order.save();
 
-    let mcStatus = null;
+    let rconResult = null;
 
-    // Ha rangot vett, adjuk meg neki MC-n és az adatbázisban is
+    // Ha rang, akkor küldjük a parancsot a szervernek
     if (order.itemType === 'rank' && order.rankValue) {
-      mcStatus = await applyMinecraftRank(order.username, order.rankValue);
+      rconResult = await applyMinecraftRank(order.username, order.rankValue);
+      
+      // Weboldali rang frissítése is
       await User.findOneAndUpdate(
         { username: order.username },
         { $set: { rank: order.rankValue } }
       );
     }
 
-    // Ha coint vett, írjuk jóvá
+    // Ha coin, írjuk jóvá a weboldalon
     if (order.itemType === 'coins') {
-      const coinMap = { '500 Valyrian Coin': 500, '1200': 1200, '3000': 3000, '7500': 7500 };
-      const amount = coinMap[order.item] || parseInt(order.item) || 0;
-      if (amount > 0) {
+        const amount = parseInt(order.item) || 0;
         await User.findOneAndUpdate(
-          { username: order.username },
-          { $inc: { 'stats.coins': amount } }
+            { username: order.username },
+            { $inc: { "stats.coins": amount } }
         );
-      }
     }
 
-    res.json({ success: true, mc: mcStatus });
+    res.json({ success: true, rcon: rconResult });
   } catch (err) {
-    res.status(500).json({ error: 'Hiba a jóváhagyás során' });
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -176,27 +143,10 @@ router.put('/:id/approve', auth, admin, async (req, res) => {
 // ─────────────────────────────────────────────
 router.put('/:id/reject', auth, admin, async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
-    if (!order) return res.status(404).json({ error: 'Nem található' });
-
-    order.status = 'rejected';
-    await order.save();
+    await Order.findByIdAndUpdate(req.params.id, { status: 'rejected' });
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: 'Hiba az elutasítás során' });
-  }
-});
-
-// ─────────────────────────────────────────────
-// [GET] /api/purchase/verify/:orderId (ELLENŐRZÉS)
-// ─────────────────────────────────────────────
-router.get('/verify/:orderId', async (req, res) => {
-  try {
-    const order = await Order.findOne({ orderId: req.params.orderId });
-    if (!order) return res.status(404).json({ error: 'Nem található' });
-    res.json(order);
-  } catch (err) {
-    res.status(500).json({ error: 'Szerver hiba' });
+    res.status(500).json({ error: 'Hiba' });
   }
 });
 
