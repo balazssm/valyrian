@@ -201,6 +201,8 @@
                                 <select onchange="updateUserRank('${user._id}', this.value)">
                                     <option value="player" ${user.rank === 'player' ? 'selected' : ''}>Player</option>
                                     <option value="vip" ${user.rank === 'vip' ? 'selected' : ''}>VIP</option>
+                                    <option value="kiemelt" ${user.rank === 'kiemelt' ? 'selected' : ''}>Kiemelt</option>
+                                    <option value="kiemeltp" ${user.rank === 'kiemeltp' ? 'selected' : ''}>Kiemelt+</option>
                                     <option value="mod" ${user.rank === 'mod' ? 'selected' : ''}>Mod</option>
                                     <option value="admin" ${user.rank === 'admin' ? 'selected' : ''}>Admin</option>
                                     <option value="owner" ${user.rank === 'owner' ? 'selected' : ''}>Owner</option>
