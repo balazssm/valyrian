@@ -753,6 +753,7 @@ function handlePurchase(){
   if(!nick){showToast('Add meg a Minecraft neved!');return;}
   showToast('Átirányítás a Discordra...');
 }
+initReveal();
 var TOKEN_KEY='valyrian_token',currentUser=null;
 function getToken(){return localStorage.getItem(TOKEN_KEY);}
 function setToken(t){localStorage.setItem(TOKEN_KEY,t);}
@@ -783,7 +784,6 @@ function buildParticles(){var cols=['rgba(14,165,233,0.45)','rgba(56,189,248,0.3
 function checkStatus(){var dot=document.getElementById('sdot'),lbl=document.getElementById('slbl'),cnt=document.getElementById('scnt'),mx=document.getElementById('smx');if(!dot)return;if(document.getElementById('maint-bar')){dot.className='sdot maintenance';lbl.textContent='Karbantartás';lbl.style.color='#fb923c';cnt.textContent='—';mx.textContent='—';return;}fetch('https://api.mcsrvstat.us/3/'+IP).then(function(r){return r.json();}).then(function(d){if(d.online){dot.className='sdot online';lbl.textContent='Szerver online';lbl.style.color='var(--online)';cnt.textContent=(d.players&&d.players.online!=null)?d.players.online:'0';mx.textContent=(d.players&&d.players.max)?d.players.max:'—';}else{dot.className='sdot offline';lbl.textContent='Szerver offline';lbl.style.color='var(--offline)';cnt.textContent='0';mx.textContent='—';}}).catch(function(){dot.className='sdot offline';lbl.textContent='Nem elérhető';lbl.style.color='var(--text3)';});}
 function initReveal(){var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.07});document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el);});}
 init();
-initReveal();
 </script>
 </body>
 </html>
