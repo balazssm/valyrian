@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-// Feltételezzük, hogy a User modelled már létezik
-// Ha más a fájlneve, igazítsd hozzá (pl. ../models/User)
+// A webes felhasználói modell (itt vannak a rangok, biók, aktivitások)
 const User = mongoose.model('User'); 
 
 router.get('/:username', async (req, res) => {
@@ -11,12 +10,12 @@ router.get('/:username', async (req, res) => {
         const { username } = req.params;
         
         // 1. ADATOK LEKÉRÉSE A NEPTUNE-BÓL (Minecraft statisztikák)
-        const db = mongoose.connection.useDb('neptune');
-        const mcData = await db.collection('playerData').findOne({ 
+        const neptuneDb = mongoose.connection.useDb('neptune');
+        const mcData = await neptuneDb.collection('playerData').findOne({ 
             username: { $regex: new RegExp(`^${username}$`, 'i') } 
         });
 
-        // 2. ADATOK LEKÉRÉSE A WEB ADATBÁZISBÓL (Rang és Bio)
+        // 2. ADATOK LEKÉRÉSE A WEB ADATBÁZISBÓL (Profil infók)
         const webUser = await User.findOne({ 
             username: { $regex: new RegExp(`^${username}$`, 'i') } 
         });
@@ -26,7 +25,7 @@ router.get('/:username', async (req, res) => {
             return res.status(404).json({ error: "Játékos nem található." });
         }
 
-        // 3. STATISZTIKÁK ÖSSZESÍTÉSE (Minden kit/játékmód alapján)
+        // 3. STATISZTIKÁK ÖSSZESÍTÉSE (Neptune logika)
         let totalKills = 0;
         let totalDeaths = 0;
         let totalWins = 0;
@@ -38,7 +37,6 @@ router.get('/:username', async (req, res) => {
                     totalKills += (kit.KILLS || 0);
                     totalDeaths += (kit.DEATHS || 0);
                     
-                    // Wins kezelése: vagy közvetlenül a kitben, vagy a customPersistentData-ban
                     if (kit.WINS) {
                         totalWins += kit.WINS;
                     } else if (kit.customPersistentData && kit.customPersistentData.WINS) {
@@ -48,24 +46,29 @@ router.get('/:username', async (req, res) => {
             }
         }
 
-        // 4. K/D SZÁMÍTÁS
-        const kdValue = totalDeaths === 0 ? totalKills.toFixed(2) : (totalKills / totalDeaths).toFixed(2);
+        const kdCalc = totalDeaths === 0 ? totalKills.toFixed(2) : (totalKills / totalDeaths).toFixed(2);
 
-        // 5. VÁLASZ KÜLDÉSE
-        // Ha van webUser, küldjük a rangját és bióját, ha nincs, alapértelmezett értéket adunk
+        // 4. VÁLASZ KÜLDÉSE (Minden adatot becsomagolunk)
         res.json({
+            // Minecraft statok
             kills: totalKills,
             deaths: totalDeaths,
             wins: totalWins,
-            kd: totalDeaths === 0 && totalKills > 0 ? "∞" : kdValue,
+            kd: totalDeaths === 0 && totalKills > 0 ? "∞" : kdCalc,
             coins: mcData ? (mcData.coins || 0) : 0,
+            
+            // Webes profil adatok
             rank: webUser ? webUser.rank : 'player',
-            bio: webUser ? webUser.bio : 'Ennek a játékosnak még nincs weboldalas profilja.'
+            bio: webUser ? webUser.bio : 'Ennek a játékosnak nincs weboldalas profilja.',
+            
+            // Whitelist és Aktivitás (Ez hiányzott a keresőből!)
+            whitelist: webUser ? webUser.whitelist : 'none',
+            activity: webUser ? webUser.activity : []
         });
 
     } catch (err) {
-        console.error("Hiba a /api/stats útvonalon:", err);
-        res.status(500).json({ error: "Szerver hiba történt a statisztikák lekérésekor." });
+        console.error("Hiba a stats lekérésekor:", err);
+        res.status(500).json({ error: "Szerver hiba." });
     }
 });
 
