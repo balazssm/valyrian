@@ -4,9 +4,31 @@ const User = require('../models/User');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const mongoose = require('mongoose');
-const sendRconCommand = require('../utils/rcon'); // Itt importáljuk az RCON segédletet
+const { Rcon } = require('rcon-client'); // Ugyanaz a kliens, mint a boltban
 
-// --- 1. Összes felhasználó lekérése ÉLŐ LuckPerms szinkronnal ---
+// ─────────────────────────────────────────────
+// RCON FÜGGVÉNY (A boltodból másolva)
+// ─────────────────────────────────────────────
+async function applyMinecraftRank(username, rank) {
+  try {
+    const rcon = await Rcon.connect({
+      host: "37.27.100.83", // A szervered fix IP-je
+      port: 25575,
+      password: process.env.MC_RCON_PASSWORD
+    });
+
+    const response = await rcon.send(`lp user ${username} parent set ${rank}`);
+    console.log("Admin RCON válasz:", response);
+
+    await rcon.end();
+    return { success: true, response };
+  } catch (err) {
+    console.error("Admin RCON hiba:", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
+// ── 1. Összes felhasználó lekérése ÉLŐ LuckPerms szinkronnal ──
 router.get('/users', auth, admin, async (req, res) => {
   try {
     const webUsers = await User.find().select('-password').lean();
@@ -26,68 +48,61 @@ router.get('/users', auth, admin, async (req, res) => {
 
     res.json(usersWithLiveRank);
   } catch (err) {
-    console.error("Szinkronizációs hiba az admin panelen:", err);
+    console.error("Szinkronizációs hiba:", err);
     res.status(500).json({ error: 'Hiba történt a felhasználók betöltésekor.' });
   }
 });
 
-// --- 2. Rang frissítése ÉLŐBEN (Weboldal + Minecraft) ---
+// ── 2. Rang frissítése ÉLŐBEN (Weboldal + Minecraft) ──
 router.put('/users/:id/rank', auth, admin, async (req, res) => {
   try {
     const { rank } = req.body;
-    
-    // Megkeressük a felhasználót a weboldal adatbázisában
     const user = await User.findById(req.params.id);
+
     if (!user) {
       return res.status(404).json({ error: 'Felhasználó nem található!' });
     }
 
-    // A. Frissítés a weboldal adatbázisában (valyrian)
+    // A. Frissítés a weboldal adatbázisában
     user.rank = rank;
     await user.save();
 
-    // B. Frissítés a játékban RCON parancson keresztül
-    // Parancs: lp user <név> parent set <rang>
-    try {
-      // Itt küldjük el a tényleges parancsot a szervernek
-      const rconResponse = await sendRconCommand(`lp user ${user.username} parent set ${rank}`);
-      console.log(`RCON Válasz (${user.username}):`, rconResponse);
-    } catch (rconErr) {
-      // Ha nem megy a szerver, a webes mentés attól még megmarad
-      console.error("RCON hiba! A szerver valószínűleg offline:", rconErr.message);
-    }
+    // B. Frissítés a játékban RCON-nal
+    const rconResult = await applyMinecraftRank(user.username, rank);
 
-    res.json({ message: 'Rang sikeresen frissítve a weboldalon és a játékban is!' });
+    res.json({ 
+      success: true, 
+      message: 'Rang frissítve mindenhol!', 
+      rcon: rconResult 
+    });
   } catch (err) {
     console.error("Rang frissítési hiba:", err);
     res.status(500).json({ error: 'Hiba a frissítéskor.' });
   }
 });
 
-// --- 3. Whitelist állapot frissítése ---
+// ── 3. Whitelist állapot frissítése ──
 router.put('/users/:id/whitelist', auth, admin, async (req, res) => {
   try {
     const { whitelistStatus } = req.body;
-    
-    const user = await User.findByIdAndUpdate(
-      req.params.id, 
-      { whitelistStatus }, 
-      { new: true }
-    );
+    const user = await User.findByIdAndUpdate(req.params.id, { whitelistStatus }, { new: true });
 
-    if (!user) {
-      return res.status(404).json({ error: 'Felhasználó nem található!' });
-    }
+    if (!user) return res.status(404).json({ error: 'Nincs meg' });
 
-    // Opcionális: Ha whitelist parancsot is akarsz küldeni a szervernek
+    // Ha elfogadják, beírjuk a szerveren is
     if (whitelistStatus === 'approved') {
-        await sendRconCommand(`whitelist add ${user.username}`).catch(e => console.log("Whitelist RCON hiba"));
+        const rcon = await Rcon.connect({
+            host: "37.27.100.83",
+            port: 25575,
+            password: process.env.MC_RCON_PASSWORD
+        });
+        await rcon.send(`whitelist add ${user.username}`);
+        await rcon.end();
     }
 
-    res.json({ message: 'Whitelist állapot sikeresen frissítve!', user });
+    res.json({ success: true, user });
   } catch (err) {
-    console.error("Whitelist frissítési hiba:", err);
-    res.status(500).json({ error: 'Hiba a whitelist frissítésekor.' });
+    res.status(500).json({ error: 'Hiba' });
   }
 });
 
