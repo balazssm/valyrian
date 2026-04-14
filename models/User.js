@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
   // Rang — a Minecraft plugin írja, vagy admin állítja be
   rank: {
     type: String,
-    enum: ['owner', 'admin', 'mod', 'dev', 'vip', 'player'],
+    enum: ['owner', 'admin', 'mod', 'dev', 'vip', 'kiemelt', 'kiemeltp', 'player'],
     default: 'player'
   },
   bio: {
@@ -29,8 +29,8 @@ const userSchema = new mongoose.Schema({
     default: '',
     maxlength: 200
   },
-  // Whitelist
-  whitelist: {
+  // Whitelist állapot kezelése (Egységesítve az admin felülettel)
+  whitelistStatus: {
     type: String,
     enum: ['none', 'pending', 'approved', 'rejected'],
     default: 'none'
@@ -44,7 +44,7 @@ const userSchema = new mongoose.Schema({
     coins:    { type: Number, default: 0 },
     streak:   { type: Number, default: 0 }
   },
-  // Aktivitás log (max 20 bejegyzés)
+  // Aktivitás log (max 20 bejegyzés tárolására)
   activity: [{
     icon:    { type: String },
     text:    { type: String },
@@ -57,6 +57,15 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  }
+});
+
+// Automatikus limit az aktivitás loghoz
+// Modern async megoldás - így NEM dob 'next is not a function' hibát
+userSchema.pre('save', async function() {
+  // Csak akkor vágjuk le, ha változott az aktivitás és túl hosszú
+  if (this.isModified('activity') && this.activity.length > 20) {
+    this.activity = this.activity.slice(-20);
   }
 });
 

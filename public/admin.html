@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valyrian Admin Panel</title>
+    <style>
+        :root {
+            --bg:#0f0f0f;
+            --card:#1a1a1a;
+            --text:#e0e0e0;
+            --gold:#f1c40f;
+            --green:#27ae60;
+            --red:#e74c3c;
+        }
+        body { margin:0; font-family:Arial, sans-serif; background:var(--bg); color:var(--text); }
+        h1 { text-align:center; color:var(--gold); padding:20px; border-bottom:2px solid #222; }
+        .container { max-width:1200px; margin:auto; padding:20px; }
+        .card { background:var(--card); padding:15px; border-radius:10px; margin-bottom:20px; border: 1px solid #333; }
+        table { width:100%; border-collapse:collapse; margin-top: 10px; }
+        th, td { padding:12px; border-bottom:1px solid #333; text-align: left; }
+        th { color: var(--gold); text-transform: uppercase; font-size: 13px; }
+        
+        .status-pending { color:orange; font-weight: bold; }
+        .status-approved { color:var(--green); font-weight: bold; }
+        .status-rejected { color:var(--red); font-weight: bold; }
+        
+        button { padding:6px 12px; border:none; border-radius:5px; cursor:pointer; font-weight: bold; transition: 0.2s; }
+        button:hover { opacity: 0.8; }
+        .approve { background:var(--green); color:white; margin-right: 5px; }
+        .reject { background:var(--red); color:white; }
+        
+        select { background:#222; color:white; padding:8px; border-radius:5px; border: 1px solid #444; cursor: pointer; }
+        
+        /* BADGE SZÍNEK - JAVÍTVA */
+        .badge { padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; text-transform: uppercase; display: inline-block; min-width: 60px; text-align: center; }
+        .badge-vip { background:#f1c40f; color:black; }
+        .badge-kiemelt { background:#2ecc71; color:black; }
+        .badge-kiemeltp { background:#e67e22; color:white; }
+        .badge-player { background:#7f8c8d; color:white; }
+        .badge-mod { background:#3498db; color:white; }
+        .badge-admin { background:#9b59b6; color:white; }
+        .badge-owner { background:#e74c3c; color:white; }
+        
+        #error-msg { color: #ff4d4d; text-align:center; margin-bottom: 15px; font-weight: bold; background: rgba(231, 76, 60, 0.1); padding: 10px; border-radius: 5px; display: none; }
+    </style>
+</head>
+<body>
+
+    <h1>⚡ Valyrian Admin Panel</h1>
+
+    <div class="container">
+        <div id="error-msg"></div>
+
+        <div class="card">
+            <h2>📦 Rendelések</h2>
+            <select onchange="loadOrders(this.value)">
+                <option value="">Összes státusz</option>
+                <option value="pending">Függőben</option>
+                <option value="approved">Elfogadva</option>
+                <option value="rejected">Elutasítva</option>
+            </select>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Felhasználó</th>
+                        <th>Tárgy</th>
+                        <th>Ár</th>
+                        <th>Státusz</th>
+                        <th>Műveletek</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-list"></tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>👤 Felhasználók Kezelése</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Név</th>
+                        <th>Jelenlegi Rang</th>
+                        <th>Whitelista</th>
+                        <th>Rang Módosítás</th>
+                    </tr>
+                </thead>
+                <tbody id="users-list"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const TOKEN = localStorage.getItem("valyrian_token");
+        const errorDisplay = document.getElementById("error-msg");
+
+        function logError(msg) {
+            errorDisplay.innerText = msg;
+            errorDisplay.style.display = "block";
+            setTimeout(() => { errorDisplay.style.display = "none"; }, 5000);
+        }
+
+        // --- RENDELÉSEK ---
+        async function loadOrders(status = "") {
+            try {
+                const res = await fetch(`/api/purchase/orders${status ? `?status=${status}` : ""}`, {
+                    headers: { "Authorization": `Bearer ${TOKEN}` }
+                });
+
+                if (!res.ok) {
+                    const txt = await res.text();
+                    throw new Error(txt.includes("<!DOCTYPE") ? "Szerver hiba (HTML jött JSON helyett)" : txt);
+                }
+
+                const data = await res.json();
+                const tbody = document.getElementById("orders-list");
+                tbody.innerHTML = data.map(o => `
+                    <tr>
+                        <td>${o.orderId || '---'}</td>
+                        <td><b>${o.username}</b></td>
+                        <td>${o.item}</td>
+                        <td>${o.priceHuf} Ft</td>
+                        <td class="status-${o.status}">${o.status.toUpperCase()}</td>
+                        <td>
+                            ${o.status === "pending" ? `
+                                <button class="approve" onclick="handleOrder('${o._id}', 'approve')">OK</button>
+                                <button class="reject" onclick="handleOrder('${o._id}', 'reject')">X</button>
+                            ` : "-"}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                logError("Rendelések hiba: " + e.message);
+            }
+        }
+
+        async function handleOrder(id, type) {
+            try {
+                const res = await fetch(`/api/purchase/${id}/${type}`, {
+                    method: "PUT",
+                    headers: { "Authorization": `Bearer ${TOKEN}` }
+                });
+                if (res.ok) loadOrders();
+                else alert("Hiba történt a művelet során!");
+            } catch (e) { console.error(e); }
+        }
+
+        // --- FELHASZNÁLÓK (RANG FIXEK) ---
+        async function loadUsers() {
+            try {
+                const res = await fetch("/api/admin/users", {
+                    headers: { "Authorization": `Bearer ${TOKEN}` }
+                });
+                
+                if (!res.ok) throw new Error("Nem sikerült betölteni a felhasználókat.");
+
+                const users = await res.json();
+                const tbody = document.getElementById("users-list");
+                
+                tbody.innerHTML = users.map(u => {
+                    const currentRank = u.rank.toLowerCase();
+                    const badgeClass = `badge-${currentRank}`;
+
+                    return `
+                    <tr>
+                        <td>${u.username}</td>
+                        <td><span class="badge ${badgeClass}">${u.rank}</span></td>
+                        <td>
+                            <select onchange="updateWL('${u._id}', this.value)">
+                                <option value="none" ${u.whitelistStatus === 'none' ? 'selected' : ''}>none</option>
+                                <option value="pending" ${u.whitelistStatus === 'pending' ? 'selected' : ''}>pending</option>
+                                <option value="approved" ${u.whitelistStatus === 'approved' ? 'selected' : ''}>approved</option>
+                                <option value="rejected" ${u.whitelistStatus === 'rejected' ? 'selected' : ''}>rejected</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select onchange="updateRank('${u._id}', this.value)">
+                                <option value="player" ${currentRank === 'player' ? 'selected' : ''}>Player</option>
+                                <option value="vip" ${currentRank === 'vip' ? 'selected' : ''}>VIP</option>
+                                <option value="kiemelt" ${currentRank === 'kiemelt' ? 'selected' : ''}>Kiemelt</option>
+                                <option value="kiemeltp" ${currentRank === 'kiemeltp' ? 'selected' : ''}>Kiemelt+</option>
+                                <option value="mod" ${currentRank === 'mod' ? 'selected' : ''}>Mod</option>
+                                <option value="admin" ${currentRank === 'admin' ? 'selected' : ''}>Admin</option>
+                                <option value="owner" ${currentRank === 'owner' ? 'selected' : ''}>Tulajdonos</option>
+                            </select>
+                        </td>
+                    </tr>`;
+                }).join('');
+            } catch (e) {
+                logError("User hiba: " + e.message);
+            }
+        }
+
+        async function updateRank(id, newRank) {
+            try {
+                const res = await fetch(`/api/admin/users/${id}/rank`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${TOKEN}`
+                    },
+                    body: JSON.stringify({ rank: newRank }) // A select value-ja már kisbetűs
+                });
+
+                if (res.ok) {
+                    loadUsers(); // Azonnal újratöltjük, hogy látszódjon a változás
+                } else {
+                    alert("Sikertelen rang váltás!");
+                }
+            } catch (e) { alert("Hálózati hiba!"); }
+        }
+
+        async function updateWL(id, val) {
+            await fetch(`/api/admin/users/${id}/whitelist`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${TOKEN}`
+                },
+                body: JSON.stringify({ whitelistStatus: val })
+            });
+        }
+
+        // START
+        if (!TOKEN) {
+            logError("Nincs bejelentkezési token! Irány a főoldal.");
+        } else {
+            loadOrders();
+            loadUsers();
+        }
+    </script>
+</body>
+</html>

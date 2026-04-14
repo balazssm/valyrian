@@ -6,21 +6,45 @@ const path = require('path');
 
 const app = express();
 
-// ── MIDDLEWARE ──
-app.use(cors({
-  origin: '*', // élesben állítsd be a saját domainedre
-  methods: ['GET','POST','PUT','DELETE'],
-  allowedHeaders: ['Content-Type','Authorization','x-plugin-key']
-}));
+// ── CORS BEÁLLÍTÁSOK ──
+app.use(cors());
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, x-plugin-key");
+  
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 app.use(express.json());
 
-// ── STATIKUS FRONTEND ──
+// ── STATIKUS FRONTEND KISZOLGÁLÁSA ──
+// Ez biztosítja, hogy a public mappából elérhető legyen minden (CSS, képek, JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ── API ROUTES ──
-app.use('/api/auth',  require('./routes/auth'));
-app.use('/api/user',  require('./routes/user'));
-app.use('/api/mc',    require('./routes/minecraft'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/user', require('./routes/user'));
+app.use('/api/mc', require('./routes/minecraft'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/purchase', require('./routes/purchase'));
+
+// ── KIFEJEZETT OLDAL ÚTVONALAK ──
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.get('/bolt', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'store.html'));
+});
+
+app.get('/fooldal', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // ── HEALTH CHECK ──
 app.get('/api/health', (req, res) => {
@@ -31,17 +55,30 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ── SPA FALLBACK ──
-app.get('*', (req, res) => {
+// ── API 404 HIBAKEZELŐ (A JAVÍTÁS!) ──
+// Ha az /api/... kezdetű kérést eddig nem kapta el semmi, akkor ne küldjünk HTML-t!
+app.use('/api', (req, res) => {
+  res.status(404).json({ 
+    error: 'API végpont nem található ezen a címen!',
+    path: req.originalUrl 
+  });
+});
+
+// ── SPA FALLBACK (Minden másra az index.html-t dobja) ──
+app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ── MONGODB ──
+// ── MONGODB CSATLAKOZÁS ÉS SZERVER INDÍTÁS ──
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB csatlakozva');
     const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => console.log(`🚀 Szerver fut: http://localhost:${PORT}`));
+    
+    // 0.0.0.0 kötelező Render/Heroku/Docker környezetben
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Szerver fut a ${PORT} porton`);
+    });
   })
   .catch(err => {
     console.error('❌ MongoDB hiba:', err.message);

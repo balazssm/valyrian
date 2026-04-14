@@ -43,7 +43,7 @@ router.post('/stats', pluginAuth, async (req, res) => {
 router.post('/rank', pluginAuth, async (req, res) => {
   try {
     const { username, rank } = req.body;
-    const allowed = ['owner','admin','mod','dev','vip','player'];
+    const allowed = ['owner','admin','mod','dev','kiemeltp','kiemelt','vip','player'];
     if (!allowed.includes(rank))
       return res.status(400).json({ error: 'Érvénytelen rang.' });
 
