@@ -8,12 +8,13 @@ const mongoose = require('mongoose');
 // --- 1. Összes felhasználó lekérése ÉLŐ LuckPerms szinkronnal ---
 router.get('/users', auth, admin, async (req, res) => {
   try {
-    // Weboldal felhasználóinak lekérése (jelszó nélkül)
+    // Weboldal felhasználóinak lekérése a 'valyrian' adatbázisból
     const webUsers = await User.find().select('-password').lean();
     
-    // Csatlakozunk a LuckPerms 'users' kollekciójához (a kép alapján ez a neve nálad)
-    // Fontos: a LuckPerms a 'valyrian' vagy 'minecraft' adatbázisba ment
-    const lpCollection = mongoose.connection.db.collection('users');
+    // Átváltunk a 'minecraft' adatbázisra, ahol a LuckPerms táblái vannak
+    const lpDatabase = mongoose.connection.useDb('minecraft');
+    // A LuckPerms a 'users' nevű kollekcióba ment (ezt láttuk a képeden)
+    const lpCollection = lpDatabase.collection('users');
 
     // Összefésüljük a weboldalas adatokat a játékbeli élő rangokkal
     const usersWithLiveRank = await Promise.all(webUsers.map(async (user) => {
@@ -23,7 +24,7 @@ router.get('/users', auth, admin, async (req, res) => {
       return {
         ...user,
         // Ha van találat az LP táblában, az ottani 'primaryGroup'-ot mutatjuk,
-        // különben marad a weboldal saját adatbázisában tárolt rangja.
+        // különben marad a weboldal saját adatbázisában tárolt alapértelmezett rangja.
         rank: lpData ? lpData.primaryGroup : user.rank 
       };
     }));
@@ -35,13 +36,12 @@ router.get('/users', auth, admin, async (req, res) => {
   }
 });
 
-// --- 2. Rang frissítése az adatbázisban ---
+// --- 2. Rang frissítése az adatbázisban (opcionális, manuális felülíráshoz) ---
 router.put('/users/:id/rank', auth, admin, async (req, res) => {
   try {
     const { rank } = req.body;
-    // Frissítjük a weboldal saját adatbázisában is a biztonság kedvéért
     await User.findByIdAndUpdate(req.params.id, { rank });
-    res.json({ message: 'Rang sikeresen frissítve az adatbázisban!' });
+    res.json({ message: 'Rang sikeresen frissítve a weboldal adatbázisában!' });
   } catch (err) {
     res.status(500).json({ error: 'Hiba a frissítéskor.' });
   }
