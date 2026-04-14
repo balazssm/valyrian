@@ -115,7 +115,10 @@
         .badge-admin { background: #8e44ad; color: white; }
         .badge-mod { background: #2980b9; color: white; }
         .badge-vip { background: var(--gold); color: black; }
+        .badge-kiemelt { background: var(--success); color: black; }
+        .badge-kiemeltp { background: var(--warning); color: black; }
         .badge-player { background: #7f8c8d; color: white; }
+        
 
         .error-text { color: var(--primary); font-weight: bold; }
 
@@ -199,13 +202,13 @@
                             </td>
                             <td>
                                 <select onchange="updateUserRank('${user._id}', this.value)">
-                                    <option value="player" ${user.rank === 'player' ? 'selected' : ''}>Player</option>
-                                    <option value="vip" ${user.rank === 'vip' ? 'selected' : ''}>VIP</option>
-                                    <option value="kiemelt" ${user.rank === 'kiemelt' ? 'selected' : ''}>Kiemelt</option>
-                                    <option value="kiemeltp" ${user.rank === 'kiemeltp' ? 'selected' : ''}>Kiemelt+</option>
-                                    <option value="mod" ${user.rank === 'mod' ? 'selected' : ''}>Mod</option>
-                                    <option value="admin" ${user.rank === 'admin' ? 'selected' : ''}>Admin</option>
-                                    <option value="owner" ${user.rank === 'owner' ? 'selected' : ''}>Owner</option>
+                                    <option value="Játékos" ${user.rank === 'player' ? 'selected' : ''}>Player</option>
+                                    <option value="Vip" ${user.rank === 'vip' ? 'selected' : ''}>VIP</option>
+                                    <option value="Kiemelt" ${user.rank === 'kiemelt' ? 'selected' : ''}>Kiemelt</option>
+                                    <option value="Kiemelt+" ${user.rank === 'kiemeltp' ? 'selected' : ''}>Kiemelt+</option>
+                                    <option value="Mod" ${user.rank === 'mod' ? 'selected' : ''}>Mod</option>
+                                    <option value="Admin" ${user.rank === 'admin' ? 'selected' : ''}>Admin</option>
+                                    <option value="Tulajdonos" ${user.rank === 'owner' ? 'selected' : ''}>Tulajdonos</option>
                                 </select>
                             </td>
                         </tr>
