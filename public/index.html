@@ -666,7 +666,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.25rem 
 var TOKEN_KEY = 'valyrian_token', currentUser = null;
 var API = '/api'; 
 
-// --- 1. ALAPKEZELŐK (API & TOKEN) ---
+// --- ALAPKEZELŐK ---
 function getToken() { return localStorage.getItem(TOKEN_KEY); }
 function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
 function clearToken() { localStorage.removeItem(TOKEN_KEY); }
@@ -680,96 +680,49 @@ async function api(m, p, b, a) {
     return d;
 }
 
-// --- 2. OLDAL ÉS MODAL VEZÉRLÉS ---
 function showPage(p) {
     document.querySelectorAll('.page').forEach(e => e.classList.remove('active'));
     var target = document.getElementById(p + '-page');
     if (target) target.classList.add('active');
-    window.scrollTo(0, 0);
 }
 
-function openModal() { 
-    document.getElementById('modal-overlay').classList.add('open'); 
-    switchTab('login'); 
-}
-
-function closeModal() { 
-    document.getElementById('modal-overlay').classList.remove('open'); 
-}
-
-function switchTab(t) {
-    document.getElementById('form-login').style.display = t === 'login' ? 'block' : 'none';
-    document.getElementById('form-register').style.display = t === 'register' ? 'block' : 'none';
-    document.getElementById('tab-login').classList.toggle('active', t === 'login');
-    document.getElementById('tab-register').classList.toggle('active', t === 'register');
-}
-
-// --- 3. PROFIL FÜLEK ---
-function openProfileTab(tabName) {
-    document.querySelectorAll('.profile-section').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.profile-tab').forEach(el => el.classList.remove('active'));
-    var targetTab = document.getElementById('tab-' + tabName);
-    if (targetTab) targetTab.classList.add('active');
-    var targetBtn = document.querySelector(`.profile-tab[data-tab="${tabName}"]`);
-    if (targetBtn) targetBtn.classList.add('active');
-}
-
-// --- 4. AUTH (LOGIN, REG, NAVIGÁCIÓ) ---
-async function doLogin() {
-    var u = document.getElementById('login-user').value.trim(), 
-        p = document.getElementById('login-pass').value, 
-        err = document.getElementById('login-err'), 
-        btn = document.getElementById('login-btn');
-    err.textContent = ''; if (!u || !p) { err.textContent = 'Mezők kitöltése kötelező!'; return; }
-    btn.disabled = true;
-    try {
-        var d = await api('POST', '/auth/login', { username: u, password: p });
-        setToken(d.token); currentUser = d.user; updateNavUser(d.user); closeModal();
-        showToast('Üdv, ' + d.user.username + '!');
-        location.reload(); 
-    } catch (e) { err.textContent = e.message; } finally { btn.disabled = false; }
-}
-
-async function doRegister() {
-    var u = document.getElementById('reg-user').value.trim(), e = document.getElementById('reg-email').value.trim(),
-        p = document.getElementById('reg-pass').value, p2 = document.getElementById('reg-pass2').value,
-        err = document.getElementById('reg-err'), ok = document.getElementById('reg-ok');
-    if (!u || !e || !p || !p2) { err.textContent = 'Minden mező kötelező!'; return; }
-    if (p !== p2) { err.textContent = 'A jelszavak nem egyeznek!'; return; }
-    try {
-        await api('POST', '/auth/register', { username: u, email: e, password: p });
-        ok.textContent = 'Sikeres regisztráció!';
-        setTimeout(() => switchTab('login'), 2000);
-    } catch (err_msg) { err.textContent = err_msg.message; }
-}
-
-function logout() { clearToken(); currentUser = null; location.reload(); }
+// --- AUTH & NAV ---
+function openModal() { document.getElementById('modal-overlay').classList.add('open'); }
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
 
 function updateNavUser(u) {
+    if(!u) return;
     document.getElementById('nav-login-li').style.display = 'none';
-    document.getElementById('nav-user-li').style.display = '';
+    document.getElementById('nav-user-li').style.display = 'flex';
     document.getElementById('nav-username-label').textContent = u.username;
-    
-    // Navigációs rang és színezés
-    const rankLabelEl = document.getElementById('nav-rank-label');
-    rankLabelEl.textContent = rankLabel(u.rank);
-    rankLabelEl.className = 'nav-user-rank ' + (u.rank || 'player');
-    
+    const rl = document.getElementById('nav-rank-label');
+    rl.textContent = rankLabel(u.rank);
+    rl.className = 'nav-user-rank ' + (u.rank || 'player');
     document.getElementById('nav-avatar-img').src = 'https://visage.surgeplay.com/bust/64/' + u.username;
 }
 
-// --- 5. PROFIL ÉS KERESÉS (Dinamikus adatokkal) ---
-async function loadProfile() {
-    if (!currentUser) return;
-    try { currentUser = await api('GET', '/auth/me', null, true); } catch (e) {}
-    fillProfileUI(currentUser);
-    togglePrivateElements(true);
-    openProfileTab('stats');
-    fetchStats(currentUser.username);
-    document.getElementById('set-bio').value = currentUser.bio || '';
-    document.getElementById('set-email').value = currentUser.email || '';
+function rankLabel(r) { 
+    const labels = { owner: 'Tulajdonos', admin: 'Admin', mod: 'Moderátor', dev: 'Fejlesztő', vip: 'VIP', kiemeltplus: 'Kiemelt+', player: 'Játékos' };
+    return labels[r] || 'Játékos'; 
 }
 
+// --- STATUS ---
+function checkStatus() {
+    var dot = document.getElementById('sdot'), lbl = document.getElementById('slbl'), cnt = document.getElementById('scnt');
+    if (!dot) return;
+    fetch('https://api.mcsrvstat.us/3/play.valyrian.hu')
+        .then(r => r.json())
+        .then(d => {
+            if (d.online) {
+                dot.className = 'sdot online'; lbl.textContent = 'Online';
+                cnt.textContent = d.players.online;
+            } else {
+                dot.className = 'sdot offline'; lbl.textContent = 'Offline'; cnt.textContent = '0';
+            }
+        }).catch(() => { if(dot) dot.className = 'sdot offline'; });
+}
+
+// --- PROFIL & KERESÉS ---
 async function searchPlayer() {
     var input = document.getElementById('nav-search-input');
     var name = input.value.trim();
@@ -777,173 +730,30 @@ async function searchPlayer() {
     try {
         var r = await fetch(API + '/stats/' + name);
         var s = await r.json();
-        if (!r.ok) { showToast("Nincs ilyen játékos!"); return; }
+        if (!r.ok) return;
         showPage('profile');
-        fillProfileUI({ username: name, bio: s.bio, rank: s.rank });
-        updateStatsUI(s);
-        updateWhitelistUI(s.whitelistStatus); 
-        updateActivityUI(s.activity);
-        var isOwn = currentUser && currentUser.username.toLowerCase() === name.toLowerCase();
-        togglePrivateElements(isOwn);
-        openProfileTab('stats');
-        input.value = ''; 
-    } catch (e) { showToast("Hiba történt!"); }
+        document.getElementById('profile-username').textContent = name;
+        document.getElementById('profile-rank-text').textContent = rankLabel(s.rank);
+        document.getElementById('profile-rank-badge').className = 'profile-rank-badge ' + (s.rank || 'player');
+        document.getElementById('profile-skin-img').src = 'https://visage.surgeplay.com/full/256/' + name;
+        document.getElementById('stat-kills').textContent = s.kills || 0;
+        document.getElementById('stat-deaths').textContent = s.deaths || 0;
+        document.getElementById('stat-coins').textContent = s.coins || 0;
+        input.value = '';
+    } catch (e) { console.error(e); }
 }
 
-async function fetchStats(name) {
-    try {
-        var res = await fetch(API + '/stats/' + name);
-        var s = await res.json();
-        if (res.ok) {
-            updateStatsUI(s);
-            updateWhitelistUI(s.whitelistStatus);
-            updateActivityUI(s.activity);
-        }
-    } catch (e) {}
+function toggleDropdown(e) { 
+    e.stopPropagation(); 
+    document.getElementById('nav-dropdown').classList.toggle('open'); 
 }
 
-function fillProfileUI(u) {
-    document.getElementById('profile-username').textContent = u.username;
-    document.getElementById('profile-skin-img').src = 'https://visage.surgeplay.com/full/256/' + u.username;
-    document.getElementById('profile-bio').textContent = u.bio || 'Nincs leírása.';
-    
-    var badge = document.getElementById('profile-rank-badge');
-    if (badge) {
-        // Hozzáadjuk a rang osztályt a színezéshez (pl. owner, kiemeltplus)
-        badge.className = 'profile-rank-badge ' + (u.rank || 'player');
-    }
-    document.getElementById('profile-rank-text').textContent = rankLabel(u.rank);
-}
+function logout() { clearToken(); location.reload(); }
+function goProfile() { showPage('profile'); }
 
-function togglePrivateElements(show) {
-    document.querySelectorAll('.profile-tab[data-tab="settings"]').forEach(el => el.style.display = show ? '' : 'none');
-    var logoutBtn = document.querySelector('#profile-page .logout-btn');
-    if (logoutBtn) logoutBtn.style.display = show ? '' : 'none';
-}
-
-// --- 6. UI FRISSÍTŐK (Stats, Whitelist, Activity) ---
-function updateStatsUI(s) {
-    document.getElementById('stat-kills').textContent = s.kills || 0;
-    document.getElementById('stat-deaths').textContent = s.deaths || 0;
-    document.getElementById('stat-kd').textContent = s.kd || "0.00";
-    document.getElementById('stat-wins').textContent = s.wins || 0;
-    document.getElementById('stat-coins').textContent = s.coins || 0;
-    document.getElementById('stat-playtime').textContent = s.playtime || "—";
-}
-
-function updateWhitelistUI(status) {
-    var wm = { 
-        approved: { cls: 'approved', emoji: '✅', text: 'Whitelistre került!' }, 
-        pending: { cls: 'pending', emoji: '⏳', text: 'Elbírálás alatt.' }, 
-        rejected: { cls: 'rejected', emoji: '❌', text: 'Elutasítva.' }, 
-        none: { cls: 'none', emoji: '❔', text: 'Nincs kérelem.' } 
-    };
-    var wl = wm[status] || wm.none;
-    var icon = document.getElementById('wl-icon'), emoji = document.getElementById('wl-icon-emoji'), desc = document.getElementById('wl-status-desc');
-    if(icon) { icon.className = 'wl-status-icon ' + wl.cls; emoji.textContent = wl.emoji; desc.textContent = wl.text; }
-}
-
-function updateActivityUI(acts) {
-    var feed = document.getElementById('activity-feed');
-    if (!feed) return;
-    feed.innerHTML = '';
-    if (!acts || acts.length === 0) {
-        feed.innerHTML = '<p style="color:var(--text3); padding:10px;">Nincs aktivitás.</p>';
-        return;
-    }
-    acts.forEach(a => {
-        var dateStr = a.time ? new Date(a.time).toLocaleString('hu-HU') : '';
-        var div = document.createElement('div');
-        div.className = 'activity-item';
-        div.innerHTML = `<div class="activity-icon">${a.icon || '⚡'}</div><div class="activity-content"><div class="activity-text">${a.text}</div><div class="activity-time">${dateStr}</div></div>`;
-        feed.appendChild(div);
-    });
-}
-
-// --- 7. SEGÉDFÜGGVÉNYEK ---
-var IP = 'play.valyrian.hu';
-function checkStatus() {
-    var dot = document.getElementById('sdot'), lbl = document.getElementById('slbl'), cnt = document.getElementById('scnt'), mx = document.getElementById('smx');
-    if (!dot) return;
-    fetch('https://api.mcsrvstat.us/3/' + IP).then(r => r.json()).then(d => {
-        if (d.online) {
-            dot.className = 'sdot online'; lbl.textContent = 'Online';
-            cnt.textContent = d.players.online; mx.textContent = d.players.max;
-        } else { dot.className = 'sdot offline'; lbl.textContent = 'Offline'; cnt.textContent = '0'; mx.textContent = '—'; }
-    }).catch(() => { dot.className = 'sdot offline'; });
-}
-
-function toggleDropdown(e) { e.stopPropagation(); document.getElementById('nav-dropdown').classList.toggle('open'); }
-function goProfile(e) { if(e) e.stopPropagation(); document.getElementById('nav-dropdown').classList.remove('open'); showPage('profile'); loadProfile(); }
-function goSettings(e) { if(e) e.stopPropagation(); document.getElementById('nav-dropdown').classList.remove('open'); showPage('profile'); loadProfile(); setTimeout(() => openProfileTab('settings'), 50); }
-function showToast(msg) { var t = document.getElementById('toast'); if(!t) return; t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2100); }
-
-function rankLabel(r) { 
-    const labels = { 
-        owner: 'Tulajdonos', 
-        admin: 'Admin', 
-        mod: 'Moderátor', 
-        dev: 'Fejlesztő', 
-        vip: 'VIP', 
-        kiemelt: 'Kiemelt', 
-        kiemeltplus: 'Kiemelt+', 
-        player: 'Játékos' 
-    };
-    return labels[r] || 'Játékos'; 
-}
-
-async function saveProfile() {
-    var bio = document.getElementById('set-bio').value.trim(), email = document.getElementById('set-email').value.trim(), ok = document.getElementById('set-ok');
-    try {
-        await api('PUT', '/user/profile', { bio, email }, true);
-        currentUser.bio = bio; ok.textContent = '✓ Mentve!'; setTimeout(() => ok.textContent = '', 2000);
-    } catch (e) { showToast(e.message); }
-}
-
-// --- 7b. HIÁNYZÓ SEGÉDFÜGGVÉNYEK ---
-function navHome(s) {
-    showPage('home');
-    setTimeout(function() { var e = document.getElementById(s); if (e) e.scrollIntoView({ behavior: 'smooth' }); }, 50);
-}
-
-function copyIP() {
-    if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(IP).then(function() { showToast('IP másolva!'); });
-    } else {
-        var ta = document.createElement('textarea');
-        ta.value = IP; ta.style.cssText = 'position:fixed;opacity:0;';
-        document.body.appendChild(ta); ta.focus(); ta.select();
-        try { document.execCommand('copy'); showToast('IP másolva!'); } catch (e) {}
-        document.body.removeChild(ta);
-    }
-}
-
-function buildParticles() {
-    var cols = ['rgba(14,165,233,0.45)', 'rgba(56,189,248,0.3)', 'rgba(125,211,252,0.2)', 'rgba(14,165,233,0.18)', 'rgba(255,255,255,0.12)'];
-    var c = document.getElementById('pts');
-    if (!c) return;
-    var f = document.createDocumentFragment();
-    for (var i = 0; i < 20; i++) {
-        var d = document.createElement('div'), sz = Math.random() * 2.2 + 1;
-        d.className = 'particle';
-        d.style.cssText = 'left:' + Math.random() * 100 + '%;width:' + sz + 'px;height:' + sz + 'px;background:' + cols[Math.floor(Math.random() * cols.length)] + ';animation-duration:' + (Math.random() * 13 + 10) + 's;animation-delay:' + (Math.random() * 16) + 's;';
-        f.appendChild(d);
-    }
-    c.appendChild(f);
-}
-
-function initReveal() {
-    var obs = new IntersectionObserver(function(entries) {
-        entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
-    }, { threshold: 0.07 });
-    document.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
-}
-
-// --- 8. INICIALIZÁLÁS (Azonnal indul) ---
+// --- INIT ---
 async function init() {
-    try { checkStatus(); } catch(e) {}
-    try { setInterval(checkStatus, 60000); } catch(e) {}
-    
+    checkStatus();
     var t = getToken();
     if (t) {
         try {
@@ -952,19 +762,13 @@ async function init() {
         } catch (e) { clearToken(); }
     }
     
-    // Dropdown bezárása kattintásra
     document.addEventListener('click', function(e) {
-        var dd = document.getElementById('nav-dropdown'), area = document.getElementById('nav-user-area');
-        if (dd && area && !area.contains(e.target)) dd.classList.remove('open');
+        var dd = document.getElementById('nav-dropdown');
+        if (dd) dd.classList.remove('open');
     });
-
-    // Kereső Enter billentyűre
-    var si = document.getElementById('nav-search-input');
-    if (si) si.addEventListener('keypress', function(e) { if (e.key === 'Enter') searchPlayer(); });
 }
 
-// Biztonsági háló: ha az init() elszáll, az oldal akkor is betölt
-try { init(); } catch(e) { console.error('Init error:', e); }
+init();
 </script>
 </body>
 </html>
