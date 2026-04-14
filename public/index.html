@@ -662,7 +662,6 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.25rem 
 </div>
 
 <div id="toast">Másolva!</div>
-
 <script>
 var TOKEN_KEY = 'valyrian_token', currentUser = null;
 var API = '/api'; 
@@ -769,25 +768,22 @@ async function loadProfile() {
     try {
         var u = await api('GET', '/auth/me', null, true);
         currentUser = u;
-    } catch (e) { console.warn("Profil frissítési hiba."); }
+    } catch (e) { console.warn("Profil hiba."); }
 
     var u = currentUser;
     document.getElementById('profile-username').textContent = u.username;
     document.getElementById('profile-skin-img').src = 'https://visage.surgeplay.com/full/256/' + u.username;
     document.getElementById('profile-bio').textContent = u.bio || 'Még nem adtál meg bemutatkozást.';
     
-    // UI Visszaállítása (Saját profil)
-    const settingsTab = document.querySelector('[data-tab="settings"]');
-    if(settingsTab) settingsTab.style.display = '';
-    const logoutBtn = document.querySelector('#profile-page .logout-btn');
-    if(logoutBtn) logoutBtn.style.display = '';
+    // SAJÁT PROFILNÁL MINDENT MUTATUNK
+    togglePrivateElements(true);
 
-    // Rang
+    // Rang Badge
     var b = document.getElementById('profile-rank-badge');
     if (b) b.className = 'profile-rank-badge ' + (u.rank || 'player');
     document.getElementById('profile-rank-text').textContent = rankLabel(u.rank);
 
-    // Statok, Whitelist, Aktivitás
+    // Statok és Aktivitás
     try {
         const res = await fetch(API + '/stats/' + u.username);
         const s = await res.json();
@@ -819,12 +815,10 @@ async function searchPlayer() {
 
         showPage('profile');
 
-        // Adatok beírása a keresett játékoshoz
         document.getElementById('profile-username').textContent = name;
         document.getElementById('profile-skin-img').src = 'https://visage.surgeplay.com/full/256/' + name;
         document.getElementById('profile-bio').textContent = s.bio || 'Nincs leírása.';
         
-        // Rang frissítése
         const badge = document.getElementById('profile-rank-badge');
         const rankText = document.getElementById('profile-rank-text');
         if (badge && rankText) {
@@ -836,25 +830,33 @@ async function searchPlayer() {
         updateWhitelistUI(s.whitelist);
         updateActivityUI(s.activity);
 
-        // MODERÁCIÓ: Gombok elrejtése, ha nem a sajátunk
+        // Csak akkor mutatjuk a beállításokat, ha saját magunkra kerestünk
         const isOwn = currentUser && currentUser.username.toLowerCase() === name.toLowerCase();
-        const settingsTab = document.querySelector('[data-tab="settings"]');
-        if(settingsTab) settingsTab.style.display = isOwn ? '' : 'none';
-        const logoutBtn = document.querySelector('#profile-page .logout-btn');
-        if(logoutBtn) logoutBtn.style.display = isOwn ? '' : 'none';
+        togglePrivateElements(isOwn);
         
         input.value = ''; 
     } catch (e) { showToast("Hiba történt."); }
 }
 
-// UI FRISSÍTŐ SEGÉDFÜGGVÉNYEK
+// GOMBOK ÉS FÜLEK ELREJTÉSE / MEGJELENÍTÉSE
+function togglePrivateElements(show) {
+    const settingsTab = document.querySelector('[data-tab="settings"]');
+    if (settingsTab) settingsTab.style.display = show ? '' : 'none';
+    
+    // A logout gomb általában a profil fejlécében vagy az oldalsávban van
+    const logoutBtn = document.querySelector('#profile-page .logout-btn');
+    if (logoutBtn) logoutBtn.style.display = show ? '' : 'none';
+
+    // Ha elrejtjük a beállításokat, ugorjunk vissza az áttekintés fülre
+    if (!show) openProfileTab('overview');
+}
+
 function updateStatsUI(s) {
     document.getElementById('stat-kills').textContent = s.kills || 0;
     document.getElementById('stat-deaths').textContent = s.deaths || 0;
     document.getElementById('stat-kd').textContent = s.kd || "0.00";
     document.getElementById('stat-wins').textContent = s.wins || 0;
     document.getElementById('stat-coins').textContent = s.coins || 0;
-    document.getElementById('stat-playtime').textContent = "—";
 }
 
 function updateWhitelistUI(status) {
@@ -874,20 +876,34 @@ function updateWhitelistUI(status) {
 }
 
 function updateActivityUI(acts) {
-    var feed = document.getElementById('activity-feed');
+    const feed = document.getElementById('activity-feed');
     if (!feed) return;
+    
     feed.innerHTML = '';
-    if (!acts || !acts.length) {
-        feed.innerHTML = '<p style="color:var(--text3);">Nincs aktivitás.</p>';
-    } else {
-        acts.forEach(function (a) {
-            var ts = a.time ? new Date(a.time).toLocaleString('hu-HU') : '';
-            var i = document.createElement('div');
-            i.className = 'activity-item';
-            i.innerHTML = `<div class="activity-icon">${a.icon || '⚡'}</div><div class="activity-text">${a.text}</div><div class="activity-time">${ts}</div>`;
-            feed.appendChild(i);
-        });
+
+    if (!acts || !Array.isArray(acts) || acts.length === 0) {
+        feed.innerHTML = '<p style="color:var(--text3); padding:20px; text-align:center;">Nincs megjeleníthető aktivitás.</p>';
+        return;
     }
+
+    acts.forEach(function (a) {
+        let dateStr = '';
+        if (a.time) {
+            const d = new Date(a.time);
+            dateStr = isNaN(d.getTime()) ? '' : d.toLocaleString('hu-HU');
+        }
+
+        const div = document.createElement('div');
+        div.className = 'activity-item';
+        div.innerHTML = `
+            <div class="activity-icon">${a.icon || '⚡'}</div>
+            <div class="activity-content">
+                <div class="activity-text">${a.text || ''}</div>
+                <div class="activity-time">${dateStr}</div>
+            </div>
+        `;
+        feed.appendChild(div);
+    });
 }
 
 function rankLabel(r) { return { owner: 'Tulajdonos', admin: 'Admin', mod: 'Moderátor', dev: 'Fejlesztő', vip: 'VIP', kiemelt: 'Kiemelt', kiemeltp: 'Kiemelt+', player: 'Játékos' }[r] || 'Játékos'; }
