@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valyrian — Bolt</title>
+<link rel="icon" type="image/x-icon" href="/img/server-logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --accent:#0ea5e9;
+  --accent2:#38bdf8;
+  --accent3:#7dd3fc;
+  --accent-dim:rgba(14,165,233,0.1);
+  --accent-border:rgba(14,165,233,0.22);
+  --bg:#05070f;
+  --bg2:#080c18;
+  --bg3:#0d1220;
+  --bg4:#121828;
+  --surface:rgba(255,255,255,0.03);
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.11);
+  --text:#e8edf5;
+  --text2:#9aa3b5;
+  --text3:#4e5a70;
+  --online:#10b981;
+  --offline:#f43f5e;
+  --vip:#f472b6;
+  --vip-bg:rgba(244,114,182,0.08);
+  --vip-border:rgba(244,114,182,0.2);
+  --kie:#34d399;
+  --kie-bg:rgba(52,211,153,0.08);
+  --kie-border:rgba(52,211,153,0.2);
+  --kiep:#fb923c;
+  --kiep-bg:rgba(251,146,60,0.08);
+  --kiep-border:rgba(251,146,60,0.2);
+}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;font-size:17px;line-height:1.65;overflow-x:hidden;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:rgba(14,165,233,0.28);border-radius:2px;}
+::-webkit-scrollbar-thumb:hover{background:rgba(14,165,233,0.5);}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:58px;background:rgba(5,7,15,0.93);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);}
+.nav-brand{display:flex;align-items:center;gap:0.6rem;text-decoration:none;}
+.nav-logo-img{width:28px;height:28px;border-radius:5px;object-fit:cover;border:1px solid var(--accent-border);}
+.nav-name{font-family:'Syne',sans-serif;font-size:0.92rem;font-weight:800;color:var(--text);letter-spacing:0.16em;text-transform:uppercase;}
+.nav-name em{color:var(--accent);font-style:normal;}
+.nav-links{display:flex;align-items:center;gap:0.15rem;list-style:none;}
+.nav-links a{font-family:'Syne',sans-serif;font-size:11px;letter-spacing:0.07em;color:var(--text3);text-decoration:none;text-transform:uppercase;padding:0.3rem 0.7rem;border-radius:5px;transition:color 0.14s,background 0.14s;}
+.nav-links a:hover{color:var(--text2);background:var(--surface);}
+.nav-links a.active-link{color:var(--accent2);}
+.nav-discord{display:flex;align-items:center;gap:0.38rem;background:rgba(88,101,242,0.09);border:1px solid rgba(88,101,242,0.24);border-radius:5px;padding:0.28rem 0.8rem;font-family:'Syne',sans-serif;font-size:10.5px;letter-spacing:0.06em;color:#8891f5!important;text-decoration:none;text-transform:uppercase;transition:all 0.14s;}
+.nav-discord:hover{background:rgba(88,101,242,0.18)!important;border-color:rgba(88,101,242,0.44)!important;}
+.nav-auth-btn{display:flex;align-items:center;gap:0.38rem;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:5px;padding:0.28rem 0.8rem;font-family:'Syne',sans-serif;font-size:10.5px;letter-spacing:0.06em;color:var(--accent2)!important;text-decoration:none;text-transform:uppercase;cursor:pointer;transition:all 0.14s;}
+.nav-auth-btn:hover{background:rgba(14,165,233,0.18)!important;border-color:rgba(14,165,233,0.42)!important;}
+
+/* MAINTENANCE */
+.maintenance-bar{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(251,146,60,0.1);border-bottom:1px solid rgba(251,146,60,0.22);padding:0.42rem 2rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:0.6rem;}
+.maintenance-bar span{font-family:'Syne',sans-serif;font-size:10.5px;letter-spacing:0.09em;color:#fdba74;text-transform:uppercase;}
+.maintenance-bar a{font-family:'Syne',sans-serif;font-size:10.5px;letter-spacing:0.07em;color:#fed7aa;text-decoration:underline;text-underline-offset:3px;text-transform:uppercase;}
+body.has-maintenance nav{top:33px;}
+body.has-maintenance .store-hero{padding-top:calc(5.5rem + 33px);}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity 0.5s ease,transform 0.5s ease;}
+.reveal.visible{opacity:1;transform:none;}
+
+/* STORE HERO */
+.store-hero{position:relative;padding:5.5rem 2rem 3.5rem;text-align:center;overflow:hidden;}
+.store-hero-bg{position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% -5%,rgba(14,165,233,0.11) 0%,transparent 60%),
+    radial-gradient(ellipse 30% 22% at 85% 80%,rgba(244,114,182,0.05) 0%,transparent 55%),
+    var(--bg);}
+.store-hero-grid{position:absolute;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(14,165,233,0.028) 1px,transparent 1px),linear-gradient(90deg,rgba(14,165,233,0.028) 1px,transparent 1px);
+  background-size:55px 55px;
+  mask-image:radial-gradient(ellipse 75% 65% at 50% 50%,black 25%,transparent 78%);}
+.store-hero-content{position:relative;z-index:1;max-width:680px;margin:0 auto;}
+.store-chip{display:inline-flex;align-items:center;gap:0.4rem;background:var(--vip-bg);border:1px solid var(--vip-border);border-radius:99px;padding:0.2rem 0.8rem;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:0.11em;color:var(--vip);text-transform:uppercase;margin-bottom:1.2rem;}
+.store-chip-dot{width:5px;height:5px;border-radius:50%;background:var(--vip);}
+.store-title{font-family:'Syne',sans-serif;font-size:clamp(2.2rem,6vw,3.8rem);font-weight:800;line-height:1;letter-spacing:-0.015em;color:var(--text);margin-bottom:0.5rem;}
+.store-title em{font-style:normal;color:var(--accent);}
+.store-sub{font-size:0.97rem;color:var(--text2);font-weight:300;margin-bottom:2rem;max-width:460px;margin-left:auto;margin-right:auto;}
+
+/* NOTICE */
+.store-notice{display:inline-flex;align-items:center;gap:0.6rem;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:7px;padding:0.55rem 1.1rem;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:0.08em;color:var(--accent2);text-transform:uppercase;}
+
+/* SECTIONS */
+section{padding:4rem 2rem;}
+.container{max-width:1040px;margin:0 auto;}
+.sec-label{font-family:'Syne',sans-serif;font-size:9.5px;letter-spacing:0.28em;color:var(--accent);text-transform:uppercase;margin-bottom:0.5rem;display:block;}
+.sec-title{font-family:'Syne',sans-serif;font-size:clamp(1.5rem,3vw,2.1rem);font-weight:800;color:var(--text);margin-bottom:0.6rem;line-height:1.1;letter-spacing:-0.01em;}
+.sec-sub{color:var(--text2);font-weight:300;max-width:460px;margin-bottom:2.2rem;font-size:0.93rem;}
+.s-dark{background:var(--bg2);}
+
+/* RANK PACKAGES */
+.rank-packages{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--border);}
+@media(max-width:820px){.rank-packages{grid-template-columns:1fr;}}
+
+.pkg-card{background:var(--bg3);padding:2rem 1.7rem;position:relative;overflow:hidden;transition:background 0.18s;display:flex;flex-direction:column;}
+.pkg-card:hover{background:var(--bg4);}
+.pkg-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;}
+.pkg-card.vip::after{background:linear-gradient(90deg,transparent,var(--vip),transparent);}
+.pkg-card.kiemelt::after{background:linear-gradient(90deg,transparent,var(--kie),transparent);}
+.pkg-card.kiemeltp::after{background:linear-gradient(90deg,transparent,var(--kiep),transparent);}
+.pkg-card.featured{background:var(--bg4);}
+
+.pkg-badge{display:inline-flex;align-items:center;gap:0.33rem;border-radius:4px;padding:0.18rem 0.6rem;font-family:'Syne',sans-serif;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;margin-bottom:1rem;border:1px solid;width:fit-content;}
+.pkg-badge.vip{background:var(--vip-bg);border-color:var(--vip-border);color:var(--vip);}
+.pkg-badge.kiemelt{background:var(--kie-bg);border-color:var(--kie-border);color:var(--kie);}
+.pkg-badge.kiemeltp{background:var(--kiep-bg);border-color:var(--kiep-border);color:var(--kiep);}
+.pkg-badge-dot{width:4px;height:4px;border-radius:50%;background:currentColor;}
+
+.pkg-popular{display:inline-flex;align-items:center;gap:0.3rem;background:rgba(14,165,233,0.1);border:1px solid var(--accent-border);border-radius:3px;padding:0.13rem 0.55rem;font-family:'Syne',sans-serif;font-size:8.5px;letter-spacing:0.14em;color:var(--accent2);text-transform:uppercase;margin-left:0.5rem;vertical-align:middle;}
+
+.pkg-name{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:0.18rem;letter-spacing:-0.01em;}
+.pkg-name.vip{color:var(--vip);}
+.pkg-name.kiemelt{color:var(--kie);}
+.pkg-name.kiemeltp{color:var(--kiep);}
+
+.pkg-tagline{font-size:0.82rem;color:var(--text3);margin-bottom:1.4rem;font-weight:300;}
+
+.pkg-price{margin-bottom:1.4rem;}
+.pkg-amount{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--text);letter-spacing:-0.02em;}
+.pkg-amount span{font-size:1rem;font-weight:400;color:var(--text3);margin-left:0.1rem;}
+.pkg-period{font-size:0.78rem;color:var(--text3);margin-top:0.1rem;}
+
+.pkg-perks{list-style:none;display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.6rem;flex:1;}
+.pkg-perk{display:flex;align-items:flex-start;gap:0.52rem;font-size:0.85rem;color:var(--text2);}
+.pkg-tick{flex-shrink:0;margin-top:3px;font-size:10px;font-weight:700;}
+.pkg-card.vip .pkg-tick{color:var(--vip);}
+.pkg-card.kiemelt .pkg-tick{color:var(--kie);}
+.pkg-card.kiemeltp .pkg-tick{color:var(--kiep);}
+
+.pkg-btn{display:flex;align-items:center;justify-content:center;gap:0.4rem;border:none;border-radius:7px;padding:0.65rem 1.2rem;font-family:'Syne',sans-serif;font-size:10.5px;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;transition:all 0.14s;width:100%;}
+.pkg-btn.vip{background:var(--vip-bg);border:1px solid var(--vip-border);color:var(--vip);}
+.pkg-btn.vip:hover{background:rgba(244,114,182,0.16);border-color:rgba(244,114,182,0.38);}
+.pkg-btn.kiemelt{background:var(--kie-bg);border:1px solid var(--kie-border);color:var(--kie);}
+.pkg-btn.kiemelt:hover{background:rgba(52,211,153,0.16);border-color:rgba(52,211,153,0.38);}
+.pkg-btn.kiemeltp{background:var(--kiep-bg);border:1px solid var(--kiep-border);color:var(--kiep);}
+.pkg-btn.kiemeltp:hover{background:rgba(251,146,60,0.16);border-color:rgba(251,146,60,0.38);}
+
+/* COIN PACKAGES */
+.coin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--border);}
+.coin-card{background:var(--bg3);padding:1.65rem 1.4rem;transition:background 0.18s;text-align:center;position:relative;}
+.coin-card:hover{background:var(--bg4);}
+.coin-card.best-value::before{content:'Legjobb ár';position:absolute;top:0;right:0;background:var(--accent);color:#fff;font-family:'Syne',sans-serif;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;padding:0.2rem 0.55rem;border-bottom-left-radius:5px;}
+.coin-icon{font-size:1.8rem;margin-bottom:0.7rem;display:block;}
+.coin-amount{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--text);margin-bottom:0.12rem;}
+.coin-amount em{color:#fbbf24;font-style:normal;}
+.coin-bonus{font-family:'Syne',sans-serif;font-size:9px;letter-spacing:0.12em;color:var(--online);text-transform:uppercase;margin-bottom:0.9rem;}
+.coin-price{font-family:'Syne',sans-serif;font-size:0.92rem;color:var(--text2);margin-bottom:1.1rem;}
+.coin-price strong{color:var(--text);font-weight:700;}
+.coin-btn{display:inline-flex;align-items:center;justify-content:center;gap:0.35rem;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:6px;padding:0.52rem 1.1rem;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:0.07em;color:var(--accent2);text-transform:uppercase;cursor:pointer;transition:all 0.14s;width:100%;}
+.coin-btn:hover{background:rgba(14,165,233,0.18);border-color:rgba(14,165,233,0.4);}
+
+/* BOOSTS */
+.boost-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:1px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--border);}
+.boost-card{background:var(--bg3);padding:1.65rem;transition:background 0.18s;position:relative;}
+.boost-card:hover{background:var(--bg4);}
+.boost-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;}
+.boost-card:nth-child(1)::before{background:linear-gradient(90deg,transparent,var(--accent),transparent);}
+.boost-card:nth-child(2)::before{background:linear-gradient(90deg,transparent,var(--kie),transparent);}
+.boost-card:nth-child(3)::before{background:linear-gradient(90deg,transparent,var(--kiep),transparent);}
+.boost-card:nth-child(4)::before{background:linear-gradient(90deg,transparent,var(--vip),transparent);}
+.boost-icon{font-size:1.5rem;margin-bottom:0.75rem;display:block;}
+.boost-title{font-family:'Syne',sans-serif;font-size:0.92rem;font-weight:700;margin-bottom:0.25rem;letter-spacing:0.01em;}
+.boost-card:nth-child(1) .boost-title{color:var(--accent2);}
+.boost-card:nth-child(2) .boost-title{color:var(--kie);}
+.boost-card:nth-child(3) .boost-title{color:var(--kiep);}
+.boost-card:nth-child(4) .boost-title{color:var(--vip);}
+.boost-desc{font-size:0.86rem;color:var(--text2);line-height:1.62;margin-bottom:1.1rem;}
+.boost-footer{display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+.boost-cost{font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:700;color:var(--text);}
+.boost-cost em{color:#fbbf24;font-style:normal;font-size:0.78rem;}
+.boost-buy-btn{background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:5px;padding:0.35rem 0.75rem;font-family:'Syne',sans-serif;font-size:9.5px;letter-spacing:0.07em;color:var(--accent2);text-transform:uppercase;cursor:pointer;transition:all 0.14s;white-space:nowrap;}
+.boost-buy-btn:hover{background:rgba(14,165,233,0.18);border-color:rgba(14,165,233,0.4);}
+
+/* FAQ */
+.faq-list{display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--border);}
+.faq-item{background:var(--bg3);transition:background 0.14s;}
+.faq-item:hover{background:var(--bg4);}
+.faq-q{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.15rem 1.5rem;cursor:pointer;font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text);letter-spacing:0.01em;user-select:none;}
+.faq-arrow{font-size:0.75rem;color:var(--text3);transition:transform 0.2s;flex-shrink:0;}
+.faq-item.open .faq-arrow{transform:rotate(180deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height 0.28s ease,padding 0.2s;}
+.faq-item.open .faq-a{max-height:200px;padding-bottom:1.1rem;}
+.faq-a p{padding:0 1.5rem;font-size:0.88rem;color:var(--text2);line-height:1.68;}
+
+/* FOOTER */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2rem;text-align:center;}
+.footer-top{display:flex;align-items:center;justify-content:center;gap:0.6rem;margin-bottom:0.5rem;}
+.fl-img{width:30px;height:30px;border-radius:5px;object-fit:cover;border:1px solid var(--accent-border);}
+.footer-brand{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:800;letter-spacing:0.14em;color:var(--text);text-transform:uppercase;}
+.footer-brand em{color:var(--accent);font-style:normal;}
+.footer-line{width:28px;height:1px;background:var(--border);margin:0.95rem auto;}
+.footer-links{display:flex;align-items:center;justify-content:center;gap:0.2rem;margin-bottom:0.95rem;flex-wrap:wrap;}
+.footer-links a{font-family:'Syne',sans-serif;font-size:9.5px;letter-spacing:0.09em;color:var(--text3);text-decoration:none;text-transform:uppercase;padding:0.26rem 0.6rem;border-radius:4px;transition:color 0.14s,background 0.14s;}
+.footer-links a:hover{color:var(--text2);background:var(--surface);}
+.footer-discord-link{color:#a5b4fc!important;}
+.footer-txt{color:var(--text3);font-size:0.8rem;}
+
+/* TOAST */
+#toast{position:fixed;bottom:1.6rem;left:50%;transform:translateX(-50%) translateY(11px);background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'Syne',sans-serif;font-size:10.5px;letter-spacing:0.09em;padding:0.5rem 1.3rem;border-radius:5px;opacity:0;transition:all 0.2s;pointer-events:none;z-index:999;text-transform:uppercase;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.82);backdrop-filter:blur(12px);opacity:0;pointer-events:none;transition:opacity 0.2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:2.1rem;width:100%;max-width:420px;position:relative;transform:translateY(14px);transition:transform 0.2s;box-shadow:0 32px 80px rgba(0,0,0,0.65);}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-close{position:absolute;top:0.85rem;right:0.85rem;background:none;border:none;color:var(--text3);cursor:pointer;font-size:1rem;transition:color 0.14s;line-height:1;}
+.modal-close:hover{color:var(--text);}
+.modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:0.3rem;letter-spacing:0.02em;}
+.modal-title em{color:var(--accent);font-style:normal;}
+.modal-sub{font-size:0.85rem;color:var(--text3);margin-bottom:1.6rem;}
+.modal-item-preview{background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:1rem 1.2rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;}
+.modal-item-icon{font-size:1.6rem;}
+.modal-item-name{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text);}
+.modal-item-price{font-family:'Syne',sans-serif;font-size:0.82rem;color:var(--text3);margin-top:0.1rem;}
+.form-label{font-family:'Syne',sans-serif;font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:0.4rem;}
+.form-input{width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;padding:0.6rem 0.85rem;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none;transition:border 0.14s;}
+.form-input:focus{border-color:var(--accent-border);}
+.form-group{margin-bottom:0.9rem;}
+.form-btn{width:100%;background:var(--accent);border:none;border-radius:7px;padding:0.68rem;font-family:'Syne',sans-serif;font-size:11px;letter-spacing:0.07em;color:#fff;text-transform:uppercase;cursor:pointer;transition:background 0.14s;margin-top:0.3rem;}
+.form-btn:hover{background:var(--accent2);}
+.form-note{font-size:0.78rem;color:var(--text3);text-align:center;margin-top:0.7rem;line-height:1.55;}
+
+@media(max-width:768px){
+  nav{padding:0 1rem;}
+  .nav-links li:nth-child(-n+5){display:none;}
+  .boost-grid{grid-template-columns:1fr;}
+  .coin-grid{grid-template-columns:repeat(2,1fr);}
+  .rank-packages{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body class="has-maintenance">
+<script>var API='/api';</script>
+
+<div class="maintenance-bar" id="maint-bar">
+  <span>⚙ Karbantartás folyamatban — A vásárlások átmenetileg szünetelnek</span>
+  <a href="https://discord.gg/s7Abx6mMym" target="_blank" rel="noopener">Frissítések a Discordon →</a>
+</div>
+
+<nav>
+  <a href="/index.html" class="nav-brand">
+    <img class="nav-logo-img" src="/img/server-logo.png" alt="Valyrian">
+    <span class="nav-name">Val<em>y</em>rian</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/index.html">Főoldal</a></li>
+    <li><a href="store.html" class="active-link">Bolt</a></li>
+    <li><a href="/index.html#whitelist">Whitelist</a></li>
+    <li><a href="https://discord.gg/s7Abx6mMym" target="_blank" rel="noopener" class="nav-discord">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.114 18.1.132 18.113a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>Discord
+    </a></li>
+    <li id="nav-login-li"><button class="nav-auth-btn" onclick="openModal()">Bejelentkezés</button></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="store-hero">
+  <div class="store-hero-bg"></div>
+  <div class="store-hero-grid"></div>
+  <div class="store-hero-content">
+    <div class="store-chip reveal"><span class="store-chip-dot"></span>Valyrian Bolt</div>
+    <h1 class="store-title reveal">Val<em>y</em>rian<br>Store</h1>
+    <p class="store-sub reveal">Rangok, érmék és boostok — támogasd a szervert és élj különleges előnyökkel.</p>
+    <div class="store-notice reveal">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      A vásárlások Discord-on keresztül intézhetők — a karbantartás után automatikus rendszer érkezik
+    </div>
+  </div>
+</div>
+
+<!-- RANK PACKAGES -->
+<section id="rangok">
+  <div class="container">
+    <span class="sec-label reveal">Rangok</span>
+    <h2 class="sec-title reveal">Válassz rangi csomagot</h2>
+    <p class="sec-sub reveal">Az egyszer megvásárolt rang életre szóló — nincs havi díj, nincs megújítás.</p>
+
+    <div class="rank-packages reveal">
+
+      <!-- VIP -->
+      <div class="pkg-card vip">
+        <div class="pkg-badge vip"><span class="pkg-badge-dot"></span>VIP</div>
+        <div class="pkg-name vip">VIP</div>
+        <div class="pkg-tagline">Tökéletes kezdőcsomagnak</div>
+        <div class="pkg-price">
+          <div class="pkg-amount">990 <span>Ft</span></div>
+          <div class="pkg-period">Egyszeri, örökre érvényes</div>
+        </div>
+        <ul class="pkg-perks">
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>Rózsaszín [VIP] tag a chat-ben</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>+1 home pont (összesen 3)</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>Hozzáférés a VIP szobához</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>250 indulóérme bónusz</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>Speciális VIP kit (7 naponta)</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>Egyedi particle effektek</li>
+        </ul>
+        <button class="pkg-btn vip" onclick="openPurchaseModal('VIP rang','990 Ft','💜')">
+          ✦ Megveszem
+        </button>
+      </div>
+
+      <!-- KIEMELT -->
+      <div class="pkg-card kiemelt featured">
+        <div class="pkg-badge kiemelt"><span class="pkg-badge-dot"></span>Kiemelt <span class="pkg-popular">⭐ Népszerű</span></div>
+        <div class="pkg-name kiemelt">Kiemelt</div>
+        <div class="pkg-tagline">A legtöbb játékos választása</div>
+        <div class="pkg-price">
+          <div class="pkg-amount">1 990 <span>Ft</span></div>
+          <div class="pkg-period">Egyszeri, örökre érvényes</div>
+        </div>
+        <ul class="pkg-perks">
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>Minden VIP előny +</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>Zöld [Kiemelt] tag a chat-ben</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>+2 home pont (összesen 5)</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>500 indulóérme bónusz</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>Hozzáférés a Kiemelt arénához</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>Dupla napi jutalmak</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>Egyedi köpeny és sisak effekt</li>
+        </ul>
+        <button class="pkg-btn kiemelt" onclick="openPurchaseModal('Kiemelt rang','1 990 Ft','💚')">
+          ✦ Megveszem
+        </button>
+      </div>
+
+      <!-- KIEMELT+ -->
+      <div class="pkg-card kiemeltp">
+        <div class="pkg-badge kiemeltp"><span class="pkg-badge-dot"></span>Kiemelt+</div>
+        <div class="pkg-name kiemeltp">Kiemelt+</div>
+        <div class="pkg-tagline">A legtöbb előny, prémium szinten</div>
+        <div class="pkg-price">
+          <div class="pkg-amount">3 490 <span>Ft</span></div>
+          <div class="pkg-period">Egyszeri, örökre érvényes</div>
+        </div>
+        <ul class="pkg-perks">
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>Minden Kiemelt előny +</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>Narancssárga [Kiemelt+] tag</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>+3 home pont (összesen 8)</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>1 000 indulóérme bónusz</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>Prioritásos queue bypass</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>Egyedi nick szín (/color)</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>Exkluzív Kiemelt+ kit (3 naponta)</li>
+          <li class="pkg-perk"><span class="pkg-tick">✦</span>Saját Discord szerep és csatorna</li>
+        </ul>
+        <button class="pkg-btn kiemeltp" onclick="openPurchaseModal('Kiemelt+ rang','3 490 Ft','🧡')">
+          ✦ Megveszem
+        </button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- COIN PACKAGES -->
+<section id="ermek" class="s-dark">
+  <div class="container">
+    <span class="sec-label reveal">Érmék</span>
+    <h2 class="sec-title reveal">Érme csomagok</h2>
+    <p class="sec-sub reveal">Az érmék a szerver belső valutája — shop-okhoz, fogadásokhoz, boosztokhoz szükséges.</p>
+
+    <div class="coin-grid reveal">
+      <div class="coin-card">
+        <span class="coin-icon">🪙</span>
+        <div class="coin-amount"><em>500</em> érme</div>
+        <div class="coin-bonus">&nbsp;</div>
+        <div class="coin-price"><strong>290 Ft</strong></div>
+        <button class="coin-btn" onclick="openPurchaseModal('500 Érme','290 Ft','🪙')">Megveszem</button>
+      </div>
+      <div class="coin-card">
+        <span class="coin-icon">🪙</span>
+        <div class="coin-amount"><em>1 200</em> érme</div>
+        <div class="coin-bonus">+200 bónusz</div>
+        <div class="coin-price"><strong>590 Ft</strong></div>
+        <button class="coin-btn" onclick="openPurchaseModal('1 200 Érme (+200 bónusz)','590 Ft','🪙')">Megveszem</button>
+      </div>
+      <div class="coin-card best-value">
+        <span class="coin-icon">💰</span>
+        <div class="coin-amount"><em>3 000</em> érme</div>
+        <div class="coin-bonus">+500 bónusz</div>
+        <div class="coin-price"><strong>1 290 Ft</strong></div>
+        <button class="coin-btn" onclick="openPurchaseModal('3 000 Érme (+500 bónusz)','1 290 Ft','💰')">Megveszem</button>
+      </div>
+      <div class="coin-card">
+        <span class="coin-icon">💎</span>
+        <div class="coin-amount"><em>7 500</em> érme</div>
+        <div class="coin-bonus">+1 500 bónusz</div>
+        <div class="coin-price"><strong>2 990 Ft</strong></div>
+        <button class="coin-btn" onclick="openPurchaseModal('7 500 Érme (+1 500 bónusz)','2 990 Ft','💎')">Megveszem</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOSTS -->
+<section id="boostok">
+  <div class="container">
+    <span class="sec-label reveal">Boostok</span>
+    <h2 class="sec-title reveal">Ideiglenes boostok</h2>
+    <p class="sec-sub reveal">24 órás extrák, amiket érmével is meg lehet venni — vagy forinttal.</p>
+
+    <div class="boost-grid reveal">
+      <div class="boost-card">
+        <span class="boost-icon">⚡</span>
+        <div class="boost-title">XP Boost x2</div>
+        <div class="boost-desc">Duplázd meg az összes tevékenységből szerzett XP-t 24 órán át.</div>
+        <div class="boost-footer">
+          <div class="boost-cost">200 <em>💰</em> · vagy 190 Ft</div>
+          <button class="boost-buy-btn" onclick="openPurchaseModal('XP Boost x2 (24h)','200 érme / 190 Ft','⚡')">Veszem</button>
+        </div>
+      </div>
+      <div class="boost-card">
+        <span class="boost-icon">🌾</span>
+        <div class="boost-title">Farm Boost x3</div>
+        <div class="boost-desc">Háromszoros drop esély a farmon 24 órán keresztül.</div>
+        <div class="boost-footer">
+          <div class="boost-cost">350 <em>💰</em> · vagy 290 Ft</div>
+          <button class="boost-buy-btn" onclick="openPurchaseModal('Farm Boost x3 (24h)','350 érme / 290 Ft','🌾')">Veszem</button>
+        </div>
+      </div>
+      <div class="boost-card">
+        <span class="boost-icon">🛡️</span>
+        <div class="boost-title">God Mode (PvP-mentes)</div>
+        <div class="boost-desc">Nem támadhatsz és nem támadhatnak meg 24 óráig — nem vonatkozik arénára.</div>
+        <div class="boost-footer">
+          <div class="boost-cost">500 <em>💰</em> · vagy 390 Ft</div>
+          <button class="boost-buy-btn" onclick="openPurchaseModal('God Mode 24h','500 érme / 390 Ft','🛡️')">Veszem</button>
+        </div>
+      </div>
+      <div class="boost-card">
+        <span class="boost-icon">💸</span>
+        <div class="boost-title">Coin Rain</div>
+        <div class="boost-desc">Minden 10 percenként véletlenszerű érmejutalmat kapsz 24 órán át.</div>
+        <div class="boost-footer">
+          <div class="boost-cost">400 <em>💰</em> · vagy 340 Ft</div>
+          <button class="boost-buy-btn" onclick="openPurchaseModal('Coin Rain (24h)','400 érme / 340 Ft','💸')">Veszem</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="s-dark">
+  <div class="container">
+    <span class="sec-label reveal">Segítség</span>
+    <h2 class="sec-title reveal">Gyakori kérdések</h2>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Hogyan zajlik a vásárlás?
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a"><p>Jelenleg a vásárlások Discord-on keresztül intézhetők — nyiss egy ticketet a #bolt csatornán. Az automatikus rendszer a karbantartás után érkezik.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Milyen fizetési módok elérhetők?
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a"><p>Jelenleg banki átutalás és Revolut elérhető. Hamarosan érkezik a kártyás és PayPal fizetés is.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Meddig érvényes a megvásárolt rang?
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a"><p>Az összes rang egyszeri vásárlás alapján örökre érvényes — nincs havi megújítás. Szerver reset esetén a rangok megtartódnak.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Mi történik ha már van rangom és újat veszek?
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a"><p>A rangok összeadódnak — ha VIP-ed van és Kiemelt-et veszel, az előző rang előnyei is megmaradnak. A magasabb rang mindig felülírja az alacsonyabbat.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Van-e visszatérítési lehetőség?
+          <span class="faq-arrow">▼</span>
+        </div>
+        <div class="faq-a"><p>Digitális termékekre általában nem vonatkozik visszatérítés, de ha technikai hiba miatt nem kaptad meg a rangodat, Discord-on keress meg minket és megoldjuk.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <img class="fl-img" src="/img/server-logo.png" alt="">
+    <span class="footer-brand">Val<em>y</em>rian</span>
+  </div>
+  <div class="footer-line"></div>
+  <div class="footer-links">
+    <a href="/index.html">Főoldal</a>
+    <a href="/index.html#about">Rólunk</a>
+    <a href="/index.html#ranks">Rangok</a>
+    <a href="store.html">Bolt</a>
+    <a href="/index.html#whitelist">Whitelist</a>
+    <a href="https://discord.gg/s7Abx6mMym" target="_blank" class="footer-discord-link">Discord</a>
+  </div>
+  <p class="footer-txt">Nem hivatalos Minecraft szerver — nem áll kapcsolatban a Mojang Studios-szal.</p>
+  <p class="footer-txt" style="margin-top:0.28rem;font-size:0.76rem;opacity:0.55;">© 2026 Valyrian Minecraft Server</p>
+</footer>
+
+<!-- PURCHASE MODAL -->
+<div class="modal-overlay" id="purchase-modal" onclick="if(event.target===this)closePurchaseModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closePurchaseModal()">✕</button>
+    <h2 class="modal-title">Val<em>y</em>rian Bolt</h2>
+    <p class="modal-sub">A vásárlás Discord-on keresztül zajlik.</p>
+    <div class="modal-item-preview">
+      <span class="modal-item-icon" id="modal-icon">🎁</span>
+      <div>
+        <div class="modal-item-name" id="modal-item-name">Termék neve</div>
+        <div class="modal-item-price" id="modal-item-price">Ár: —</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Minecraft neved</label>
+      <input class="form-input" type="text" id="purchase-nick" placeholder="pl. Notch">
+    </div>
+    <a href="https://discord.gg/s7Abx6mMym" target="_blank" rel="noopener">
+      <button class="form-btn" onclick="handlePurchase()">
+        Megnyitom a Discord ticket-et →
+      </button>
+    </a>
+    <p class="form-note">A gombra kattintva a Discord szerverünkre kerülsz, ahol megnyithatsz egy vásárlási ticket-et. Csapatunk 24 órán belül feldolgozza a kérésedet.</p>
+  </div>
+</div>
+
+<div id="toast">Hamarosan!</div>
+
+<script>
+function initReveal(){
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}
+    });
+  },{threshold:0.07});
+  document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el);});
+}
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2100);
+}
+function toggleFaq(el){
+  var item=el.parentElement;
+  var wasOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(function(i){i.classList.remove('open');});
+  if(!wasOpen)item.classList.add('open');
+}
+function openPurchaseModal(name,price,icon){
+  document.getElementById('modal-item-name').textContent=name;
+  document.getElementById('modal-item-price').textContent='Ár: '+price;
+  document.getElementById('modal-icon').textContent=icon;
+  document.getElementById('purchase-modal').classList.add('open');
+}
+function closePurchaseModal(){
+  document.getElementById('purchase-modal').classList.remove('open');
+}
+function handlePurchase(){
+  var nick=document.getElementById('purchase-nick').value.trim();
+  if(!nick){showToast('Add meg a Minecraft neved!');return;}
+  showToast('Átirányítás a Discordra...');
+}
+function openModal(){showToast('Bejelentkezés az index.html-en!');}
+initReveal();
+</script>
+</body>
+</html>
