@@ -621,6 +621,72 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
   </div>
 </div>
 
+  
+<!-- PROFILE PAGE -->
+<div id="profile-page" class="page">
+  <div class="profile-header">
+    <div class="profile-header-inner">
+      <div class="profile-skin-wrap">
+        <div class="profile-skin"><img id="profile-skin-img" src="" alt="Skin"></div>
+        <div class="profile-skin-online"></div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-rank-badge player" id="profile-rank-badge"><div class="profile-rank-dot"></div><span id="profile-rank-text">Játékos</span></div>
+        <div class="profile-username" id="profile-username">-</div>
+        <div class="profile-bio" id="profile-bio">Még nem adtál meg bemutatkozást.</div>
+      </div>
+      <div style="padding-bottom:1.2rem;margin-left:auto;"><button class="logout-btn" onclick="logout()">🚪 Kijelentkezés</button></div>
+    </div>
+    <div style="max-width:1040px;margin:0 auto;padding:0 2rem;">
+      <div style="width:70px;display:inline-block;"></div>
+      <div class="profile-tabs" style="display:inline-flex;">
+        <button class="profile-tab active" data-tab="stats" onclick="openProfileTab('stats')">📊 Statisztikák</button>
+        <button class="profile-tab" data-tab="activity" onclick="openProfileTab('activity')">📋 Aktivitás</button>
+        <button class="profile-tab" data-tab="settings" onclick="openProfileTab('settings')">⚙ Beállítások</button>
+      </div>
+    </div>
+  </div>
+  <div class="profile-body">
+    <div class="profile-section active" id="tab-stats">
+      <div class="stats-grid">
+        <div class="stat-card"><span class="stat-icon">⚔️</span><span class="stat-val" id="stat-kills">—</span><span class="stat-lbl">Ölések</span></div>
+        <div class="stat-card"><span class="stat-icon">💀</span><span class="stat-val" id="stat-deaths">—</span><span class="stat-lbl">Halálok</span></div>
+        <div class="stat-card"><span class="stat-icon">🏆</span><span class="stat-val" id="stat-kd">—</span><span class="stat-lbl">K/D arány</span></div>
+        <div class="stat-card"><span class="stat-icon">⏱️</span><span class="stat-val" id="stat-playtime">—</span><span class="stat-lbl">Játékidő</span></div>
+        <div class="stat-card"><span class="stat-icon">🥊</span><span class="stat-val" id="stat-wins">—</span><span class="stat-lbl">Győzelmek</span></div>
+        <div class="stat-card"><span class="stat-icon">💰</span><span class="stat-val" id="stat-coins">—</span><span class="stat-lbl">Érmék</span></div>
+      </div>
+      <div class="whitelist-status-box">
+        <div class="wl-status-icon none" id="wl-icon"><span id="wl-icon-emoji">❔</span></div>
+        <div class="wl-status-text"><h4>Whitelist státusz</h4><p id="wl-status-desc">Betöltés...</p></div>
+      </div>
+    </div>
+    <div class="profile-section" id="tab-activity">
+      <div class="activity-feed" id="activity-feed"><p style="color:var(--text3);">Betöltés...</p></div>
+    </div>
+    <div class="profile-section" id="tab-settings">
+      <div class="settings-grid">
+        <div class="settings-box">
+          <h3>Profil szerkesztése</h3>
+          <div class="form-group"><label class="form-label">Bemutatkozás</label><input class="form-input" type="text" id="set-bio" placeholder="Írj magadról pár szót..."></div>
+          <div class="form-group"><label class="form-label">E-mail cím</label><input class="form-input" type="email" id="set-email" placeholder="te@email.com"></div>
+          <button class="settings-save" onclick="saveProfile()">Mentés</button>
+          <div class="form-ok" id="set-ok" style="text-align:left;margin-top:0.45rem;"></div>
+        </div>
+        <div class="settings-box">
+          <h3>Jelszó módosítása</h3>
+          <div class="form-group"><label class="form-label">Jelenlegi jelszó</label><input class="form-input" type="password" id="set-oldpass" placeholder="••••••••"></div>
+          <div class="form-group"><label class="form-label">Új jelszó</label><input class="form-input" type="password" id="set-newpass" placeholder="Min. 6 karakter"></div>
+          <div class="form-group"><label class="form-label">Megerősítés</label><input class="form-input" type="password" id="set-newpass2" placeholder="••••••••"></div>
+          <button class="settings-save" onclick="changePassword()">Módosítás</button>
+          <div class="form-err" id="pass-err" style="text-align:left;margin-top:0.45rem;"></div>
+          <div class="form-ok" id="pass-ok" style="text-align:left;margin-top:0.45rem;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast">Hamarosan!</div>
 
 <script>
