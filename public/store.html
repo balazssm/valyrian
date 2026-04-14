@@ -624,33 +624,6 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
   <p class="footer-txt">Nem hivatalos Minecraft szerver — nem áll kapcsolatban a Mojang Studios-szal.</p>
   <p class="footer-txt" style="margin-top:0.28rem;font-size:0.76rem;opacity:0.55;">© 2026 Valyrian Minecraft Server</p>
 </footer>
-
-<!-- PURCHASE MODAL -->
-<div class="modal-overlay" id="purchase-modal" onclick="if(event.target===this)closePurchaseModal()">
-  <div class="modal">
-    <button class="modal-close" onclick="closePurchaseModal()">✕</button>
-    <h2 class="modal-title">Val<em>y</em>rian Bolt</h2>
-    <p class="modal-sub">A vásárlás Discord-on keresztül zajlik.</p>
-    <div class="modal-item-preview">
-      <span class="modal-item-icon" id="modal-icon">🎁</span>
-      <div>
-        <div class="modal-item-name" id="modal-item-name">Termék neve</div>
-        <div class="modal-item-price" id="modal-item-price">Ár: —</div>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Minecraft neved</label>
-      <input class="form-input" type="text" id="purchase-nick" placeholder="pl. Notch">
-    </div>
-    <a href="https://discord.gg/s7Abx6mMym" target="_blank" rel="noopener">
-      <button class="form-btn" onclick="handlePurchase()">
-        Megnyitom a Discord ticket-et →
-      </button>
-    </a>
-    <p class="form-note">A gombra kattintva a Discord szerverünkre kerülsz, ahol megnyithatsz egy vásárlási ticket-et. Csapatunk 24 órán belül feldolgozza a kérésedet.</p>
-  </div>
-</div>
-
   
 <!-- PROFILE PAGE -->
 <div id="profile-page" class="page">
@@ -714,6 +687,31 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
         </div>
       </div>
     </div>
+  </div>
+</div>
+<!-- PURCHASE MODAL -->
+<div class="modal-overlay" id="purchase-modal" onclick="if(event.target===this)closePurchaseModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closePurchaseModal()">✕</button>
+    <h2 class="modal-title">Val<em>y</em>rian Bolt</h2>
+    <p class="modal-sub">A vásárlás Discord-on keresztül zajlik.</p>
+    <div class="modal-item-preview">
+      <span class="modal-item-icon" id="modal-icon">🎁</span>
+      <div>
+        <div class="modal-item-name" id="modal-item-name">Termék neve</div>
+        <div class="modal-item-price" id="modal-item-price">Ár: —</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Minecraft neved</label>
+      <input class="form-input" type="text" id="purchase-nick" placeholder="pl. Notch">
+    </div>
+    <a href="https://discord.gg/s7Abx6mMym" target="_blank" rel="noopener">
+      <button class="form-btn" onclick="handlePurchase()">
+        Megnyitom a Discord ticket-et →
+      </button>
+    </a>
+    <p class="form-note">A gombra kattintva a Discord szerverünkre kerülsz, ahol megnyithatsz egy vásárlási ticket-et. Csapatunk 24 órán belül feldolgozza a kérésedet.</p>
   </div>
 </div>
 
