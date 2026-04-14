@@ -3,37 +3,58 @@ const router = express.Router();
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
+const mongoose = require('mongoose');
 
-// Összes felhasználó lekérése
+// --- 1. Összes felhasználó lekérése ÉLŐ LuckPerms szinkronnal ---
 router.get('/users', auth, admin, async (req, res) => {
   try {
-    const users = await User.find().select('-password'); // Jelszó ne látsszon!
-    res.json(users);
+    // Weboldal felhasználóinak lekérése (jelszó nélkül)
+    const webUsers = await User.find().select('-password').lean();
+    
+    // Csatlakozunk a LuckPerms 'users' kollekciójához (a kép alapján ez a neve nálad)
+    // Fontos: a LuckPerms a 'valyrian' vagy 'minecraft' adatbázisba ment
+    const lpCollection = mongoose.connection.db.collection('users');
+
+    // Összefésüljük a weboldalas adatokat a játékbeli élő rangokkal
+    const usersWithLiveRank = await Promise.all(webUsers.map(async (user) => {
+      // LuckPerms kisbetűvel tárolja a neveket a 'name' mezőben
+      const lpData = await lpCollection.findOne({ name: user.username.toLowerCase() });
+      
+      return {
+        ...user,
+        // Ha van találat az LP táblában, az ottani 'primaryGroup'-ot mutatjuk,
+        // különben marad a weboldal saját adatbázisában tárolt rangja.
+        rank: lpData ? lpData.primaryGroup : user.rank 
+      };
+    }));
+
+    res.json(usersWithLiveRank);
   } catch (err) {
-    res.status(500).json({ error: 'Hiba a lekéréskor.' });
+    console.error("Szinkronizációs hiba az admin panelen:", err);
+    res.status(500).json({ error: 'Hiba történt a felhasználók betöltésekor.' });
   }
 });
 
-// Rang frissítése
+// --- 2. Rang frissítése az adatbázisban ---
 router.put('/users/:id/rank', auth, admin, async (req, res) => {
   try {
     const { rank } = req.body;
-    // Ellenőrizzük, hogy a kapott rang benne van-e az engedélyezettekben (opcionális biztonság)
+    // Frissítjük a weboldal saját adatbázisában is a biztonság kedvéért
     await User.findByIdAndUpdate(req.params.id, { rank });
-    res.json({ message: 'Rang sikeresen frissítve!' });
+    res.json({ message: 'Rang sikeresen frissítve az adatbázisban!' });
   } catch (err) {
     res.status(500).json({ error: 'Hiba a frissítéskor.' });
   }
 });
 
-// --- ÚJ RÉSZ: Whitelist állapot frissítése ---
+// --- 3. Whitelist állapot frissítése ---
 router.put('/users/:id/whitelist', auth, admin, async (req, res) => {
   try {
-    const { whitelistStatus } = req.body; // Az admin.html-ből 'whitelistStatus' néven küldjük
+    const { whitelistStatus } = req.body;
     
     const user = await User.findByIdAndUpdate(
       req.params.id, 
-      { whitelistStatus }, // A User.js modellben is ez a mezőnév
+      { whitelistStatus }, 
       { new: true }
     );
 
@@ -43,7 +64,7 @@ router.put('/users/:id/whitelist', auth, admin, async (req, res) => {
 
     res.json({ message: 'Whitelist állapot sikeresen frissítve!', user });
   } catch (err) {
-    console.error("Whitelist hiba:", err);
+    console.error("Whitelist frissítési hiba:", err);
     res.status(500).json({ error: 'Hiba a whitelist frissítésekor.' });
   }
 });
