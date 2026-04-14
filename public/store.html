@@ -42,7 +42,43 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:rgba(14,165,233,0.28);border-radius:2px;}
 ::-webkit-scrollbar-thumb:hover{background:rgba(14,165,233,0.5);}
+/* LEGAL */
+  
+.legal-box{
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  background:var(--border);
+}
 
+.legal-item{
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  padding:1rem 1.4rem;
+  background:var(--bg3);
+  font-size:0.85rem;
+}
+
+.legal-item:hover{
+  background:var(--bg4);
+}
+
+.legal-label{
+  font-family:'Syne',sans-serif;
+  font-size:9px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--text3);
+}
+
+.legal-value{
+  color:var(--text2);
+  text-align:right;
+}
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:58px;background:rgba(5,7,15,0.93);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);}
 .nav-brand{display:flex;align-items:center;gap:0.6rem;text-decoration:none;}
@@ -604,7 +640,40 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
     </div>
   </div>
 </section>
+<section class="s-dark" id="ceginfo">
+  <div class="container">
+    <span class="sec-label reveal">Információk</span>
+    <h2 class="sec-title reveal">Cégadatok</h2>
+    <p class="sec-sub reveal">A szolgáltató és üzemeltető hivatalos adatai.</p>
 
+    <div class="legal-box reveal">
+      <div class="legal-item">
+        <span class="legal-label">Üzemeltető</span>
+        <span class="legal-value">Valyrian Kft. (Egyéni Vállálkozó)</span>
+      </div>
+
+      <div class="legal-item">
+        <span class="legal-label">Székhely</span>
+        <span class="legal-value">Szeged</span>
+      </div>
+
+      <div class="legal-item">
+        <span class="legal-label">Adószám</span>
+        <span class="legal-value">8518611660</span>
+      </div>
+
+      <div class="legal-item">
+        <span class="legal-label">Kapcsolat</span>
+        <span class="legal-value">support@valyrian.hu</span>
+      </div>
+
+      <div class="legal-item">
+        <span class="legal-label">Fizetési módok</span>
+        <span class="legal-value">Banki átutalás, Revolut, hamarosan bankkártya</span>
+      </div>
+    </div>
+  </div>
+</section>
 <!-- FOOTER -->
 <footer>
   <div class="footer-top">
