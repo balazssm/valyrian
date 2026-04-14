@@ -42,43 +42,14 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans
 ::-webkit-scrollbar-track{background:var(--bg);}
 ::-webkit-scrollbar-thumb{background:rgba(14,165,233,0.28);border-radius:2px;}
 ::-webkit-scrollbar-thumb:hover{background:rgba(14,165,233,0.5);}
+
 /* LEGAL */
-  
-.legal-box{
-  display:flex;
-  flex-direction:column;
-  gap:1px;
-  border:1px solid var(--border);
-  border-radius:10px;
-  overflow:hidden;
-  background:var(--border);
-}
+.legal-box{display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--border);}
+.legal-item{display:flex;justify-content:space-between;gap:1rem;padding:1rem 1.4rem;background:var(--bg3);font-size:0.85rem;}
+.legal-item:hover{background:var(--bg4);}
+.legal-label{font-family:'Syne',sans-serif;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);}
+.legal-value{color:var(--text2);text-align:right;}
 
-.legal-item{
-  display:flex;
-  justify-content:space-between;
-  gap:1rem;
-  padding:1rem 1.4rem;
-  background:var(--bg3);
-  font-size:0.85rem;
-}
-
-.legal-item:hover{
-  background:var(--bg4);
-}
-
-.legal-label{
-  font-family:'Syne',sans-serif;
-  font-size:9px;
-  letter-spacing:0.14em;
-  text-transform:uppercase;
-  color:var(--text3);
-}
-
-.legal-value{
-  color:var(--text2);
-  text-align:right;
-}
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:58px;background:rgba(5,7,15,0.93);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);}
 .nav-brand{display:flex;align-items:center;gap:0.6rem;text-decoration:none;}
@@ -104,14 +75,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .nav-dropdown-item.danger:hover{background:rgba(244,63,94,0.07);color:#f87171;}
 .nav-dropdown-sep{height:1px;background:var(--border);margin:0.18rem 0;}
 
-
-/* MAINTENANCE */
-.maintenance-bar{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(251,146,60,0.1);border-bottom:1px solid rgba(251,146,60,0.22);padding:0.42rem 2rem;text-align:center;display:flex;align-items:center;justify-content:center;gap:0.6rem;}
-.maintenance-bar span{font-family:'Syne',sans-serif;font-size:10.5px;letter-spacing:0.09em;color:#fdba74;text-transform:uppercase;}
-.maintenance-bar a{font-family:'Syne',sans-serif;font-size:10.5px;letter-spacing:0.07em;color:#fed7aa;text-decoration:underline;text-underline-offset:3px;text-transform:uppercase;}
-body.has-maintenance nav{top:33px;}
-body.has-maintenance .store-hero{padding-top:calc(5.5rem + 33px);}
-
 /* REVEAL */
 .reveal{opacity:0;transform:translateY(18px);transition:opacity 0.5s ease,transform 0.5s ease;}
 .reveal.visible{opacity:1;transform:none;}
@@ -134,8 +97,8 @@ body.has-maintenance .store-hero{padding-top:calc(5.5rem + 33px);}
 .store-title em{font-style:normal;color:var(--accent);}
 .store-sub{font-size:0.97rem;color:var(--text2);font-weight:300;margin-bottom:2rem;max-width:460px;margin-left:auto;margin-right:auto;}
 
-/* NOTICE */
-.store-notice{display:inline-flex;align-items:center;gap:0.6rem;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:7px;padding:0.55rem 1.1rem;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:0.08em;color:var(--accent2);text-transform:uppercase;}
+/* NOTICE — automatikus rendszer aktív */
+.store-notice{display:inline-flex;align-items:center;gap:0.6rem;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.22);border-radius:7px;padding:0.55rem 1.1rem;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:0.08em;color:#6ee7b7;text-transform:uppercase;}
 
 /* SECTIONS */
 section{padding:4rem 2rem;}
@@ -148,7 +111,6 @@ section{padding:4rem 2rem;}
 /* RANK PACKAGES */
 .rank-packages{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--border);}
 @media(max-width:820px){.rank-packages{grid-template-columns:1fr;}}
-
 .pkg-card{background:var(--bg3);padding:2rem 1.7rem;position:relative;overflow:hidden;transition:background 0.18s;display:flex;flex-direction:column;}
 .pkg-card:hover{background:var(--bg4);}
 .pkg-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;}
@@ -156,34 +118,27 @@ section{padding:4rem 2rem;}
 .pkg-card.kiemelt::after{background:linear-gradient(90deg,transparent,var(--kie),transparent);}
 .pkg-card.kiemeltp::after{background:linear-gradient(90deg,transparent,var(--kiep),transparent);}
 .pkg-card.featured{background:var(--bg4);}
-
 .pkg-badge{display:inline-flex;align-items:center;gap:0.33rem;border-radius:4px;padding:0.18rem 0.6rem;font-family:'Syne',sans-serif;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;margin-bottom:1rem;border:1px solid;width:fit-content;}
 .pkg-badge.vip{background:var(--vip-bg);border-color:var(--vip-border);color:var(--vip);}
 .pkg-badge.kiemelt{background:var(--kie-bg);border-color:var(--kie-border);color:var(--kie);}
 .pkg-badge.kiemeltp{background:var(--kiep-bg);border-color:var(--kiep-border);color:var(--kiep);}
 .pkg-badge-dot{width:4px;height:4px;border-radius:50%;background:currentColor;}
-
 .pkg-popular{display:inline-flex;align-items:center;gap:0.3rem;background:rgba(14,165,233,0.1);border:1px solid var(--accent-border);border-radius:3px;padding:0.13rem 0.55rem;font-family:'Syne',sans-serif;font-size:8.5px;letter-spacing:0.14em;color:var(--accent2);text-transform:uppercase;margin-left:0.5rem;vertical-align:middle;}
-
 .pkg-name{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:0.18rem;letter-spacing:-0.01em;}
 .pkg-name.vip{color:var(--vip);}
 .pkg-name.kiemelt{color:var(--kie);}
 .pkg-name.kiemeltp{color:var(--kiep);}
-
 .pkg-tagline{font-size:0.82rem;color:var(--text3);margin-bottom:1.4rem;font-weight:300;}
-
 .pkg-price{margin-bottom:1.4rem;}
 .pkg-amount{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--text);letter-spacing:-0.02em;}
 .pkg-amount span{font-size:1rem;font-weight:400;color:var(--text3);margin-left:0.1rem;}
 .pkg-period{font-size:0.78rem;color:var(--text3);margin-top:0.1rem;}
-
 .pkg-perks{list-style:none;display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.6rem;flex:1;}
 .pkg-perk{display:flex;align-items:flex-start;gap:0.52rem;font-size:0.85rem;color:var(--text2);}
 .pkg-tick{flex-shrink:0;margin-top:3px;font-size:10px;font-weight:700;}
 .pkg-card.vip .pkg-tick{color:var(--vip);}
 .pkg-card.kiemelt .pkg-tick{color:var(--kie);}
 .pkg-card.kiemeltp .pkg-tick{color:var(--kiep);}
-
 .pkg-btn{display:flex;align-items:center;justify-content:center;gap:0.4rem;border:none;border-radius:7px;padding:0.65rem 1.2rem;font-family:'Syne',sans-serif;font-size:10.5px;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;transition:all 0.14s;width:100%;}
 .pkg-btn.vip{background:var(--vip-bg);border:1px solid var(--vip-border);color:var(--vip);}
 .pkg-btn.vip:hover{background:rgba(244,114,182,0.16);border-color:rgba(244,114,182,0.38);}
@@ -214,13 +169,11 @@ section{padding:4rem 2rem;}
 .boost-card:nth-child(1)::before{background:linear-gradient(90deg,transparent,var(--accent),transparent);}
 .boost-card:nth-child(2)::before{background:linear-gradient(90deg,transparent,var(--kie),transparent);}
 .boost-card:nth-child(3)::before{background:linear-gradient(90deg,transparent,var(--kiep),transparent);}
-.boost-card:nth-child(4)::before{background:linear-gradient(90deg,transparent,var(--vip),transparent);}
 .boost-icon{font-size:1.5rem;margin-bottom:0.75rem;display:block;}
 .boost-title{font-family:'Syne',sans-serif;font-size:0.92rem;font-weight:700;margin-bottom:0.25rem;letter-spacing:0.01em;}
 .boost-card:nth-child(1) .boost-title{color:var(--accent2);}
 .boost-card:nth-child(2) .boost-title{color:var(--kie);}
 .boost-card:nth-child(3) .boost-title{color:var(--kiep);}
-.boost-card:nth-child(4) .boost-title{color:var(--vip);}
 .boost-desc{font-size:0.86rem;color:var(--text2);line-height:1.62;margin-bottom:1.1rem;}
 .boost-footer{display:flex;align-items:center;justify-content:space-between;gap:1rem;}
 .boost-cost{font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:700;color:var(--text);}
@@ -256,10 +209,10 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
 #toast{position:fixed;bottom:1.6rem;left:50%;transform:translateX(-50%) translateY(11px);background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'Syne',sans-serif;font-size:10.5px;letter-spacing:0.09em;padding:0.5rem 1.3rem;border-radius:5px;opacity:0;transition:all 0.2s;pointer-events:none;z-index:999;text-transform:uppercase;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-/* MODAL */
+/* ─── PURCHASE MODAL ─────────────────────────────────────────────────────── */
 .modal-overlay{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.82);backdrop-filter:blur(12px);opacity:0;pointer-events:none;transition:opacity 0.2s;}
 .modal-overlay.open{opacity:1;pointer-events:all;}
-.modal{background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:2.1rem;width:100%;max-width:378px;position:relative;transform:translateY(14px);transition:transform 0.2s;box-shadow:0 32px 80px rgba(0,0,0,0.65);}
+.modal{background:var(--bg3);border:1px solid var(--border2);border-radius:14px;padding:2.1rem;width:100%;max-width:420px;position:relative;transform:translateY(14px);transition:transform 0.2s;box-shadow:0 32px 80px rgba(0,0,0,0.65);}
 .modal-overlay.open .modal{transform:translateY(0);}
 .modal-close{position:absolute;top:0.85rem;right:0.85rem;background:none;border:none;color:var(--text3);cursor:pointer;font-size:1rem;transition:color 0.14s;line-height:1;}
 .modal-close:hover{color:var(--text);}
@@ -268,9 +221,12 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
 .modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text);text-align:center;margin-bottom:0.18rem;letter-spacing:0.02em;}
 .modal-title em{color:var(--accent);font-style:normal;}
 .modal-sub{font-size:0.83rem;color:var(--text3);text-align:center;margin-bottom:1.4rem;}
-.modal-tabs{display:flex;gap:0.4rem;background:var(--bg4);border-radius:6px;padding:0.26rem;margin-bottom:1.4rem;}
-.modal-tab{flex:1;background:none;border:none;padding:0.46rem;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:0.07em;color:var(--text3);cursor:pointer;text-transform:uppercase;border-radius:4px;transition:all 0.14s;}
-.modal-tab.active{background:var(--bg2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3);}
+
+.modal-item-preview{background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:1rem 1.2rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;}
+.modal-item-icon{font-size:1.6rem;}
+.modal-item-name{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text);}
+.modal-item-price{font-family:'Syne',sans-serif;font-size:0.82rem;color:var(--text3);margin-top:0.1rem;}
+
 .form-group{margin-bottom:0.95rem;}
 .form-label{display:block;font-family:'Syne',sans-serif;font-size:9px;letter-spacing:0.16em;color:var(--text3);text-transform:uppercase;margin-bottom:0.38rem;}
 .form-input{width:100%;background:var(--bg4);border:1px solid var(--border);border-radius:5px;padding:0.62rem 0.88rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.94rem;outline:none;transition:border-color 0.14s;}
@@ -281,71 +237,60 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
 .form-btn:disabled{opacity:0.4;cursor:not-allowed;}
 .form-err{font-size:0.8rem;color:#f87171;text-align:center;margin-top:0.6rem;min-height:1.1em;}
 .form-ok{font-size:0.8rem;color:var(--online);text-align:center;margin-top:0.6rem;min-height:1.1em;}
+.form-note{font-size:0.78rem;color:var(--text3);text-align:center;margin-top:0.7rem;line-height:1.55;}
+
+/* Fizetési módok */
+.payment-methods{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.1rem;}
+.pay-method{display:flex;align-items:center;gap:0.65rem;background:var(--bg4);border:1px solid var(--border);border-radius:7px;padding:0.72rem 1rem;cursor:pointer;transition:all 0.14s;}
+.pay-method:hover{border-color:var(--border2);}
+.pay-method.selected{border-color:var(--accent-border);background:var(--accent-dim);}
+.pay-method-radio{width:14px;height:14px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.12s;}
+.pay-method.selected .pay-method-radio{border-color:var(--accent);background:var(--accent);}
+.pay-method-radio-dot{width:5px;height:5px;border-radius:50%;background:#fff;opacity:0;transition:opacity 0.12s;}
+.pay-method.selected .pay-method-radio-dot{opacity:1;}
+.pay-method-icon{font-size:1.1rem;}
+.pay-method-label{font-family:'Syne',sans-serif;font-size:0.82rem;font-weight:700;color:var(--text);}
+.pay-method-sub{font-size:0.76rem;color:var(--text3);}
+
+/* Rendelés visszaigazolás */
+.order-confirm{background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:1.4rem;text-align:center;}
+.order-confirm-icon{font-size:2.2rem;margin-bottom:0.6rem;}
+.order-confirm-title{font-family:'Syne',sans-serif;font-size:0.97rem;font-weight:800;color:#6ee7b7;margin-bottom:0.35rem;}
+.order-confirm-id{font-family:'Syne',sans-serif;font-size:0.78rem;color:var(--text3);letter-spacing:0.08em;margin-bottom:0.85rem;}
+.order-confirm-steps{text-align:left;list-style:none;display:flex;flex-direction:column;gap:0.38rem;}
+.order-confirm-step{display:flex;gap:0.6rem;font-size:0.83rem;color:var(--text2);}
+.order-confirm-step-num{font-family:'Syne',sans-serif;font-size:0.72rem;font-weight:800;color:var(--accent2);flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;margin-top:1px;}
+
+/* Auth modal (bejelentkezés) */
+.auth-modal .modal-tabs{display:flex;gap:0.4rem;background:var(--bg4);border-radius:6px;padding:0.26rem;margin-bottom:1.4rem;}
+.auth-modal .modal-tab{flex:1;background:none;border:none;padding:0.46rem;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:0.07em;color:var(--text3);cursor:pointer;text-transform:uppercase;border-radius:4px;transition:all 0.14s;}
+.auth-modal .modal-tab.active{background:var(--bg2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3);}
 .form-divider{display:flex;align-items:center;gap:0.8rem;margin:0.95rem 0;}
 .form-divider::before,.form-divider::after{content:'';flex:1;height:1px;background:var(--border);}
 .form-divider span{font-family:'Syne',sans-serif;font-size:8.5px;letter-spacing:0.15em;color:var(--text3);text-transform:uppercase;}
 .discord-login-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:0.48rem;background:rgba(88,101,242,0.09);border:1px solid rgba(88,101,242,0.26);border-radius:5px;padding:0.65rem;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:0.08em;color:#a5b4fc;cursor:pointer;text-transform:uppercase;transition:all 0.14s;}
 .discord-login-btn:hover{background:rgba(88,101,242,0.18);border-color:rgba(88,101,242,0.45);}
-.modal-item-preview{background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:1rem 1.2rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;}
-.modal-item-icon{font-size:1.6rem;}
-.modal-item-name{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text);}
-.modal-item-price{font-family:'Syne',sans-serif;font-size:0.82rem;color:var(--text3);margin-top:0.1rem;}
-.form-note{font-size:0.78rem;color:var(--text3);text-align:center;margin-top:0.7rem;line-height:1.55;}
-  
-/* PROFILE */
-#profile-page{min-height:100vh;background:var(--bg);padding-top:58px;}
-.profile-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:2.6rem 2rem 0;}
-.profile-header-inner{max-width:1040px;margin:0 auto;display:flex;align-items:flex-end;gap:1.65rem;}
-.profile-skin-wrap{position:relative;flex-shrink:0;}
-.profile-skin{width:70px;height:124px;border-radius:9px;border:1px solid var(--border2);overflow:hidden;background:var(--bg3);}
-.profile-skin img{width:100%;height:100%;object-fit:cover;}
-.profile-skin-online{position:absolute;bottom:5px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--online);border:2px solid var(--bg2);}
-.profile-info{flex:1;padding-bottom:1.2rem;}
-.profile-rank-badge{display:inline-flex;align-items:center;gap:0.32rem;padding:0.18rem 0.62rem;border-radius:4px;font-family:'Syne',sans-serif;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:0.42rem;border:1px solid;}
-.profile-rank-badge.owner,.profile-rank-badge.admin{background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent2);}
-.profile-rank-badge.mod{background:rgba(167,139,250,0.07);border-color:rgba(167,139,250,0.22);color:#c4b5fd;}
-.profile-rank-badge.dev{background:rgba(52,211,153,0.07);border-color:rgba(52,211,153,0.22);color:#6ee7b7;}
-.profile-rank-badge.vip{background:var(--vip-bg);border-color:var(--vip-border);color:var(--vip);}
-.profile-rank-badge.kiemelt{background:var(--kie-bg);border-color:var(--kie-border);color:var(--kie);}
-.profile-rank-badge.kiemeltp{background:var(--kiep-bg);border-color:var(--kiep-border);color:var(--kiep);}
-.profile-rank-badge.player{background:var(--surface);border-color:var(--border);color:var(--text3);}
-.profile-rank-dot{width:4px;height:4px;border-radius:50%;background:currentColor;flex-shrink:0;}
-.profile-username{font-family:'Syne',sans-serif;font-size:1.85rem;font-weight:800;color:var(--text);letter-spacing:-0.01em;margin-bottom:0.18rem;}
-.profile-bio{font-size:0.88rem;color:var(--text3);}
-.profile-tabs{display:flex;border-top:1px solid var(--border);margin-top:1.2rem;}
-.profile-tab{background:none;border:none;padding:0.76rem 1.25rem;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:0.09em;color:var(--text3);cursor:pointer;text-transform:uppercase;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.14s;position:relative;top:1px;}
-.profile-tab.active{color:var(--accent2);border-bottom-color:var(--accent);}
-.profile-tab:hover:not(.active){color:var(--text2);}
-.profile-body{max-width:1040px;margin:0 auto;padding:1.9rem 2rem;}
-.profile-section{display:none;}
-.profile-section.active{display:block;}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:1px;border:1px solid var(--border);border-radius:9px;overflow:hidden;background:var(--border);margin-bottom:1.35rem;}
-.stat-card{background:var(--bg3);padding:1.15rem;text-align:center;transition:background 0.14s;}
-.stat-card:hover{background:var(--bg4);}
-.stat-icon{font-size:1.3rem;margin-bottom:0.38rem;display:block;}
-.stat-val{font-family:'Syne',sans-serif;font-size:1.65rem;font-weight:800;color:var(--accent2);display:block;}
-.stat-lbl{font-family:'Syne',sans-serif;font-size:8px;letter-spacing:0.16em;color:var(--text3);text-transform:uppercase;margin-top:0.1rem;}
-.activity-feed{display:flex;flex-direction:column;gap:0.55rem;}
-.activity-item{display:flex;align-items:center;gap:0.82rem;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:0.8rem 1rem;}
-.activity-icon{width:30px;height:30px;border-radius:5px;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;}
-.activity-text{flex:1;font-size:0.85rem;color:var(--text2);}
-.activity-time{font-family:'Syne',sans-serif;font-size:8.5px;letter-spacing:0.09em;color:var(--text3);white-space:nowrap;}
-.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;}
-.settings-box{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:1.55rem;}
-.settings-box h3{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:1.05rem;}
-.settings-box .form-group{margin-bottom:0.82rem;}
-.settings-save{background:var(--accent);border:none;color:#fff;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:0.08em;padding:0.55rem 1.3rem;border-radius:5px;cursor:pointer;text-transform:uppercase;transition:background 0.14s;margin-top:0.38rem;}
-.settings-save:hover{background:var(--accent2);}
-.whitelist-status-box{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:1.4rem;display:flex;align-items:center;gap:0.95rem;}
-.wl-status-icon{width:38px;height:38px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
-.wl-status-icon.approved{background:rgba(16,185,129,0.09);border:1px solid rgba(16,185,129,0.22);}
-.wl-status-icon.pending{background:rgba(251,146,60,0.09);border:1px solid rgba(251,146,60,0.22);}
-.wl-status-icon.none,.wl-status-icon.rejected{background:var(--surface);border:1px solid var(--border);}
-.wl-status-text h4{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:0.12rem;}
-.wl-status-text p{font-size:0.83rem;color:var(--text3);}
-.logout-btn{display:inline-flex;align-items:center;gap:0.38rem;background:rgba(244,63,94,0.07);border:1px solid rgba(244,63,94,0.18);border-radius:5px;padding:0.38rem 0.95rem;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:0.08em;color:#f87171;cursor:pointer;text-transform:uppercase;transition:all 0.14s;}
-.logout-btn:hover{background:rgba(244,63,94,0.14);border-color:rgba(244,63,94,0.35);}
-  
+
+/* Nav user */
+.nav-tabs{display:flex;gap:0.4rem;background:var(--bg4);border-radius:6px;padding:0.26rem;margin-bottom:1.4rem;}
+.nav-tab{flex:1;background:none;border:none;padding:0.46rem;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:0.07em;color:var(--text3);cursor:pointer;text-transform:uppercase;border-radius:4px;transition:all 0.14s;}
+.nav-tab.active{background:var(--bg2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.3);}
+
+/* Spinner */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:5px;}
+
+/* Steps indicator */
+.modal-steps{display:flex;align-items:center;gap:0;margin-bottom:1.6rem;}
+.modal-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.3rem;position:relative;}
+.modal-step::before{content:'';position:absolute;top:11px;left:50%;width:100%;height:1px;background:var(--border);}
+.modal-step:last-child::before{display:none;}
+.modal-step-dot{width:22px;height:22px;border-radius:50%;background:var(--bg4);border:1.5px solid var(--border2);font-family:'Syne',sans-serif;font-size:9px;font-weight:800;color:var(--text3);display:flex;align-items:center;justify-content:center;position:relative;z-index:1;transition:all 0.2s;}
+.modal-step.active .modal-step-dot{background:var(--accent-dim);border-color:var(--accent);color:var(--accent2);}
+.modal-step.done .modal-step-dot{background:var(--online);border-color:var(--online);color:#fff;}
+.modal-step-label{font-family:'Syne',sans-serif;font-size:8px;letter-spacing:0.1em;color:var(--text3);text-transform:uppercase;text-align:center;}
+.modal-step.active .modal-step-label{color:var(--accent2);}
+
 @media(max-width:768px){
   nav{padding:0 1rem;}
   .nav-links li:nth-child(-n+5){display:none;}
@@ -355,13 +300,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
 }
 </style>
 </head>
-<body class="has-maintenance">
+<body>
 <script>var API='/api';</script>
-
-<div class="maintenance-bar" id="maint-bar">
-  <span>⚙ Karbantartás folyamatban — A vásárlások átmenetileg szünetelnek</span>
-  <a href="https://discord.gg/s7Abx6mMym" target="_blank" rel="noopener">Frissítések a Discordon →</a>
-</div>
 
 <nav>
   <a href="/index.html" class="nav-brand">
@@ -370,12 +310,12 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
   </a>
   <ul class="nav-links">
     <li><a href="/fooldal">Főoldal</a></li>
-    <li><a href="store.html" class="active-link">Bolt</a></li>
+    <li><a href="store.html">Bolt</a></li>
     <li><a href="/fooldal#whitelist">Whitelist</a></li>
     <li><a href="https://discord.gg/s7Abx6mMym" target="_blank" rel="noopener" class="nav-discord">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.114 18.1.132 18.113a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>Discord
     </a></li>
-    <li id="nav-login-li"><button class="nav-auth-btn" onclick="openModal()">Bejelentkezés</button></li>
+    <li id="nav-login-li"><button class="nav-auth-btn" onclick="openAuthModal()">Bejelentkezés</button></li>
     <li id="nav-user-li" style="display:none;">
       <div class="nav-user-area" id="nav-user-area" onclick="toggleDropdown(event)">
         <div class="nav-user-avatar"><img id="nav-avatar-img" src="" alt=""></div>
@@ -389,16 +329,16 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
   </ul>
 </nav>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+<!-- AUTH MODAL -->
+<div class="modal-overlay auth-modal" id="auth-modal" onclick="if(event.target===this)closeAuthModal()">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
+    <button class="modal-close" onclick="closeAuthModal()">✕</button>
     <div class="modal-logo"><img class="modal-logo-img" src="/img/server-logo.png" alt=""></div>
     <h2 class="modal-title">Val<em>y</em>rian</h2>
     <p class="modal-sub">Üdvözlünk! Jelentkezz be a folytatáshoz.</p>
-    <div class="modal-tabs">
-      <button class="modal-tab active" id="tab-login" onclick="switchTab('login')">Bejelentkezés</button>
-      <button class="modal-tab" id="tab-register" onclick="switchTab('register')">Regisztráció</button>
+    <div class="modal-tabs nav-tabs">
+      <button class="modal-tab nav-tab active" id="tab-login" onclick="switchAuthTab('login')">Bejelentkezés</button>
+      <button class="modal-tab nav-tab" id="tab-register" onclick="switchAuthTab('register')">Regisztráció</button>
     </div>
     <div id="form-login">
       <div class="form-group"><label class="form-label">Minecraft Nick</label><input class="form-input" type="text" id="login-user" placeholder="pl. Notch" onkeydown="if(event.key==='Enter')doLogin()"></div>
@@ -419,7 +359,115 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
     </div>
   </div>
 </div>
-  
+
+<!-- PURCHASE MODAL -->
+<div class="modal-overlay" id="purchase-modal" onclick="if(event.target===this)closePurchaseModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closePurchaseModal()">✕</button>
+    
+    <!-- Steps -->
+    <div class="modal-steps" id="modal-steps">
+      <div class="modal-step active" id="step-1">
+        <div class="modal-step-dot">1</div>
+        <div class="modal-step-label">Adatok</div>
+      </div>
+      <div class="modal-step" id="step-2">
+        <div class="modal-step-dot">2</div>
+        <div class="modal-step-label">Fizetés</div>
+      </div>
+      <div class="modal-step" id="step-3">
+        <div class="modal-step-dot">3</div>
+        <div class="modal-step-label">Kész</div>
+      </div>
+    </div>
+
+    <!-- Step 1: Adatok -->
+    <div id="purchase-step-1">
+      <h2 class="modal-title" style="margin-bottom:0.18rem;">Val<em>y</em>rian Bolt</h2>
+      <p class="modal-sub">Automatikus rendelési rendszer</p>
+      <div class="modal-item-preview">
+        <span class="modal-item-icon" id="modal-icon">🎁</span>
+        <div>
+          <div class="modal-item-name" id="modal-item-name">Termék neve</div>
+          <div class="modal-item-price" id="modal-item-price">Ár: —</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Minecraft neved</label>
+        <input class="form-input" type="text" id="purchase-nick" placeholder="pl. Notch" onkeydown="if(event.key==='Enter')goToStep2()">
+      </div>
+      <button class="form-btn" id="step1-btn" onclick="goToStep2()">Tovább a fizetéshez →</button>
+      <div class="form-err" id="step1-err"></div>
+    </div>
+
+    <!-- Step 2: Fizetési mód -->
+    <div id="purchase-step-2" style="display:none;">
+      <h2 class="modal-title" style="margin-bottom:0.9rem;">Fizetési mód</h2>
+      <div class="payment-methods">
+        <div class="pay-method selected" id="pay-transfer" onclick="selectPayment('transfer')">
+          <div class="pay-method-radio"><div class="pay-method-radio-dot"></div></div>
+          <span class="pay-method-icon">🏦</span>
+          <div>
+            <div class="pay-method-label">Banki átutalás</div>
+            <div class="pay-method-sub">OTP, Revolut, bármilyen bank — megjegyzésbe az Order ID</div>
+          </div>
+        </div>
+        <div class="pay-method" id="pay-revolut" onclick="selectPayment('revolut')">
+          <div class="pay-method-radio"><div class="pay-method-radio-dot"></div></div>
+          <span class="pay-method-icon">💳</span>
+          <div>
+            <div class="pay-method-label">Revolut</div>
+            <div class="pay-method-sub">Gyors, azonnali — @valyrian.hu Revolut tag</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Átutalás megjegyzése / Revolut ref (opcionális)</label>
+        <input class="form-input" type="text" id="purchase-ref" placeholder="pl. neve vagy utalás ID">
+      </div>
+      <button class="form-btn" id="step2-btn" onclick="submitPurchase()">
+        ✦ Rendelés elküldése
+      </button>
+      <div class="form-err" id="step2-err"></div>
+      <p class="form-note">A rendelés leadásával adminjaink azonnal értesítést kapnak Discordon. Az átfutási idő általában 1–6 óra.</p>
+    </div>
+
+    <!-- Step 3: Visszaigazolás -->
+    <div id="purchase-step-3" style="display:none;">
+      <div class="order-confirm">
+        <div class="order-confirm-icon">✅</div>
+        <div class="order-confirm-title">Rendelés rögzítve!</div>
+        <div class="order-confirm-id" id="confirm-order-id">Rendelésszám: —</div>
+        <ul class="order-confirm-steps">
+          <li class="order-confirm-step">
+            <span class="order-confirm-step-num">1</span>
+            <span>Utald el az összeget a megadott adatokra (megjegyzésbe az Order ID-t).</span>
+          </li>
+          <li class="order-confirm-step">
+            <span class="order-confirm-step-num">2</span>
+            <span>Adminjaink ellenőrzik és jóváhagyják a befizetést.</span>
+          </li>
+          <li class="order-confirm-step">
+            <span class="order-confirm-step-num">3</span>
+            <span>A rang / coin automatikusan aktiválódik a Minecraft szerveren!</span>
+          </li>
+        </ul>
+      </div>
+      <div style="margin-top:1.1rem;background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:1rem 1.2rem;">
+        <div style="font-family:'Syne',sans-serif;font-size:9px;letter-spacing:0.14em;color:var(--text3);text-transform:uppercase;margin-bottom:0.5rem;">Banki adatok</div>
+        <div style="font-size:0.85rem;color:var(--text2);line-height:1.9;">
+          <strong style="color:var(--text);">Kedvezményezett:</strong> Valyrian Kft.<br>
+          <strong style="color:var(--text);">IBAN:</strong> HU00 0000 0000 0000 0000 0000 0000<br>
+          <strong style="color:var(--text);">Revolut:</strong> @valyrianhu<br>
+          <strong style="color:var(--text);">Összeg:</strong> <span id="confirm-price">—</span><br>
+          <strong style="color:var(--text);">Megjegyzés:</strong> <span id="confirm-ref" style="color:var(--accent2);font-family:'Syne',sans-serif;font-size:0.82rem;"></span>
+        </div>
+      </div>
+      <button class="form-btn" style="margin-top:1rem;background:var(--bg4);color:var(--text2);border:1px solid var(--border);" onclick="closePurchaseModal()">Bezárás</button>
+    </div>
+  </div>
+</div>
+
 <!-- HERO -->
 <div class="store-hero">
   <div class="store-hero-bg"></div>
@@ -429,8 +477,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
     <h1 class="store-title reveal">Val<em>y</em>rian<br>Bolt</h1>
     <p class="store-sub reveal">Rangok, Coinok és boostok — támogasd a szervert és élj különleges előnyökkel.</p>
     <div class="store-notice reveal">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-      A vásárlások Discord-on keresztül intézhetők — a karbantartás után automatikus rendszer érkezik
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      Automatikus rendelési rendszer aktív — azonnali Discord értesítés + Minecraft rang kiosztás
     </div>
   </div>
 </div>
@@ -441,9 +489,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
     <span class="sec-label reveal">Rangok</span>
     <h2 class="sec-title reveal">Válassz rangi csomagot</h2>
     <p class="sec-sub reveal">Az egyszer megvásárolt rang életre szóló — nincs havi díj, nincs megújítás.</p>
-
     <div class="rank-packages reveal">
-
       <!-- VIP -->
       <div class="pkg-card vip">
         <div class="pkg-badge vip"><span class="pkg-badge-dot"></span>VIP</div>
@@ -461,11 +507,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
           <li class="pkg-perk"><span class="pkg-tick">✦</span>Speciális VIP kit (7 naponta)</li>
           <li class="pkg-perk"><span class="pkg-tick">✦</span>Egyedi particle effektek</li>
         </ul>
-        <button class="pkg-btn vip" onclick="openPurchaseModal('VIP rang','990 Ft','💜')">
-          ✦ Megveszem
-        </button>
+        <button class="pkg-btn vip" onclick="openPurchaseModal('VIP rang','990 Ft','💜',990,'rank','vip')">✦ Megveszem</button>
       </div>
-
       <!-- KIEMELT -->
       <div class="pkg-card kiemelt featured">
         <div class="pkg-badge kiemelt"><span class="pkg-badge-dot"></span>Kiemelt <span class="pkg-popular">⭐ Népszerű</span></div>
@@ -484,11 +527,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
           <li class="pkg-perk"><span class="pkg-tick">✦</span>Dupla napi jutalmak</li>
           <li class="pkg-perk"><span class="pkg-tick">✦</span>Egyedi köpeny és sisak effekt</li>
         </ul>
-        <button class="pkg-btn kiemelt" onclick="openPurchaseModal('Kiemelt rang','1 990 Ft','💚')">
-          ✦ Megveszem
-        </button>
+        <button class="pkg-btn kiemelt" onclick="openPurchaseModal('Kiemelt rang','1 990 Ft','💚',1990,'rank','kiemelt')">✦ Megveszem</button>
       </div>
-
       <!-- KIEMELT+ -->
       <div class="pkg-card kiemeltp">
         <div class="pkg-badge kiemeltp"><span class="pkg-badge-dot"></span>Kiemelt+</div>
@@ -508,11 +548,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
           <li class="pkg-perk"><span class="pkg-tick">✦</span>Exkluzív Kiemelt+ kit (3 naponta)</li>
           <li class="pkg-perk"><span class="pkg-tick">✦</span>Saját Discord szerep és csatorna</li>
         </ul>
-        <button class="pkg-btn kiemeltp" onclick="openPurchaseModal('Kiemelt+ rang','3 490 Ft','🧡')">
-          ✦ Megveszem
-        </button>
+        <button class="pkg-btn kiemeltp" onclick="openPurchaseModal('Kiemelt+ rang','3 490 Ft','🧡',3490,'rank','kiemeltp')">✦ Megveszem</button>
       </div>
-
     </div>
   </div>
 </section>
@@ -523,35 +560,34 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
     <span class="sec-label reveal">Valyrian Coinok</span>
     <h2 class="sec-title reveal">Valyrian Coin csomagok</h2>
     <p class="sec-sub reveal">A Valyrian Coin a szerver belső valutája — shop-okhoz, fogadásokhoz, boosztokhoz szükséges.</p>
-
     <div class="coin-grid reveal">
       <div class="coin-card">
         <span class="coin-icon">💎</span>
         <div class="coin-amount"><em>500</em> Valyrian Coin</div>
         <div class="coin-bonus">&nbsp;</div>
         <div class="coin-price"><strong>290 Ft</strong></div>
-        <button class="coin-btn" onclick="openPurchaseModal('500 Valyrian Coin','290 Ft','💎')">Megveszem</button>
+        <button class="coin-btn" onclick="openPurchaseModal('500 Valyrian Coin','290 Ft','💎',290,'coins',null)">Megveszem</button>
       </div>
       <div class="coin-card">
         <span class="coin-icon">💎</span>
         <div class="coin-amount"><em>1 200</em> Valyrian Coin</div>
         <div class="coin-bonus">+200 bónusz</div>
         <div class="coin-price"><strong>590 Ft</strong></div>
-        <button class="coin-btn" onclick="openPurchaseModal('1 200 Valyrian Coin (+200 bónusz)','590 Ft','💎')">Megveszem</button>
+        <button class="coin-btn" onclick="openPurchaseModal('1 200 Valyrian Coin (+200 bónusz)','590 Ft','💎',590,'coins',null)">Megveszem</button>
       </div>
       <div class="coin-card best-value">
         <span class="coin-icon">💎</span>
         <div class="coin-amount"><em>3 000</em> Valyrian Coin</div>
         <div class="coin-bonus">+500 bónusz</div>
         <div class="coin-price"><strong>1 290 Ft</strong></div>
-        <button class="coin-btn" onclick="openPurchaseModal('3 000 Valyrian Coin (+500 bónusz)','1 290 Ft','💎')">Megveszem</button>
+        <button class="coin-btn" onclick="openPurchaseModal('3 000 Valyrian Coin (+500 bónusz)','1 290 Ft','💎',1290,'coins',null)">Megveszem</button>
       </div>
       <div class="coin-card">
         <span class="coin-icon">💎</span>
         <div class="coin-amount"><em>7 500</em> Valyrian Coin</div>
         <div class="coin-bonus">+1 500 bónusz</div>
         <div class="coin-price"><strong>2 990 Ft</strong></div>
-        <button class="coin-btn" onclick="openPurchaseModal('7 500 Valyrian Coin (+1 500 bónusz)','2 990 Ft','💎')">Megveszem</button>
+        <button class="coin-btn" onclick="openPurchaseModal('7 500 Valyrian Coin (+1 500 bónusz)','2 990 Ft','💎',2990,'coins',null)">Megveszem</button>
       </div>
     </div>
   </div>
@@ -563,7 +599,6 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
     <span class="sec-label reveal">Boostok</span>
     <h2 class="sec-title reveal">Ideiglenes boostok</h2>
     <p class="sec-sub reveal">24 órás extrák, amiket coinnal is meg lehet venni — vagy forinttal.</p>
-
     <div class="boost-grid reveal">
       <div class="boost-card">
         <span class="boost-icon">⚡</span>
@@ -571,7 +606,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
         <div class="boost-desc">Duplázd meg az összes tevékenységből szerzett XP-t 24 órán át.</div>
         <div class="boost-footer">
           <div class="boost-cost">200 <em>💰</em> · vagy 190 Ft</div>
-          <button class="boost-buy-btn" onclick="openPurchaseModal('XP Boost x2 (24h)','200 Valyrian Coin / 190 Ft','⚡')">Veszem</button>
+          <button class="boost-buy-btn" onclick="openPurchaseModal('XP Boost x2 (24h)','190 Ft','⚡',190,'boost',null)">Veszem</button>
         </div>
       </div>
       <div class="boost-card">
@@ -580,7 +615,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
         <div class="boost-desc">Háromszoros drop esély a farmon 24 órán keresztül.</div>
         <div class="boost-footer">
           <div class="boost-cost">350 <em>💰</em> · vagy 290 Ft</div>
-          <button class="boost-buy-btn" onclick="openPurchaseModal('Farm Boost x3 (24h)','350 Valyrian Coin / 290 Ft','🌾')">Veszem</button>
+          <button class="boost-buy-btn" onclick="openPurchaseModal('Farm Boost x3 (24h)','290 Ft','🌾',290,'boost',null)">Veszem</button>
         </div>
       </div>
       <div class="boost-card">
@@ -589,7 +624,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
         <div class="boost-desc">Minden 10 percenként véletlenszerű érmejutalmat kapsz 24 órán át.</div>
         <div class="boost-footer">
           <div class="boost-cost">400 <em>💰</em> · vagy 340 Ft</div>
-          <button class="boost-buy-btn" onclick="openPurchaseModal('Coin Rain (24h)','400 Valyrian Coin / 340 Ft','💸')">Veszem</button>
+          <button class="boost-buy-btn" onclick="openPurchaseModal('Coin Rain (24h)','340 Ft','💸',340,'boost',null)">Veszem</button>
         </div>
       </div>
     </div>
@@ -603,77 +638,44 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
     <h2 class="sec-title reveal">Gyakori kérdések</h2>
     <div class="faq-list reveal">
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">
-          Hogyan zajlik a vásárlás?
-          <span class="faq-arrow">▼</span>
-        </div>
-        <div class="faq-a"><p>Jelenleg a vásárlások Discord-on keresztül intézhetők — nyiss egy ticketet a #bolt csatornán. Az automatikus rendszer a karbantartás után érkezik.</p></div>
+        <div class="faq-q" onclick="toggleFaq(this)">Hogyan zajlik a vásárlás? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a"><p>Kattints a „Megveszem" gombra, add meg a Minecraft nevedet és válassz fizetési módot. A rendszer automatikusan rögzíti a rendelést és adminjaink Discord értesítést kapnak. Az átutalás beérkezése után (általában 1–6 óra) a rang automatikusan aktiválódik a Minecraft szerveren.</p></div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">
-          Milyen fizetési módok elérhetők?
-          <span class="faq-arrow">▼</span>
-        </div>
+        <div class="faq-q" onclick="toggleFaq(this)">Milyen fizetési módok elérhetők? <span class="faq-arrow">▼</span></div>
         <div class="faq-a"><p>Jelenleg banki átutalás és Revolut elérhető. Hamarosan érkezik a kártyás és PayPal fizetés is.</p></div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">
-          Meddig érvényes a megvásárolt rang?
-          <span class="faq-arrow">▼</span>
-        </div>
-        <div class="faq-a"><p>Az összes rang egyszeri vásárlás alapján örökre érvényes — nincs havi megújítás. Szerver reset esetén a rangok megtartódnak.</p></div>
+        <div class="faq-q" onclick="toggleFaq(this)">Meddig érvényes a megvásárolt rang? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a"><p>Az összes rang egyszeri vásárlás alapján örökre érvényes — nincs havi megújítás.</p></div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">
-          Mi történik ha már van rangom és újat veszek?
-          <span class="faq-arrow">▼</span>
-        </div>
-        <div class="faq-a"><p>A rangok összeadódnak — ha VIP-ed van és Kiemelt-et veszel, az előző rang előnyei is megmaradnak. A magasabb rang mindig felülírja az alacsonyabbat.</p></div>
+        <div class="faq-q" onclick="toggleFaq(this)">Mikor kapom meg a rangot? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a"><p>A rendelés leadása után adminjaink azonnal Discord értesítést kapnak. Az átutalás ellenőrzése és jóváhagyása után (általában 1–6 óra) a rang automatikusan kiosztásra kerül — Minecraftban is, a weboldalon is.</p></div>
       </div>
       <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">
-          Van-e visszatérítési lehetőség?
-          <span class="faq-arrow">▼</span>
-        </div>
-        <div class="faq-a"><p>Digitális termékekre általában nem vonatkozik visszatérítés, de ha technikai hiba miatt nem kaptad meg a rangodat, Discord-on keress meg minket és megoldjuk.</p></div>
+        <div class="faq-q" onclick="toggleFaq(this)">Van-e visszatérítési lehetőség? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a"><p>Digitális termékekre általában nem vonatkozik visszatérítés, de ha technikai hiba miatt nem kaptad meg a rangodat, Discord-on keress meg minket.</p></div>
       </div>
     </div>
   </div>
 </section>
+
 <section class="s-dark" id="ceginfo">
   <div class="container">
     <span class="sec-label reveal">Információk</span>
     <h2 class="sec-title reveal">Cégadatok</h2>
     <p class="sec-sub reveal">A szolgáltató és üzemeltető hivatalos adatai.</p>
-
     <div class="legal-box reveal">
-      <div class="legal-item">
-        <span class="legal-label">Üzemeltető</span>
-        <span class="legal-value">Valyrian Kft. (Egyéni Vállalkozó)</span>
-      </div>
-
-      <div class="legal-item">
-        <span class="legal-label">Székhely</span>
-        <span class="legal-value">Szeged</span>
-      </div>
-
-      <div class="legal-item">
-        <span class="legal-label">Adószám</span>
-        <span class="legal-value">8518611660</span>
-      </div>
-
-      <div class="legal-item">
-        <span class="legal-label">Kapcsolat</span>
-        <span class="legal-value">support@valyrian.hu</span>
-      </div>
-
-      <div class="legal-item">
-        <span class="legal-label">Fizetési módok</span>
-        <span class="legal-value">Banki átutalás, Revolut, hamarosan bankkártya</span>
-      </div>
+      <div class="legal-item"><span class="legal-label">Üzemeltető</span><span class="legal-value">Valyrian Kft. (Egyéni Vállalkozó)</span></div>
+      <div class="legal-item"><span class="legal-label">Székhely</span><span class="legal-value">Szeged</span></div>
+      <div class="legal-item"><span class="legal-label">Adószám</span><span class="legal-value">8518611660</span></div>
+      <div class="legal-item"><span class="legal-label">Kapcsolat</span><span class="legal-value">support@valyrian.hu</span></div>
+      <div class="legal-item"><span class="legal-label">Fizetési módok</span><span class="legal-value">Banki átutalás, Revolut, hamarosan bankkártya</span></div>
     </div>
   </div>
 </section>
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-top">
@@ -693,98 +695,190 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
   <p class="footer-txt" style="margin-top:0.28rem;font-size:0.76rem;opacity:0.55;">© 2026 Valyrian Minecraft Server</p>
 </footer>
 
-<!-- PURCHASE MODAL -->
-<div class="modal-overlay" id="purchase-modal" onclick="if(event.target===this)closePurchaseModal()">
-  <div class="modal">
-    <button class="modal-close" onclick="closePurchaseModal()">✕</button>
-    <h2 class="modal-title">Val<em>y</em>rian Bolt</h2>
-    <p class="modal-sub">A vásárlás Discord-on keresztül zajlik.</p>
-    <div class="modal-item-preview">
-      <span class="modal-item-icon" id="modal-icon">🎁</span>
-      <div>
-        <div class="modal-item-name" id="modal-item-name">Termék neve</div>
-        <div class="modal-item-price" id="modal-item-price">Ár: —</div>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Minecraft neved</label>
-      <input class="form-input" type="text" id="purchase-nick" placeholder="pl. Notch">
-    </div>
-    <a href="https://discord.gg/s7Abx6mMym" target="_blank" rel="noopener">
-      <button class="form-btn" onclick="handlePurchase()">
-        Megnyitom a Discord ticket-et →
-      </button>
-    </a>
-    <p class="form-note">A gombra kattintva a Discord szerverünkre kerülsz, ahol megnyithatsz egy vásárlási ticket-et. Csapatunk 24 órán belül feldolgozza a kérésedet.</p>
-  </div>
-</div>
-
-<div id="toast">Hamarosan!</div>
+<div id="toast"></div>
 
 <script>
-function initReveal(){
-  var obs=new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}
-    });
-  },{threshold:0.07});
-  document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el);});
-}
-function showToast(msg){
-  var t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(function(){t.classList.remove('show');},2100);
+// ── Globális state ────────────────────────────────────────────────────────────
+var TOKEN_KEY = 'valyrian_token', currentUser = null;
+var purchaseState = { item:'', price:'', icon:'', priceHuf:0, type:'rank', rankValue:null, payMethod:'transfer' };
+
+// ── Utility ──────────────────────────────────────────────────────────────────
+function getToken(){ return localStorage.getItem(TOKEN_KEY); }
+function setToken(t){ localStorage.setItem(TOKEN_KEY, t); }
+function clearToken(){ localStorage.removeItem(TOKEN_KEY); }
+function showToast(msg, dur){
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, dur || 2100);
 }
 function toggleFaq(el){
-  var item=el.parentElement;
-  var wasOpen=item.classList.contains('open');
-  document.querySelectorAll('.faq-item').forEach(function(i){i.classList.remove('open');});
-  if(!wasOpen)item.classList.add('open');
+  var item = el.parentElement, was = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(function(i){ i.classList.remove('open'); });
+  if (!was) item.classList.add('open');
 }
-function openPurchaseModal(name,price,icon){
-  document.getElementById('modal-item-name').textContent=name;
-  document.getElementById('modal-item-price').textContent='Ár: '+price;
-  document.getElementById('modal-icon').textContent=icon;
+function initReveal(){
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.07 });
+  document.querySelectorAll('.reveal').forEach(function(el){ obs.observe(el); });
+}
+
+// ── API hívás ────────────────────────────────────────────────────────────────
+async function api(m, p, b, auth){
+  var o = { method: m, headers: { 'Content-Type': 'application/json' } };
+  if (auth) o.headers['Authorization'] = 'Bearer ' + getToken();
+  if (b) o.body = JSON.stringify(b);
+  var r = await fetch(API + p, o), d = await r.json();
+  if (!r.ok) throw new Error(d.error || 'Hiba történt.');
+  return d;
+}
+
+// ── Auth Modal ───────────────────────────────────────────────────────────────
+function openAuthModal(){ document.getElementById('auth-modal').classList.add('open'); }
+function closeAuthModal(){ document.getElementById('auth-modal').classList.remove('open'); }
+function switchAuthTab(t){
+  document.getElementById('form-login').style.display = t==='login' ? '' : 'none';
+  document.getElementById('form-register').style.display = t==='register' ? '' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', t==='login');
+  document.getElementById('tab-register').classList.toggle('active', t==='register');
+  ['login-err','reg-err','reg-ok'].forEach(function(i){ document.getElementById(i).textContent = ''; });
+}
+
+async function doLogin(){
+  var u=document.getElementById('login-user').value.trim(), p=document.getElementById('login-pass').value;
+  var err=document.getElementById('login-err'), btn=document.getElementById('login-btn');
+  err.textContent = '';
+  if (!u||!p){ err.textContent='Kérlek töltsd ki az összes mezőt!'; return; }
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Betöltés...';
+  try {
+    var d = await api('POST','/auth/login',{username:u,password:p});
+    setToken(d.token); currentUser=d.user; updateNavUser(d.user); closeAuthModal();
+    showToast('Üdvözlünk, '+d.user.username+'!');
+  } catch(e){ err.textContent=e.message; }
+  finally { btn.disabled=false; btn.textContent='Bejelentkezés'; }
+}
+
+async function doRegister(){
+  var u=document.getElementById('reg-user').value.trim(), e=document.getElementById('reg-email').value.trim();
+  var p=document.getElementById('reg-pass').value, p2=document.getElementById('reg-pass2').value;
+  var err=document.getElementById('reg-err'), ok=document.getElementById('reg-ok'), btn=document.getElementById('reg-btn');
+  err.textContent=''; ok.textContent='';
+  if (!u||!e||!p||!p2){ err.textContent='Kérlek töltsd ki az összes mezőt!'; return; }
+  if (p.length<6){ err.textContent='A jelszónak legalább 6 karakter kell!'; return; }
+  if (p!==p2){ err.textContent='A két jelszó nem egyezik!'; return; }
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Regisztráció...';
+  try {
+    var d = await api('POST','/auth/register',{username:u,email:e,password:p});
+    setToken(d.token); currentUser=d.user; updateNavUser(d.user);
+    ok.textContent='Sikeres regisztráció!';
+    setTimeout(function(){ closeAuthModal(); showToast('Üdvözlünk, '+d.user.username+'!'); }, 800);
+  } catch(e2){ err.textContent=e2.message; }
+  finally { btn.disabled=false; btn.textContent='Fiók létrehozása'; }
+}
+
+function updateNavUser(u){
+  document.getElementById('nav-login-li').style.display='none';
+  document.getElementById('nav-user-li').style.display='';
+  document.getElementById('nav-username-label').textContent=u.username;
+  document.getElementById('nav-rank-label').textContent=rankLabel(u.rank);
+  document.getElementById('nav-avatar-img').src='https://visage.surgeplay.com/bust/64/'+u.username;
+}
+function toggleDropdown(e){ e.stopPropagation(); document.getElementById('nav-dropdown').classList.toggle('open'); }
+function logout(){
+  clearToken(); currentUser=null;
+  document.getElementById('nav-login-li').style.display='';
+  document.getElementById('nav-user-li').style.display='none';
+  document.getElementById('nav-dropdown').classList.remove('open');
+  showToast('Sikeresen kijelentkeztél.');
+}
+function rankLabel(r){ return {owner:'Tulajdonos',admin:'Admin',mod:'Moderátor',dev:'Fejlesztő',vip:'VIP',kiemelt:'Kiemelt',kiemeltp:'Kiemelt+',player:'Játékos'}[r]||'Játékos'; }
+
+// ── Purchase Modal ────────────────────────────────────────────────────────────
+function openPurchaseModal(name, price, icon, priceHuf, type, rankValue){
+  purchaseState = { item:name, price:price, icon:icon, priceHuf:priceHuf, type:type, rankValue:rankValue, payMethod:'transfer' };
+  document.getElementById('modal-item-name').textContent = name;
+  document.getElementById('modal-item-price').textContent = 'Ár: ' + price;
+  document.getElementById('modal-icon').textContent = icon;
+  // nick előtöltés ha be van jelentkezve
+  if (currentUser) document.getElementById('purchase-nick').value = currentUser.username;
+  // reset steps
+  showPurchaseStep(1);
+  document.getElementById('step1-err').textContent = '';
+  document.getElementById('step2-err').textContent = '';
+  document.getElementById('purchase-ref').value = '';
   document.getElementById('purchase-modal').classList.add('open');
 }
-function closePurchaseModal(){
-  document.getElementById('purchase-modal').classList.remove('open');
+function closePurchaseModal(){ document.getElementById('purchase-modal').classList.remove('open'); }
+
+function showPurchaseStep(n){
+  [1,2,3].forEach(function(i){
+    document.getElementById('purchase-step-'+i).style.display = i===n ? '' : 'none';
+    var s = document.getElementById('step-'+i);
+    s.classList.remove('active','done');
+    if (i < n) s.classList.add('done');
+    else if (i === n) s.classList.add('active');
+  });
 }
-function handlePurchase(){
-  var nick=document.getElementById('purchase-nick').value.trim();
-  if(!nick){showToast('Add meg a Minecraft neved!');return;}
-  showToast('Átirányítás a Discordra...');
+
+function selectPayment(method){
+  purchaseState.payMethod = method;
+  ['transfer','revolut'].forEach(function(m){
+    document.getElementById('pay-'+m).classList.toggle('selected', m===method);
+    document.getElementById('pay-'+m).querySelector('.pay-method-radio-dot').style.opacity = m===method ? '1' : '0';
+  });
 }
-initReveal();
-var TOKEN_KEY='valyrian_token',currentUser=null;
-function getToken(){return localStorage.getItem(TOKEN_KEY);}
-function setToken(t){localStorage.setItem(TOKEN_KEY,t);}
-function clearToken(){localStorage.removeItem(TOKEN_KEY);}
-async function api(m,p,b,a){var o={method:m,headers:{'Content-Type':'application/json'}};if(a)o.headers['Authorization']='Bearer '+getToken();if(b)o.body=JSON.stringify(b);var r=await fetch(API+p,o),d=await r.json();if(!r.ok)throw new Error(d.error||'Hiba történt.');return d;}
-async function init(){buildParticles();initReveal();checkStatus();setInterval(checkStatus,60000);var t=getToken();if(t){try{var u=await api('GET','/auth/me',null,true);currentUser=u;updateNavUser(u);}catch(e){clearToken();}}document.addEventListener('click',function(e){var d=document.getElementById('nav-dropdown'),a=document.getElementById('nav-user-area');if(d&&a&&!a.contains(e.target))d.classList.remove('open');});}
-function showPage(p){document.querySelectorAll('.page').forEach(function(e){e.classList.remove('active');});document.getElementById(p+'-page').classList.add('active');window.scrollTo(0,0);if(p==='profile'&&currentUser)loadProfile();}
-function navHome(s){showPage('home');setTimeout(function(){var e=document.getElementById(s);if(e)e.scrollIntoView({behavior:'smooth'});},50);}
-function toggleDropdown(e){e.stopPropagation();document.getElementById('nav-dropdown').classList.toggle('open');}
-function goProfile(e){e.stopPropagation();document.getElementById('nav-dropdown').classList.remove('open');showPage('profile');}
-function goSettings(e){e.stopPropagation();document.getElementById('nav-dropdown').classList.remove('open');openProfileTab('settings');}
-function openModal(){document.getElementById('modal-overlay').classList.add('open');}
-function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
-function switchTab(t){document.getElementById('form-login').style.display=t==='login'?'':'none';document.getElementById('form-register').style.display=t==='register'?'':'none';document.getElementById('tab-login').classList.toggle('active',t==='login');document.getElementById('tab-register').classList.toggle('active',t==='register');['login-err','reg-err','reg-ok'].forEach(function(i){document.getElementById(i).textContent='';});}
-async function doLogin(){var u=document.getElementById('login-user').value.trim(),p=document.getElementById('login-pass').value,err=document.getElementById('login-err'),btn=document.getElementById('login-btn');err.textContent='';if(!u||!p){err.textContent='Kérlek töltsd ki az összes mezőt!';return;}btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Betöltés...';try{var d=await api('POST','/auth/login',{username:u,password:p});setToken(d.token);currentUser=d.user;updateNavUser(d.user);closeModal();showToast('Üdvözlünk, '+d.user.username+'!');}catch(e){err.textContent=e.message;}finally{btn.disabled=false;btn.textContent='Bejelentkezés';}}
-async function doRegister(){var u=document.getElementById('reg-user').value.trim(),e=document.getElementById('reg-email').value.trim(),p=document.getElementById('reg-pass').value,p2=document.getElementById('reg-pass2').value,err=document.getElementById('reg-err'),ok=document.getElementById('reg-ok'),btn=document.getElementById('reg-btn');err.textContent='';ok.textContent='';if(!u||!e||!p||!p2){err.textContent='Kérlek töltsd ki az összes mezőt!';return;}if(p.length<6){err.textContent='A jelszónak legalább 6 karakter kell!';return;}if(p!==p2){err.textContent='A két jelszó nem egyezik!';return;}btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Regisztráció...';try{var d=await api('POST','/auth/register',{username:u,email:e,password:p});setToken(d.token);currentUser=d.user;updateNavUser(d.user);ok.textContent='Sikeres regisztráció!';setTimeout(function(){closeModal();showToast('Üdvözlünk, '+d.user.username+'!');},800);}catch(e2){err.textContent=e2.message;}finally{btn.disabled=false;btn.textContent='Fiók létrehozása';}}
-function updateNavUser(u){document.getElementById('nav-login-li').style.display='none';document.getElementById('nav-user-li').style.display='';document.getElementById('nav-username-label').textContent=u.username;document.getElementById('nav-rank-label').textContent=rankLabel(u.rank);document.getElementById('nav-avatar-img').src='https://visage.surgeplay.com/bust/64/'+u.username;var h=document.getElementById('hero-login-btn');if(h)h.style.display='none';}
-function logout(){clearToken();currentUser=null;document.getElementById('nav-login-li').style.display='';document.getElementById('nav-user-li').style.display='none';document.getElementById('nav-dropdown').classList.remove('open');var h=document.getElementById('hero-login-btn');if(h)h.style.display='';showPage('home');showToast('Sikeresen kijelentkeztél.');}
-async function loadProfile(){if(!currentUser)return;try{var u=await api('GET','/auth/me',null,true);currentUser=u;}catch(e){}var u=currentUser;document.getElementById('profile-skin-img').src='https://visage.surgeplay.com/full/256/'+u.username;document.getElementById('profile-username').textContent=u.username;document.getElementById('profile-bio').textContent=u.bio||'Még nem adtál meg bemutatkozást.';var b=document.getElementById('profile-rank-badge');b.className='profile-rank-badge '+(u.rank||'player');document.getElementById('profile-rank-text').textContent=rankLabel(u.rank);var s=u.stats||{};document.getElementById('stat-kills').textContent=s.kills||0;document.getElementById('stat-deaths').textContent=s.deaths||0;var kd=s.deaths>0?(s.kills/s.deaths).toFixed(2):(s.kills>0?'∞':'0.00');document.getElementById('stat-kd').textContent=kd;var pt=s.playtime||0;document.getElementById('stat-playtime').textContent=pt>=60?Math.floor(pt/60)+' ó '+(pt%60)+' p':pt+' p';document.getElementById('stat-wins').textContent=s.wins||0;document.getElementById('stat-coins').textContent=s.coins||0;var wm={approved:{cls:'approved',emoji:'✅',text:'Whitelistre kerültél! Csatlakozhatsz a szerverhez.'},pending:{cls:'pending',emoji:'⏳',text:'Whitelist kérelmed elbírálás alatt áll.'},rejected:{cls:'rejected',emoji:'❌',text:'Whitelist kérelmed elutasítva. Írj a Discordon.'},none:{cls:'none',emoji:'❔',text:'Még nem jelentkeztél whitelistra.'}};var wl=wm[u.whitelist]||wm.none;document.getElementById('wl-icon').className='wl-status-icon '+wl.cls;document.getElementById('wl-icon-emoji').textContent=wl.emoji;document.getElementById('wl-status-desc').textContent=wl.text;var feed=document.getElementById('activity-feed');feed.innerHTML='';var acts=u.activity||[];if(!acts.length){feed.innerHTML='<p style="color:var(--text3);">Nincs megjeleníthető aktivitás.</p>';}else acts.forEach(function(a){var ts=a.time?new Date(a.time).toLocaleString('hu-HU'):'';var i=document.createElement('div');i.className='activity-item';i.innerHTML='<div class="activity-icon">'+(a.icon||'⚡')+'</div><div class="activity-text">'+a.text+'</div><div class="activity-time">'+ts+'</div>';feed.appendChild(i);});document.getElementById('set-bio').value=u.bio||'';document.getElementById('set-email').value=u.email||'';}
-function openProfileTab(t){showPage('profile');document.querySelectorAll('.profile-tab').forEach(function(e){e.classList.toggle('active',e.dataset.tab===t);});document.querySelectorAll('.profile-section').forEach(function(e){e.classList.remove('active');});var s=document.getElementById('tab-'+t);if(s)s.classList.add('active');}
-async function saveProfile(){var bio=document.getElementById('set-bio').value.trim(),email=document.getElementById('set-email').value.trim(),ok=document.getElementById('set-ok');ok.textContent='';try{await api('PUT','/user/profile',{bio,email},true);currentUser.bio=bio;currentUser.email=email;document.getElementById('profile-bio').textContent=bio||'Még nem adtál meg bemutatkozást.';ok.textContent='✓ Profil mentve!';setTimeout(function(){ok.textContent='';},2500);}catch(e){ok.style.color='#f87171';ok.textContent=e.message;}}
-async function changePassword(){var op=document.getElementById('set-oldpass').value,np=document.getElementById('set-newpass').value,np2=document.getElementById('set-newpass2').value,err=document.getElementById('pass-err'),ok=document.getElementById('pass-ok');err.textContent='';ok.textContent='';if(!op||!np||!np2){err.textContent='Töltsd ki az összes mezőt!';return;}if(np.length<6){err.textContent='Az új jelszónak min. 6 karakter kell!';return;}if(np!==np2){err.textContent='A két jelszó nem egyezik!';return;}try{await api('PUT','/user/password',{oldPassword:op,newPassword:np},true);ok.textContent='✓ Jelszó módosítva!';['set-oldpass','set-newpass','set-newpass2'].forEach(function(i){document.getElementById(i).value='';});setTimeout(function(){ok.textContent='';},2500);}catch(e){err.textContent=e.message;}}
-function rankLabel(r){return{owner:'Tulajdonos',admin:'Admin',mod:'Moderátor',dev:'Fejlesztő',vip:'VIP',kiemelt:'Kiemelt',kiemeltp:'Kiemelt+',player:'Játékos'}[r]||'Játékos';}
-var IP='play.valyrian.hu';
-function copyIP(){if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(IP).then(function(){showToast('IP másolva!');});}else{var ta=document.createElement('textarea');ta.value=IP;ta.style.cssText='position:fixed;opacity:0;';document.body.appendChild(ta);ta.focus();ta.select();try{document.execCommand('copy');showToast('IP másolva!');}catch(e){}document.body.removeChild(ta);}}
-function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2100);}
-function buildParticles(){var cols=['rgba(14,165,233,0.45)','rgba(56,189,248,0.3)','rgba(125,211,252,0.2)','rgba(14,165,233,0.18)','rgba(255,255,255,0.12)'];var c=document.getElementById('pts');if(!c)return;var f=document.createDocumentFragment();for(var i=0;i<20;i++){var d=document.createElement('div'),sz=Math.random()*2.2+1;d.className='particle';d.style.cssText='left:'+Math.random()*100+'%;width:'+sz+'px;height:'+sz+'px;background:'+cols[Math.floor(Math.random()*cols.length)]+';animation-duration:'+(Math.random()*13+10)+'s;animation-delay:'+(Math.random()*16)+'s;';f.appendChild(d);}c.appendChild(f);}
-function checkStatus(){var dot=document.getElementById('sdot'),lbl=document.getElementById('slbl'),cnt=document.getElementById('scnt'),mx=document.getElementById('smx');if(!dot)return;if(document.getElementById('maint-bar')){dot.className='sdot maintenance';lbl.textContent='Karbantartás';lbl.style.color='#fb923c';cnt.textContent='—';mx.textContent='—';return;}fetch('https://api.mcsrvstat.us/3/'+IP).then(function(r){return r.json();}).then(function(d){if(d.online){dot.className='sdot online';lbl.textContent='Szerver online';lbl.style.color='var(--online)';cnt.textContent=(d.players&&d.players.online!=null)?d.players.online:'0';mx.textContent=(d.players&&d.players.max)?d.players.max:'—';}else{dot.className='sdot offline';lbl.textContent='Szerver offline';lbl.style.color='var(--offline)';cnt.textContent='0';mx.textContent='—';}}).catch(function(){dot.className='sdot offline';lbl.textContent='Nem elérhető';lbl.style.color='var(--text3)';});}
-function initReveal(){var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.07});document.querySelectorAll('.reveal').forEach(function(el){obs.observe(el);});}
+
+function goToStep2(){
+  var nick = document.getElementById('purchase-nick').value.trim();
+  var err = document.getElementById('step1-err');
+  err.textContent = '';
+  if (!nick || nick.length < 3){ err.textContent='Add meg a Minecraft nevedet (min. 3 karakter)!'; return; }
+  showPurchaseStep(2);
+}
+
+async function submitPurchase(){
+  var nick = document.getElementById('purchase-nick').value.trim();
+  var ref  = document.getElementById('purchase-ref').value.trim();
+  var btn  = document.getElementById('step2-btn');
+  var err  = document.getElementById('step2-err');
+  err.textContent = '';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Rendelés küldése...';
+  try {
+    var d = await api('POST', '/purchase/' + purchaseState.type, {
+      username:   nick,
+      item:       purchaseState.item,
+      priceHuf:   purchaseState.priceHuf,
+      paymentRef: ref,
+      rankValue:  purchaseState.rankValue
+    });
+    // Siker → Step 3
+    document.getElementById('confirm-order-id').textContent = 'Rendelésszám: ' + d.orderId;
+    document.getElementById('confirm-price').textContent = purchaseState.price;
+    document.getElementById('confirm-ref').textContent = d.orderId;
+    showPurchaseStep(3);
+    showToast('Rendelés rögzítve! ✅');
+  } catch(e){
+    err.textContent = e.message;
+  } finally {
+    btn.disabled = false; btn.innerHTML = '✦ Rendelés elküldése';
+  }
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init(){
+  initReveal();
+  document.addEventListener('click', function(e){
+    var d=document.getElementById('nav-dropdown'), a=document.getElementById('nav-user-area');
+    if (d&&a&&!a.contains(e.target)) d.classList.remove('open');
+  });
+  var t = getToken();
+  if (t) {
+    try {
+      var u = await api('GET','/auth/me',null,true);
+      currentUser = u; updateNavUser(u);
+    } catch(e){ clearToken(); }
+  }
+}
 init();
 </script>
 </body>
