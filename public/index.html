@@ -712,7 +712,7 @@ function openProfileTab(tabName) {
     if (targetBtn) targetBtn.classList.add('active');
 }
 
-// --- 4. AUTH (LOGIN, REG) ---
+// --- 4. AUTH ---
 async function doLogin() {
     var u = document.getElementById('login-user').value.trim(), 
         p = document.getElementById('login-pass').value, 
@@ -751,7 +751,7 @@ function updateNavUser(u) {
     document.getElementById('nav-avatar-img').src = 'https://visage.surgeplay.com/bust/64/' + u.username;
 }
 
-// --- 5. PROFIL ÉS KERESÉS (WHITELIST JAVÍTVA) ---
+// --- 5. PROFIL ÉS KERESÉS ---
 async function loadProfile() {
     if (!currentUser) return;
     try { currentUser = await api('GET', '/auth/me', null, true); } catch (e) {}
@@ -774,7 +774,7 @@ async function searchPlayer() {
         showPage('profile');
         fillProfileUI({ username: name, bio: s.bio, rank: s.rank });
         updateStatsUI(s);
-        updateWhitelistUI(s.whitelistStatus); // JAVÍTVA: whitelistStatus-t küldünk
+        updateWhitelistUI(s.whitelistStatus);
         updateActivityUI(s.activity);
         var isOwn = currentUser && currentUser.username.toLowerCase() === name.toLowerCase();
         togglePrivateElements(isOwn);
@@ -789,7 +789,7 @@ async function fetchStats(name) {
         var s = await res.json();
         if (res.ok) {
             updateStatsUI(s);
-            updateWhitelistUI(s.whitelistStatus); // JAVÍTVA: whitelistStatus-t küldünk
+            updateWhitelistUI(s.whitelistStatus);
             updateActivityUI(s.activity);
         }
     } catch (e) {}
@@ -799,8 +799,12 @@ function fillProfileUI(u) {
     document.getElementById('profile-username').textContent = u.username;
     document.getElementById('profile-skin-img').src = 'https://visage.surgeplay.com/full/256/' + u.username;
     document.getElementById('profile-bio').textContent = u.bio || 'Nincs leírása.';
+    
+    // Badge frissítése: töröljük a régit, hozzáadjuk az újat
     var badge = document.getElementById('profile-rank-badge');
-    if (badge) badge.className = 'profile-rank-badge ' + (u.rank || 'player');
+    if (badge) {
+        badge.className = 'profile-rank-badge ' + (u.rank || 'player');
+    }
     document.getElementById('profile-rank-text').textContent = rankLabel(u.rank);
 }
 
@@ -866,7 +870,21 @@ function toggleDropdown(e) { e.stopPropagation(); document.getElementById('nav-d
 function goProfile(e) { if(e) e.stopPropagation(); document.getElementById('nav-dropdown').classList.remove('open'); showPage('profile'); loadProfile(); }
 function goSettings(e) { if(e) e.stopPropagation(); document.getElementById('nav-dropdown').classList.remove('open'); showPage('profile'); loadProfile(); setTimeout(() => openProfileTab('settings'), 50); }
 function showToast(msg) { var t = document.getElementById('toast'); if(!t) return; t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2100); }
-function rankLabel(r) { return { owner: 'Tulajdonos', admin: 'Admin', mod: 'Moderátor', dev: 'Fejlesztő', vip: 'VIP', kiemelt: 'Kiemelt', kiemeltplus: 'Kiemelt+', player: 'Játékos' }[r] || 'Játékos'; }
+
+// --- RANGOK JAVÍTÁSA ---
+function rankLabel(r) { 
+    const labels = { 
+        owner: 'Tulajdonos', 
+        admin: 'Admin', 
+        mod: 'Moderátor', 
+        dev: 'Fejlesztő', 
+        vip: 'VIP', 
+        kiemelt: 'Kiemelt', 
+        kiemeltplus: 'Kiemelt+', 
+        player: 'Játékos' 
+    };
+    return labels[r] || 'Játékos'; 
+}
 
 async function saveProfile() {
     var bio = document.getElementById('set-bio').value.trim(), email = document.getElementById('set-email').value.trim(), ok = document.getElementById('set-ok');
