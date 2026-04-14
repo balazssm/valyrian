@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 
-// A webes felhasználói modell (itt vannak a rangok, biók, aktivitások)
+// A webes felhasználói modell
 const User = mongoose.model('User'); 
 
 router.get('/:username', async (req, res) => {
@@ -20,12 +20,11 @@ router.get('/:username', async (req, res) => {
             username: { $regex: new RegExp(`^${username}$`, 'i') } 
         });
 
-        // Ha egyik helyen sem létezik a játékos
         if (!mcData && !webUser) {
             return res.status(404).json({ error: "Játékos nem található." });
         }
 
-        // 3. STATISZTIKÁK ÖSSZESÍTÉSE (Neptune logika)
+        // 3. STATISZTIKÁK ÖSSZESÍTÉSE
         let totalKills = 0;
         let totalDeaths = 0;
         let totalWins = 0;
@@ -48,7 +47,7 @@ router.get('/:username', async (req, res) => {
 
         const kdCalc = totalDeaths === 0 ? totalKills.toFixed(2) : (totalKills / totalDeaths).toFixed(2);
 
-        // 4. VÁLASZ KÜLDÉSE (Minden adatot becsomagolunk)
+        // 4. VÁLASZ KÜLDÉSE - Összehangolva a Frontend elvárásaival
         res.json({
             // Minecraft statok
             kills: totalKills,
@@ -58,11 +57,13 @@ router.get('/:username', async (req, res) => {
             coins: mcData ? (mcData.coins || 0) : 0,
             
             // Webes profil adatok
-            rank: webUser ? webUser.rank : 'player',
+            // Ha az adatbázisban véletlen 'kiemeltp' maradt volna, itt javítjuk 'kiemeltplus'-ra
+            rank: webUser ? (webUser.rank === 'kiemeltp' ? 'kiemeltplus' : webUser.rank) : 'player',
             bio: webUser ? webUser.bio : 'Ennek a játékosnak nincs weboldalas profilja.',
             
-            // Whitelist és Aktivitás (Ez hiányzott a keresőből!)
-            whitelist: webUser ? webUser.whitelist : 'none',
+            // JAVÍTVA: A kulcs neve most már 'whitelistStatus', ahogy az adatbázisban van!
+            whitelistStatus: webUser ? webUser.whitelistStatus : 'none',
+            
             activity: webUser ? webUser.activity : []
         });
 
