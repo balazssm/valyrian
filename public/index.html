@@ -718,72 +718,31 @@ function navHome(s) {
 
 function toggleDropdown(e) { e.stopPropagation(); document.getElementById('nav-dropdown').classList.toggle('open'); }
 
-function goProfile(e) { 
-    if(e) e.stopPropagation(); 
-    document.getElementById('nav-dropdown').classList.remove('open'); 
-    showPage('profile'); 
-    loadProfile(); 
-}
-
-function goSettings(e) { e.stopPropagation(); document.getElementById('nav-dropdown').classList.remove('open'); openProfileTab('settings'); }
-function openModal() { document.getElementById('modal-overlay').classList.add('open'); }
-function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
-
-function switchTab(t) {
-    document.getElementById('form-login').style.display = t === 'login' ? '' : 'none';
-    document.getElementById('form-register').style.display = t === 'register' ? '' : 'none';
-    document.getElementById('tab-login').classList.toggle('active', t === 'login');
-    document.getElementById('tab-register').classList.toggle('active', t === 'register');
-}
-
-async function doLogin() {
-    var u = document.getElementById('login-user').value.trim(), p = document.getElementById('login-pass').value, err = document.getElementById('login-err'), btn = document.getElementById('login-btn');
-    err.textContent = ''; if (!u || !p) { err.textContent = 'Mezők kitöltése kötelező!'; return; }
-    btn.disabled = true;
-    try {
-        var d = await api('POST', '/auth/login', { username: u, password: p });
-        setToken(d.token); currentUser = d.user; updateNavUser(d.user); closeModal(); showToast('Üdv, ' + d.user.username + '!');
-    } catch (e) { err.textContent = e.message; } finally { btn.disabled = false; }
-}
-
-function updateNavUser(u) {
-    document.getElementById('nav-login-li').style.display = 'none';
-    document.getElementById('nav-user-li').style.display = '';
-    document.getElementById('nav-username-label').textContent = u.username;
-    document.getElementById('nav-rank-label').textContent = rankLabel(u.rank);
-    document.getElementById('nav-avatar-img').src = 'https://visage.surgeplay.com/bust/64/' + u.username;
-}
-
-function logout() {
-    clearToken(); currentUser = null;
-    document.getElementById('nav-login-li').style.display = '';
-    document.getElementById('nav-user-li').style.display = 'none';
-    document.getElementById('nav-dropdown').classList.remove('open');
-    showPage('home'); showToast('Kijelentkezve.');
-}
-
-// SAJÁT PROFIL BETÖLTÉSE
+// --- SAJÁT PROFIL BETÖLTÉSE ---
 async function loadProfile() {
     if (!currentUser) return;
+    
+    // Frissítsük az adatokat a szerverről
     try {
-        var u = await api('GET', '/auth/me', null, true);
-        currentUser = u;
-    } catch (e) { console.warn("Profil hiba."); }
+        currentUser = await api('GET', '/auth/me', null, true);
+    } catch (e) { console.warn("Hiba frissítéskor"); }
 
-    var u = currentUser;
+    const u = currentUser;
+
+    // Alapinfók beírása
     document.getElementById('profile-username').textContent = u.username;
     document.getElementById('profile-skin-img').src = 'https://visage.surgeplay.com/full/256/' + u.username;
     document.getElementById('profile-bio').textContent = u.bio || 'Még nem adtál meg bemutatkozást.';
     
-    // SAJÁT PROFILNÁL MINDENT MUTATUNK
-    togglePrivateElements(true);
-
     // Rang Badge
-    var b = document.getElementById('profile-rank-badge');
+    const b = document.getElementById('profile-rank-badge');
     if (b) b.className = 'profile-rank-badge ' + (u.rank || 'player');
     document.getElementById('profile-rank-text').textContent = rankLabel(u.rank);
 
-    // Statok és Aktivitás
+    // Saját profilnál MINDENT MUTATUNK
+    togglePrivateElements(true);
+
+    // Statok, Whitelist, Aktivitás (A SAJÁT adatainkkal)
     try {
         const res = await fetch(API + '/stats/' + u.username);
         const s = await res.json();
@@ -792,13 +751,14 @@ async function loadProfile() {
             updateWhitelistUI(s.whitelist);
             updateActivityUI(s.activity);
         }
-    } catch (err) { console.error(err); }
+    } catch (err) { console.error("Stats hiba:", err); }
 
-    document.getElementById('set-bio').value = u.bio || '';
-    document.getElementById('set-email').value = u.email || '';
+    // Beállítások inputok kitöltése
+    if(document.getElementById('set-bio')) document.getElementById('set-bio').value = u.bio || '';
+    if(document.getElementById('set-email')) document.getElementById('set-email').value = u.email || '';
 }
 
-// JÁTÉKOS KERESÉSE
+// --- JÁTÉKOS KERESÉSE ---
 async function searchPlayer() {
     const input = document.getElementById('nav-search-input');
     const name = input.value.trim();
@@ -815,40 +775,43 @@ async function searchPlayer() {
 
         showPage('profile');
 
+        // Keresett játékos adatai
         document.getElementById('profile-username').textContent = name;
         document.getElementById('profile-skin-img').src = 'https://visage.surgeplay.com/full/256/' + name;
-        document.getElementById('profile-bio').textContent = s.bio || 'Nincs leírása.';
+        document.getElementById('profile-bio').textContent = s.bio || 'Ennek a játékosnak nincs leírása.';
         
         const badge = document.getElementById('profile-rank-badge');
-        const rankText = document.getElementById('profile-rank-text');
-        if (badge && rankText) {
-            badge.className = 'profile-rank-badge ' + (s.rank || 'player');
-            rankText.textContent = rankLabel(s.rank);
-        }
+        if (badge) badge.className = 'profile-rank-badge ' + (s.rank || 'player');
+        document.getElementById('profile-rank-text').textContent = rankLabel(s.rank);
 
+        // UI frissítése a kapott adatokkal
         updateStatsUI(s);
         updateWhitelistUI(s.whitelist);
         updateActivityUI(s.activity);
 
-        // Csak akkor mutatjuk a beállításokat, ha saját magunkra kerestünk
+        // Csak akkor mutatunk privát dolgokat, ha magunkra kerestünk
         const isOwn = currentUser && currentUser.username.toLowerCase() === name.toLowerCase();
         togglePrivateElements(isOwn);
         
         input.value = ''; 
-    } catch (e) { showToast("Hiba történt."); }
+    } catch (e) { showToast("Hiba történt a kereséskor."); }
 }
 
-// GOMBOK ÉS FÜLEK ELREJTÉSE / MEGJELENÍTÉSE
-function togglePrivateElements(show) {
-    const settingsTab = document.querySelector('[data-tab="settings"]');
-    if (settingsTab) settingsTab.style.display = show ? '' : 'none';
-    
-    // A logout gomb általában a profil fejlécében vagy az oldalsávban van
-    const logoutBtn = document.querySelector('#profile-page .logout-btn');
-    if (logoutBtn) logoutBtn.style.display = show ? '' : 'none';
+// --- ELEMEK ELREJTÉSE / MEGJELENÍTÉSE ---
+function togglePrivateElements(isOwn) {
+    // Beállítások gomb/fül a navigációban (vagy a profil oldalon)
+    document.querySelectorAll('[data-tab="settings"]').forEach(el => {
+        el.style.display = isOwn ? '' : 'none';
+    });
 
-    // Ha elrejtjük a beállításokat, ugorjunk vissza az áttekintés fülre
-    if (!show) openProfileTab('overview');
+    // Kijelentkezés gomb a profil oldalon
+    const logoutBtn = document.querySelector('#profile-page .logout-btn');
+    if (logoutBtn) logoutBtn.style.display = isOwn ? '' : 'none';
+
+    // Ha nem saját profil, ugorjunk az 'overview' fülre biztos ami biztos
+    if (!isOwn && typeof openProfileTab === 'function') {
+        openProfileTab('overview');
+    }
 }
 
 function updateStatsUI(s) {
@@ -879,10 +842,10 @@ function updateActivityUI(acts) {
     const feed = document.getElementById('activity-feed');
     if (!feed) return;
     
-    feed.innerHTML = '';
+    feed.innerHTML = ''; // Mindig ürítünk!
 
     if (!acts || !Array.isArray(acts) || acts.length === 0) {
-        feed.innerHTML = '<p style="color:var(--text3); padding:20px; text-align:center;">Nincs megjeleníthető aktivitás.</p>';
+        feed.innerHTML = '<p style="color:var(--text3); padding:20px; text-align:center; font-style:italic;">Nincs megjeleníthető aktivitás.</p>';
         return;
     }
 
@@ -910,12 +873,41 @@ function rankLabel(r) { return { owner: 'Tulajdonos', admin: 'Admin', mod: 'Mode
 
 async function saveProfile() {
     var bio = document.getElementById('set-bio').value.trim(), email = document.getElementById('set-email').value.trim(), ok = document.getElementById('set-ok');
-    ok.textContent = ''; try {
+    ok.textContent = ''; 
+    try {
         await api('PUT', '/user/profile', { bio, email }, true);
         currentUser.bio = bio; currentUser.email = email;
-        document.getElementById('profile-bio').textContent = bio || 'Nincs bemutatkozás.';
-        ok.textContent = '✓ Mentve!'; setTimeout(() => ok.textContent = '', 2000);
-    } catch (e) { ok.style.color = '#f87171'; ok.textContent = e.message; }
+        document.getElementById('profile-bio').textContent = bio || 'Még nem adtál meg bemutatkozást.';
+        ok.style.color = '#4ade80';
+        ok.textContent = '✓ Mentve!'; 
+        setTimeout(() => ok.textContent = '', 2000);
+    } catch (e) { 
+        ok.style.color = '#f87171'; 
+        ok.textContent = e.message; 
+    }
+}
+
+function goProfile(e) { 
+    if(e) e.stopPropagation(); 
+    document.getElementById('nav-dropdown').classList.remove('open'); 
+    showPage('profile'); 
+    loadProfile(); 
+}
+
+function updateNavUser(u) {
+    document.getElementById('nav-login-li').style.display = 'none';
+    document.getElementById('nav-user-li').style.display = '';
+    document.getElementById('nav-username-label').textContent = u.username;
+    document.getElementById('nav-rank-label').textContent = rankLabel(u.rank);
+    document.getElementById('nav-avatar-img').src = 'https://visage.surgeplay.com/bust/64/' + u.username;
+}
+
+function logout() {
+    clearToken(); currentUser = null;
+    document.getElementById('nav-login-li').style.display = '';
+    document.getElementById('nav-user-li').style.display = 'none';
+    document.getElementById('nav-dropdown').classList.remove('open');
+    showPage('home'); showToast('Sikeresen kijelentkeztél.');
 }
 
 var IP = 'play.valyrian.hu';
