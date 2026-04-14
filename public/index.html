@@ -686,7 +686,6 @@ function showPage(p) {
     var target = document.getElementById(p + '-page');
     if (target) target.classList.add('active');
     window.scrollTo(0, 0);
-    window.location.hash = p;
 }
 
 function openModal() { 
@@ -903,15 +902,6 @@ async function saveProfile() {
 
 // --- 8. INICIALIZÁLÁS (Azonnal indul) ---
 async function init() {
-    // Oldal visszaállítása F5 után hash alapján
-    var hash = window.location.hash.replace('#', '');
-    var validPages = ['home', 'profile'];
-    if (hash && validPages.includes(hash)) {
-        showPage(hash);
-    } else {
-        showPage('home');
-    }
-
     checkStatus();
     setInterval(checkStatus, 60000);
     
