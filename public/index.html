@@ -397,7 +397,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.25rem 
 </style>
 </head>
 <body class="">
-<script>var API='/api';</script>
+<script>var API='https://valyrian.hu/api';</script>
 
 <!-- <div class="maintenance-bar" id="maint-bar">
   <span>⚙ Karbantartás folyamatban — Csatlakozni egyelőre nem lehet</span>
@@ -902,8 +902,8 @@ async function saveProfile() {
 
 // --- 8. INICIALIZÁLÁS (Azonnal indul) ---
 async function init() {
-    checkStatus();
-    setInterval(checkStatus, 60000);
+    try { checkStatus(); } catch(e) {}
+    try { setInterval(checkStatus, 60000); } catch(e) {}
     
     var t = getToken();
     if (t) {
@@ -920,10 +920,12 @@ async function init() {
     });
 
     // Kereső Enter billentyűre
-    document.getElementById('nav-search-input')?.addEventListener('keypress', e => { if (e.key === 'Enter') searchPlayer(); });
+    var si = document.getElementById('nav-search-input');
+    if (si) si.addEventListener('keypress', function(e) { if (e.key === 'Enter') searchPlayer(); });
 }
 
-init();
+// Biztonsági háló: ha az init() elszáll, az oldal akkor is betölt
+try { init(); } catch(e) { console.error('Init error:', e); }
 </script>
 </body>
 </html>
