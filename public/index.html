@@ -685,6 +685,7 @@ async function init() {
     initReveal();
     checkStatus();
     setInterval(checkStatus, 60000);
+    
     var t = getToken();
     if (t) {
         try {
@@ -693,21 +694,23 @@ async function init() {
             updateNavUser(u);
         } catch (e) { clearToken(); }
     }
+
     document.addEventListener('click', function (e) {
         var d = document.getElementById('nav-dropdown'), a = document.getElementById('nav-user-area');
         if (d && a && !a.contains(e.target)) d.classList.remove('open');
     });
 
-    // Enter gombra is keressen a keresőben
+    // Enter gombra való keresés eseménykezelője
     document.getElementById('nav-search-input')?.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') searchPlayer();
     });
 }
 
-// JAVÍTOTT showPage: Nem frissít rá automatikusan a profilra, ha csak lapozunk
+// Oldalváltás - Tisztán csak a váltásért felel
 function showPage(p) {
     document.querySelectorAll('.page').forEach(function (e) { e.classList.remove('active'); });
-    document.getElementById(p + '-page').classList.add('active');
+    var target = document.getElementById(p + '-page');
+    if (target) target.classList.add('active');
     window.scrollTo(0, 0);
 }
 
@@ -718,7 +721,7 @@ function navHome(s) {
 
 function toggleDropdown(e) { e.stopPropagation(); document.getElementById('nav-dropdown').classList.toggle('open'); }
 
-// JAVÍTOTT goProfile: Itt kényszerítjük a saját profilunk betöltését
+// Saját profil megnyitása
 function goProfile(e) { 
     if(e) e.stopPropagation(); 
     document.getElementById('nav-dropdown').classList.remove('open'); 
@@ -748,7 +751,7 @@ async function doLogin() {
     } catch (e) { err.textContent = e.message; } finally { btn.disabled = false; btn.textContent = 'Bejelentkezés'; }
 }
 
-async function updateNavUser(u) {
+function updateNavUser(u) {
     document.getElementById('nav-login-li').style.display = 'none';
     document.getElementById('nav-user-li').style.display = '';
     document.getElementById('nav-username-label').textContent = u.username;
@@ -766,38 +769,38 @@ function logout() {
     showPage('home'); showToast('Sikeresen kijelentkeztél.');
 }
 
-// SAJÁT PROFIL BETÖLTÉSE
+// SAJÁT PROFIL BETÖLTÉSE (Auth-ból frissítve)
 async function loadProfile() {
     if (!currentUser) return;
     try {
         var u = await api('GET', '/auth/me', null, true);
         currentUser = u;
-    } catch (e) { console.warn("Szerver hiba profil frissítéskor."); }
+    } catch (e) { console.warn("Hiba a profil frissítésekor."); }
 
     var u = currentUser;
     document.getElementById('profile-skin-img').src = 'https://visage.surgeplay.com/full/256/' + u.username;
     document.getElementById('profile-username').textContent = u.username;
     document.getElementById('profile-bio').textContent = u.bio || 'Még nem adtál meg bemutatkozást.';
     
-    // Mutatjuk a beállításokat, mert ez a saját profilunk
-    const settingsTab = document.querySelector('[data-tab="settings"]');
-    if(settingsTab) settingsTab.style.display = '';
+    // Rang Badge és Szöveg
+    var b = document.getElementById('profile-rank-badge');
+    if (b) b.className = 'profile-rank-badge ' + (u.rank || 'player');
+    document.getElementById('profile-rank-text').textContent = rankLabel(u.rank);
 
+    // Saját statok lekérése
     try {
-        const statsRes = await fetch(API + '/stats/' + u.username);
-        const s = await statsRes.json();
-        if (statsRes.ok) {
-            document.getElementById('stat-kills').textContent = s.kills || 0;
-            document.getElementById('stat-deaths').textContent = s.deaths || 0;
-            document.getElementById('stat-kd').textContent = s.kd || "0.00";
-            document.getElementById('stat-wins').textContent = s.wins || 0;
-            document.getElementById('stat-coins').textContent = s.coins || 0;
+        const res = await fetch(API + '/stats/' + u.username);
+        const s = await res.json();
+        if (res.ok) {
+            updateStatsUI(s);
         }
     } catch (err) { console.error("Stats hiba:", err); }
 
-    document.getElementById('stat-playtime').textContent = "—";
+    // Beállítások fül megjelenítése (mivel saját profil)
+    const settingsTab = document.querySelector('[data-tab="settings"]');
+    if(settingsTab) settingsTab.style.display = '';
 
-    // Whitelist és Aktivitás...
+    // Whitelist státusz
     var wm = { approved: { cls: 'approved', emoji: '✅', text: 'Whitelistre kerültél!' }, pending: { cls: 'pending', emoji: '⏳', text: 'Elbírálás alatt.' }, rejected: { cls: 'rejected', emoji: '❌', text: 'Elutasítva.' }, none: { cls: 'none', emoji: '❔', text: 'Nincs kérelem.' } };
     var wl = wm[u.whitelist] || wm.none;
     document.getElementById('wl-icon').className = 'wl-status-icon ' + wl.cls;
@@ -808,7 +811,7 @@ async function loadProfile() {
     document.getElementById('set-email').value = u.email || '';
 }
 
-// JAVÍTOTT KERESÉS: Nem hívja meg a loadProfile-t
+// KERESETT JÁTÉKOS BETÖLTÉSE
 async function searchPlayer() {
     const input = document.getElementById('nav-search-input');
     const name = input.value.trim();
@@ -819,42 +822,66 @@ async function searchPlayer() {
         const s = await r.json();
 
         if (!r.ok) {
-            showToast("Nincs ilyen játékos!");
+            showToast("Nincs ilyen játékos a Neptune-ban!");
             return;
         }
 
         showPage('profile');
 
-        // Adatok manuális beírása a keresett játékoshoz
+        // Adatok beírása a keresett játékoshoz
         document.getElementById('profile-username').textContent = name;
         document.getElementById('profile-skin-img').src = 'https://visage.surgeplay.com/full/256/' + name;
-        document.getElementById('profile-bio').textContent = "Játékos statisztikáinak megtekintése.";
+        document.getElementById('profile-bio').textContent = s.bio || 'Ennek a játékosnak nincs leírása.';
         
-        document.getElementById('stat-kills').textContent = s.kills;
-        document.getElementById('stat-deaths').textContent = s.deaths;
-        document.getElementById('stat-kd').textContent = s.kd;
-        document.getElementById('stat-wins').textContent = s.wins;
-        document.getElementById('stat-coins').textContent = s.coins;
-        document.getElementById('stat-playtime').textContent = "—";
+        // Rang frissítése
+        const badge = document.getElementById('profile-rank-badge');
+        const rankText = document.getElementById('profile-rank-text');
+        if (badge && rankText) {
+            badge.className = 'profile-rank-badge ' + (s.rank || 'player');
+            rankText.textContent = rankLabel(s.rank);
+        }
 
-        // ELREJTJÜK a beállításokat, ha nem a sajátunk
+        updateStatsUI(s);
+
+        // Beállítások elrejtése (mivel nem a sajátunk)
         const isOwn = currentUser && currentUser.username.toLowerCase() === name.toLowerCase();
         const settingsTab = document.querySelector('[data-tab="settings"]');
         if(settingsTab) settingsTab.style.display = isOwn ? '' : 'none';
         
         input.value = ''; 
     } catch (e) {
-        showToast("Hiba történt.");
+        showToast("Hiba történt a keresés során.");
     }
 }
 
+// Segédfüggvény a statok kiírásához
+function updateStatsUI(s) {
+    document.getElementById('stat-kills').textContent = s.kills || 0;
+    document.getElementById('stat-deaths').textContent = s.deaths || 0;
+    document.getElementById('stat-kd').textContent = s.kd || "0.00";
+    document.getElementById('stat-wins').textContent = s.wins || 0;
+    document.getElementById('stat-coins').textContent = s.coins || 0;
+    document.getElementById('stat-playtime').textContent = "—";
+}
+
 function rankLabel(r) { return { owner: 'Tulajdonos', admin: 'Admin', mod: 'Moderátor', dev: 'Fejlesztő', vip: 'VIP', kiemelt: 'Kiemelt', kiemeltp: 'Kiemelt+', player: 'Játékos' }[r] || 'Játékos'; }
+
+async function saveProfile() {
+    var bio = document.getElementById('set-bio').value.trim(), email = document.getElementById('set-email').value.trim(), ok = document.getElementById('set-ok');
+    ok.textContent = ''; try {
+        await api('PUT', '/user/profile', { bio, email }, true);
+        currentUser.bio = bio; currentUser.email = email;
+        document.getElementById('profile-bio').textContent = bio || 'Még nem adtál meg bemutatkozást.';
+        ok.textContent = '✓ Mentve!'; setTimeout(() => ok.textContent = '', 2000);
+    } catch (e) { ok.style.color = '#f87171'; ok.textContent = e.message; }
+}
+
 var IP = 'play.valyrian.hu';
-function copyIP() { if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(IP).then(function () { showToast('IP másolva!'); }); } else { var ta = document.createElement('textarea'); ta.value = IP; ta.style.cssText = 'position:fixed;opacity:0;'; document.body.appendChild(ta); ta.focus(); ta.select(); try { document.execCommand('copy'); showToast('IP másolva!'); } catch (e) { } document.body.removeChild(ta); } }
-function showToast(msg) { var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(function () { t.classList.remove('show'); }, 2100); }
-function buildParticles() { var cols = ['rgba(14,165,233,0.45)', 'rgba(56,189,248,0.3)', 'rgba(125,211,252,0.2)', 'rgba(14,165,233,0.18)', 'rgba(255,255,255,0.12)']; var c = document.getElementById('pts'); if (!c) return; var f = document.createDocumentFragment(); for (var i = 0; i < 20; i++) { var d = document.createElement('div'), sz = Math.random() * 2.2 + 1; d.className = 'particle'; d.style.cssText = 'left:' + Math.random() * 100 + '%;width:' + sz + 'px;height:' + sz + 'px;background:' + cols[Math.floor(Math.random() * cols.length)] + ';animation-duration:' + (Math.random() * 13 + 10) + 's;animation-delay:' + (Math.random() * 16) + 's;'; f.appendChild(d); } c.appendChild(f); }
-function checkStatus() { var dot = document.getElementById('sdot'), lbl = document.getElementById('slbl'), cnt = document.getElementById('scnt'), mx = document.getElementById('smx'); if (!dot) return; fetch('https://api.mcsrvstat.us/3/' + IP).then(function (r) { return r.json(); }).then(function (d) { if (d.online) { dot.className = 'sdot online'; lbl.textContent = 'Szerver online'; lbl.style.color = 'var(--online)'; cnt.textContent = (d.players && d.players.online != null) ? d.players.online : '0'; mx.textContent = (d.players && d.players.max) ? d.players.max : '—'; } else { dot.className = 'sdot offline'; lbl.textContent = 'Szerver offline'; lbl.style.color = 'var(--offline)'; cnt.textContent = '0'; mx.textContent = '—'; } }).catch(function () { dot.className = 'sdot offline'; lbl.textContent = 'Nem elérhető'; lbl.style.color = 'var(--text3)'; }); }
-function initReveal() { var obs = new IntersectionObserver(function (entries) { entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } }); }, { threshold: 0.07 }); document.querySelectorAll('.reveal').forEach(function (el) { obs.observe(el); }); }
+function copyIP() { if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(IP).then(() => showToast('IP másolva!')); } else { var ta = document.createElement('textarea'); ta.value = IP; ta.style.cssText = 'position:fixed;opacity:0;'; document.body.appendChild(ta); ta.focus(); ta.select(); try { document.execCommand('copy'); showToast('IP másolva!'); } catch (e) {} document.body.removeChild(ta); } }
+function showToast(msg) { var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2100); }
+function buildParticles() { var c = document.getElementById('pts'); if (!c) return; var f = document.createDocumentFragment(); for (var i = 0; i < 20; i++) { var d = document.createElement('div'), sz = Math.random() * 2.2 + 1; d.className = 'particle'; d.style.cssText = `left:${Math.random() * 100}%;width:${sz}px;height:${sz}px;animation-duration:${Math.random() * 13 + 10}s;animation-delay:${Math.random() * 16}s;`; f.appendChild(d); } c.appendChild(f); }
+function checkStatus() { var dot = document.getElementById('sdot'), lbl = document.getElementById('slbl'), cnt = document.getElementById('scnt'), mx = document.getElementById('smx'); if (!dot) return; fetch('https://api.mcsrvstat.us/3/' + IP).then(r => r.json()).then(d => { if (d.online) { dot.className = 'sdot online'; lbl.textContent = 'Online'; cnt.textContent = d.players.online; mx.textContent = d.players.max; } else { dot.className = 'sdot offline'; lbl.textContent = 'Offline'; cnt.textContent = '0'; mx.textContent = '—'; } }).catch(() => { dot.className = 'sdot offline'; lbl.textContent = 'Hiba'; }); }
+function initReveal() { var obs = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } }); }, { threshold: 0.07 }); document.querySelectorAll('.reveal').forEach(el => obs.observe(el)); }
 
 init();
 </script>
