@@ -900,24 +900,67 @@ async function saveProfile() {
     } catch (e) { showToast(e.message); }
 }
 
-// --- 8. INICIALIZÁLÁS (Azonnal indul) ---
-async function init(){
-    buildParticles();
-    initReveal();
-    checkStatus();
-    setInterval(checkStatus,60000);
-    var t=getToken();
-    if(t){
-        try{
-            var u=await api('GET','/auth/me',null,true);
-            currentUser=u;
-            updateNavUser(u);
-        }catch(e){clearToken();}
+// --- 7b. HIÁNYZÓ SEGÉDFÜGGVÉNYEK ---
+function navHome(s) {
+    showPage('home');
+    setTimeout(function() { var e = document.getElementById(s); if (e) e.scrollIntoView({ behavior: 'smooth' }); }, 50);
+}
+
+function copyIP() {
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(IP).then(function() { showToast('IP másolva!'); });
+    } else {
+        var ta = document.createElement('textarea');
+        ta.value = IP; ta.style.cssText = 'position:fixed;opacity:0;';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        try { document.execCommand('copy'); showToast('IP másolva!'); } catch (e) {}
+        document.body.removeChild(ta);
     }
-    document.addEventListener('click',function(e){
-        var d=document.getElementById('nav-dropdown'),a=document.getElementById('nav-user-area');
-        if(d&&a&&!a.contains(e.target))d.classList.remove('open');
+}
+
+function buildParticles() {
+    var cols = ['rgba(14,165,233,0.45)', 'rgba(56,189,248,0.3)', 'rgba(125,211,252,0.2)', 'rgba(14,165,233,0.18)', 'rgba(255,255,255,0.12)'];
+    var c = document.getElementById('pts');
+    if (!c) return;
+    var f = document.createDocumentFragment();
+    for (var i = 0; i < 20; i++) {
+        var d = document.createElement('div'), sz = Math.random() * 2.2 + 1;
+        d.className = 'particle';
+        d.style.cssText = 'left:' + Math.random() * 100 + '%;width:' + sz + 'px;height:' + sz + 'px;background:' + cols[Math.floor(Math.random() * cols.length)] + ';animation-duration:' + (Math.random() * 13 + 10) + 's;animation-delay:' + (Math.random() * 16) + 's;';
+        f.appendChild(d);
+    }
+    c.appendChild(f);
+}
+
+function initReveal() {
+    var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.07 });
+    document.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
+}
+
+// --- 8. INICIALIZÁLÁS (Azonnal indul) ---
+async function init() {
+    try { checkStatus(); } catch(e) {}
+    try { setInterval(checkStatus, 60000); } catch(e) {}
+    
+    var t = getToken();
+    if (t) {
+        try {
+            currentUser = await api('GET', '/auth/me', null, true);
+            updateNavUser(currentUser);
+        } catch (e) { clearToken(); }
+    }
+    
+    // Dropdown bezárása kattintásra
+    document.addEventListener('click', function(e) {
+        var dd = document.getElementById('nav-dropdown'), area = document.getElementById('nav-user-area');
+        if (dd && area && !area.contains(e.target)) dd.classList.remove('open');
     });
+
+    // Kereső Enter billentyűre
+    var si = document.getElementById('nav-search-input');
+    if (si) si.addEventListener('keypress', function(e) { if (e.key === 'Enter') searchPlayer(); });
 }
 
 // Biztonsági háló: ha az init() elszáll, az oldal akkor is betölt
