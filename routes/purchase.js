@@ -107,13 +107,21 @@ router.get('/orders', auth, admin, async (req, res) => {
   }
 });
 
-// ── [POST] /api/purchase/:type (VÁSÁRLÁS LEADÁSA) ──
+// ── [POST] /api/purchase/:type (ÚJ, NÖVEKVŐ SORSZÁMMAL) ──
 router.post('/:type', async (req, res) => {
   try {
     const { type } = req.params;
     const { username, item, priceHuf, paymentRef, rankValue } = req.body;
 
-    const orderId = 'VAL-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex').toUpperCase();
+    // 1. Sorszám növelése és lekérése az adatbázisból
+    const counter = await Counter.findOneAndUpdate(
+      { id: "order_id" },       // Megkeressük az order_id nevű számlálót
+      { $inc: { seq: 1 } },     // Megnöveljük 1-gyel
+      { new: true, upsert: true } // Ha nincs még ilyen, létrehozza
+    );
+
+    // 2. Egyedi szöveges ID összeállítása (VAL-1, VAL-2, stb.)
+    const orderId = `VAL-${counter.seq}`;
 
     const order = await Order.create({
       orderId,
@@ -126,12 +134,13 @@ router.post('/:type', async (req, res) => {
       status: 'pending'
     });
 
-    // --- WEBHOOK KÜLDÉSE (ÚJ RENDELÉS) ---
+    // Webhook küldése
     await sendDiscordWebhook(order, "NEW");
 
     res.status(201).json({ success: true, orderId });
   } catch (err) {
-    res.status(500).json({ error: 'Hiba' });
+    console.error("Hiba:", err);
+    res.status(500).json({ error: 'Hiba a rendelés mentésekor.' });
   }
 });
 
