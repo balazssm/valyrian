@@ -254,6 +254,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
 .modal-item-icon{font-size:1.6rem;}
 .modal-item-name{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:var(--text);}
 .modal-item-price{font-family:'Syne',sans-serif;font-size:0.82rem;color:var(--text3);margin-top:0.1rem;}
+.form-note{font-size:0.78rem;color:var(--text3);text-align:center;margin-top:0.7rem;line-height:1.55;}
   
 /* PROFILE */
 #profile-page{min-height:100vh;background:var(--bg);padding-top:58px;}
@@ -344,8 +345,6 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
         <div class="nav-user-avatar"><img id="nav-avatar-img" src="" alt=""></div>
         <div><div class="nav-user-name" id="nav-username-label">-</div><div class="nav-user-rank" id="nav-rank-label">-</div></div>
         <div class="nav-user-dropdown" id="nav-dropdown">
-          <button class="nav-dropdown-item" onclick="goProfile(event)">👤 Profilom</button>
-          <button class="nav-dropdown-item" onclick="goSettings(event)">⚙ Beállítások</button>
           <div class="nav-dropdown-sep"></div>
           <button class="nav-dropdown-item danger" onclick="logout()">🚪 Kijelentkezés</button>
         </div>
@@ -624,71 +623,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2re
   <p class="footer-txt">Nem hivatalos Minecraft szerver — nem áll kapcsolatban a Mojang Studios-szal.</p>
   <p class="footer-txt" style="margin-top:0.28rem;font-size:0.76rem;opacity:0.55;">© 2026 Valyrian Minecraft Server</p>
 </footer>
-  
-<!-- PROFILE PAGE -->
-<div id="profile-page" class="page">
-  <div class="profile-header">
-    <div class="profile-header-inner">
-      <div class="profile-skin-wrap">
-        <div class="profile-skin"><img id="profile-skin-img" src="" alt="Skin"></div>
-        <div class="profile-skin-online"></div>
-      </div>
-      <div class="profile-info">
-        <div class="profile-rank-badge player" id="profile-rank-badge"><div class="profile-rank-dot"></div><span id="profile-rank-text">Játékos</span></div>
-        <div class="profile-username" id="profile-username">-</div>
-        <div class="profile-bio" id="profile-bio">Még nem adtál meg bemutatkozást.</div>
-      </div>
-      <div style="padding-bottom:1.2rem;margin-left:auto;"><button class="logout-btn" onclick="logout()">🚪 Kijelentkezés</button></div>
-    </div>
-    <div style="max-width:1040px;margin:0 auto;padding:0 2rem;">
-      <div style="width:70px;display:inline-block;"></div>
-      <div class="profile-tabs" style="display:inline-flex;">
-        <button class="profile-tab active" data-tab="stats" onclick="openProfileTab('stats')">📊 Statisztikák</button>
-        <button class="profile-tab" data-tab="activity" onclick="openProfileTab('activity')">📋 Aktivitás</button>
-        <button class="profile-tab" data-tab="settings" onclick="openProfileTab('settings')">⚙ Beállítások</button>
-      </div>
-    </div>
-  </div>
-  <div class="profile-body">
-    <div class="profile-section active" id="tab-stats">
-      <div class="stats-grid">
-        <div class="stat-card"><span class="stat-icon">⚔️</span><span class="stat-val" id="stat-kills">—</span><span class="stat-lbl">Ölések</span></div>
-        <div class="stat-card"><span class="stat-icon">💀</span><span class="stat-val" id="stat-deaths">—</span><span class="stat-lbl">Halálok</span></div>
-        <div class="stat-card"><span class="stat-icon">🏆</span><span class="stat-val" id="stat-kd">—</span><span class="stat-lbl">K/D arány</span></div>
-        <div class="stat-card"><span class="stat-icon">⏱️</span><span class="stat-val" id="stat-playtime">—</span><span class="stat-lbl">Játékidő</span></div>
-        <div class="stat-card"><span class="stat-icon">🥊</span><span class="stat-val" id="stat-wins">—</span><span class="stat-lbl">Győzelmek</span></div>
-        <div class="stat-card"><span class="stat-icon">💰</span><span class="stat-val" id="stat-coins">—</span><span class="stat-lbl">Érmék</span></div>
-      </div>
-      <div class="whitelist-status-box">
-        <div class="wl-status-icon none" id="wl-icon"><span id="wl-icon-emoji">❔</span></div>
-        <div class="wl-status-text"><h4>Whitelist státusz</h4><p id="wl-status-desc">Betöltés...</p></div>
-      </div>
-    </div>
-    <div class="profile-section" id="tab-activity">
-      <div class="activity-feed" id="activity-feed"><p style="color:var(--text3);">Betöltés...</p></div>
-    </div>
-    <div class="profile-section" id="tab-settings">
-      <div class="settings-grid">
-        <div class="settings-box">
-          <h3>Profil szerkesztése</h3>
-          <div class="form-group"><label class="form-label">Bemutatkozás</label><input class="form-input" type="text" id="set-bio" placeholder="Írj magadról pár szót..."></div>
-          <div class="form-group"><label class="form-label">E-mail cím</label><input class="form-input" type="email" id="set-email" placeholder="te@email.com"></div>
-          <button class="settings-save" onclick="saveProfile()">Mentés</button>
-          <div class="form-ok" id="set-ok" style="text-align:left;margin-top:0.45rem;"></div>
-        </div>
-        <div class="settings-box">
-          <h3>Jelszó módosítása</h3>
-          <div class="form-group"><label class="form-label">Jelenlegi jelszó</label><input class="form-input" type="password" id="set-oldpass" placeholder="••••••••"></div>
-          <div class="form-group"><label class="form-label">Új jelszó</label><input class="form-input" type="password" id="set-newpass" placeholder="Min. 6 karakter"></div>
-          <div class="form-group"><label class="form-label">Megerősítés</label><input class="form-input" type="password" id="set-newpass2" placeholder="••••••••"></div>
-          <button class="settings-save" onclick="changePassword()">Módosítás</button>
-          <div class="form-err" id="pass-err" style="text-align:left;margin-top:0.45rem;"></div>
-          <div class="form-ok" id="pass-ok" style="text-align:left;margin-top:0.45rem;"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+
 <!-- PURCHASE MODAL -->
 <div class="modal-overlay" id="purchase-modal" onclick="if(event.target===this)closePurchaseModal()">
   <div class="modal">
