@@ -32,6 +32,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/user', require('./routes/user'));
 app.use('/api/mc', require('./routes/minecraft'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/purchase', require('./routes/purchase'));
 
 // ── ADMIN OLDAL KISZOLGÁLÁSA ──
 app.get('/admin', (req, res) => {
