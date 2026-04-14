@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
   // Rang — a Minecraft plugin írja, vagy admin állítja be
   rank: {
     type: String,
-    enum: ['owner', 'admin', 'mod', 'dev', 'vip', 'player'],
+    enum: ['owner', 'admin', 'mod', 'dev', 'vip', 'kiemelt', 'kiemeltp', 'player'],
     default: 'player'
   },
   bio: {
