@@ -1,5 +1,5 @@
 /**
- * Valyrian – Vásárlási route (KÉTIRÁNYÚ WEBHOOK: Leadás + Elfogadás)
+ * Valyrian – Vásárlási route (SORSZÁMOZOTT ID + DISCORD FIX)
  */
 
 require('dotenv').config();
@@ -13,8 +13,17 @@ const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 
 // ─────────────────────────────────────────────
-// Order Schema
+// MODELLEK DEFINIÁLÁSA (Order + Counter)
 // ─────────────────────────────────────────────
+
+// Counter a sorszámozáshoz
+const counterSchema = new mongoose.Schema({
+  _id: { type: String, required: true },
+  seq: { type: Number, default: 0 }
+});
+const Counter = mongoose.models.Counter || mongoose.model('Counter', counterSchema);
+
+// Rendelés modell
 const orderSchema = new mongoose.Schema({
   orderId: { type: String, unique: true, index: true },
   username: String,
@@ -28,27 +37,24 @@ const orderSchema = new mongoose.Schema({
   approvedAt: Date,
   createdAt: { type: Date, default: Date.now }
 });
-
 const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
 
 // ─────────────────────────────────────────────
-// Discord Webhook Függvény (Többféle státuszhoz)
+// DISCORD WEBHOOK (ROLE PING: 1486777961452539964)
 // ─────────────────────────────────────────────
 async function sendDiscordWebhook(order, type = "APPROVED") {
     const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
     if (!webhookUrl) return;
 
     const roleID = "1486777961452539964"; 
-    
-    // Üzenet testreszabása a státusz alapján
     let title = "💰 Sikeres Tranzakció";
     let content = `<@&${roleID}> 🔔 **ÚJ BEFIZETÉS ELFOGADVA!**`;
-    let color = 15105570; // Narancs
+    let color = 15105570;
 
     if (type === "NEW") {
-        title = "🛒 Új rendelés érkezett (Függőben)";
-        content = `<@&${roleID}> ⚠️ **VALAKI VÁSÁROLT! ELLENŐRIZD AZ ADMIN PANET!**`;
-        color = 3447003; // Kék
+        title = "🛒 Új rendelés érkezett";
+        content = `<@&${roleID}> ⚠️ **VALAKI VÁSÁROLT!**`;
+        color = 3447003;
     }
 
     const payload = {
@@ -60,10 +66,9 @@ async function sendDiscordWebhook(order, type = "APPROVED") {
                 { name: "Játékos", value: `**${order.username}**`, inline: true },
                 { name: "Termék", value: order.item, inline: true },
                 { name: "Összeg", value: `${order.priceHuf} Ft`, inline: true },
-                { name: "Állapot", value: type === "NEW" ? "🟡 Ellenőrzésre vár" : "🟢 Kiosztva", inline: true },
                 { name: "Rendelés ID", value: `\`${order.orderId}\`` }
             ],
-            footer: { text: "Valyrian Store - Automata Értesítés" },
+            footer: { text: "Valyrian Store" },
             timestamp: new Date()
         }]
     };
@@ -74,13 +79,11 @@ async function sendDiscordWebhook(order, type = "APPROVED") {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-    } catch (err) {
-        console.error("Discord hiba:", err.message);
-    }
+    } catch (err) { console.error("Discord hiba:", err.message); }
 }
 
 // ─────────────────────────────────────────────
-// Minecraft RCON
+// MINECRAFT RCON
 // ─────────────────────────────────────────────
 async function applyMinecraftRank(username, rank) {
   try {
@@ -97,31 +100,25 @@ async function applyMinecraftRank(username, rank) {
   }
 }
 
-// ── [GET] /api/purchase/orders ──
-router.get('/orders', auth, admin, async (req, res) => {
-  try {
-    const orders = await Order.find().sort({ createdAt: -1 });
-    res.json(orders);
-  } catch (err) {
-    res.status(500).json({ error: 'Hiba' });
-  }
-});
-
-// ── [POST] /api/purchase/:type (ÚJ, NÖVEKVŐ SORSZÁMMAL) ──
+// ── [POST] /api/purchase/:type (ÚJ RENDELÉS) ──
 router.post('/:type', async (req, res) => {
   try {
     const { type } = req.params;
     const { username, item, priceHuf, paymentRef, rankValue } = req.body;
 
-    // 1. Sorszám növelése és lekérése az adatbázisból
-    const counter = await Counter.findOneAndUpdate(
-      { id: "order_id" },       // Megkeressük az order_id nevű számlálót
-      { $inc: { seq: 1 } },     // Megnöveljük 1-gyel
-      { new: true, upsert: true } // Ha nincs még ilyen, létrehozza
-    );
-
-    // 2. Egyedi szöveges ID összeállítása (VAL-1, VAL-2, stb.)
-    const orderId = `VAL-${counter.seq}`;
+    let orderId;
+    try {
+      // Megpróbáljuk növelni a sorszámot
+      const counter = await Counter.findOneAndUpdate(
+        { _id: "order_id" }, 
+        { $inc: { seq: 1 } }, 
+        { new: true, upsert: true }
+      );
+      orderId = `VAL-${counter.seq}`;
+    } catch (counterError) {
+      // Ha a counter valamiért meghal, generálunk egy randomot, hogy ne akadjon el a vásárlás
+      orderId = 'VAL-' + Date.now().toString().slice(-4);
+    }
 
     const order = await Order.create({
       orderId,
@@ -134,17 +131,16 @@ router.post('/:type', async (req, res) => {
       status: 'pending'
     });
 
-    // Webhook küldése
     await sendDiscordWebhook(order, "NEW");
-
     res.status(201).json({ success: true, orderId });
+
   } catch (err) {
-    console.error("Hiba:", err);
-    res.status(500).json({ error: 'Hiba a rendelés mentésekor.' });
+    console.error("Végzetes hiba:", err);
+    res.status(500).json({ error: 'Szerver hiba a menteskor.' });
   }
 });
 
-// ── [PUT] /api/purchase/:id/approve (ADMIN ELFOGADJA) ──
+// ── [PUT] /api/purchase/:id/approve (ELFOGADÁS) ──
 router.put('/:id/approve', auth, admin, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -157,45 +153,35 @@ router.put('/:id/approve', auth, admin, async (req, res) => {
     await order.save();
 
     let rconResult = null;
-
     if (order.itemType === 'rank' && order.rankValue) {
       let mcRank = order.rankValue.toLowerCase();
       if (mcRank === 'kiemeltp') mcRank = 'kiemeltplus';
       if (mcRank === 'player') mcRank = 'default';
 
       rconResult = await applyMinecraftRank(order.username, mcRank);
-      
-      await User.findOneAndUpdate(
-        { username: order.username },
-        { $set: { rank: order.rankValue } }
-      );
+      await User.findOneAndUpdate({ username: order.username }, { $set: { rank: order.rankValue } });
     }
 
     if (order.itemType === 'coins') {
         const amount = parseInt(order.item) || 0;
-        await User.findOneAndUpdate(
-            { username: order.username },
-            { $inc: { "stats.coins": amount } }
-        );
+        await User.findOneAndUpdate({ username: order.username }, { $inc: { "stats.coins": amount } });
     }
 
-    // --- WEBHOOK KÜLDÉSE (ELFOGADVA) ---
     await sendDiscordWebhook(order, "APPROVED");
-
     res.json({ success: true, rcon: rconResult });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// ── [PUT] /api/purchase/:id/reject ──
+// ── ADMIN LISTA ÉS ELUTASÍTÁS ──
+router.get('/orders', auth, admin, async (req, res) => {
+  const orders = await Order.find().sort({ createdAt: -1 });
+  res.json(orders);
+});
+
 router.put('/:id/reject', auth, admin, async (req, res) => {
-  try {
-    await Order.findByIdAndUpdate(req.params.id, { status: 'rejected' });
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: 'Hiba' });
-  }
+  await Order.findByIdAndUpdate(req.params.id, { status: 'rejected' });
+  res.json({ success: true });
 });
 
 module.exports = router;
