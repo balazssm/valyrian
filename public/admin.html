@@ -176,8 +176,10 @@
                         badgeClass = 'badge-kiemeltplus';
                     } else if (currentRank === 'owner') {
                         displayText = 'TULAJDONOS';
+                    } else if (currentRank === 'dev') {
+                        displayText = 'Developer';
+                        badgeClass = 'badge-dev';
                     }
-
                     return `
                     <tr>
                         <td><b>${u.username}</b></td>
