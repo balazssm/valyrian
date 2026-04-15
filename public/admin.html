@@ -39,6 +39,7 @@
         /* BADGE STÍLUSOK */
         .badge { padding:4px 8px; border-radius:4px; font-size:11px; font-weight:bold; text-transform: uppercase; display: inline-block; min-width: 80px; text-align: center; }
         .badge-owner { background:var(--red); color:white; }
+        .badge-dev { background:var(--blue); color:white; }
         .badge-admin { background:var(--purple); color:white; }
         .badge-mod { background:var(--blue); color:white; }
         .badge-vip { background:var(--gold); color:black; }
@@ -197,6 +198,7 @@
                                 <option value="kiemeltplus" ${currentRank === 'kiemeltplus' || currentRank === 'kiemeltp' ? 'selected' : ''}>Kiemelt+</option>
                                 <option value="mod" ${currentRank === 'mod' ? 'selected' : ''}>Mod</option>
                                 <option value="admin" ${currentRank === 'admin' ? 'selected' : ''}>Admin</option>
+                                <option value="dev" ${currentRank === 'dev' ? 'selected' : ''}>Developer</option>
                                 <option value="owner" ${currentRank === 'owner' ? 'selected' : ''}>Tulajdonos</option>
                             </select>
                         </td>
