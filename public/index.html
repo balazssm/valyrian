@@ -454,6 +454,77 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.25rem 
     display: none; /* Kis mobilon elrejtjük az elválasztókat a helyhiány miatt */
   }
 }
+  /* ===== FIX PACK (NE TÖRÖLD A RÉGIT, EZ FELÜLÍRJA) ===== */
+
+* {
+  min-width: 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* NAV stabilizálás */
+nav {
+  flex-wrap: wrap;
+}
+
+.nav-links {
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.nav-user-area {
+  min-width: 0;
+}
+
+/* HERO overflow fix */
+.hero,
+.hero-content {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* GRID FIX (LEGFONTOSABB) */
+.ranks-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
+}
+
+.about-grid,
+.settings-grid,
+.wl-box {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+}
+
+/* MOBILE DRAWER FIX */
+.mobile-drawer {
+  width: 85% !important;
+  max-width: 320px;
+}
+
+/* STATUS PILL ne törjön szét */
+.status-pill {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* IP ROW FIX */
+.ip-row {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* PROFILE FIX */
+.profile-header-inner {
+  flex-wrap: wrap;
+}
+
+/* SAFE CONTAINER */
+.container {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
 </style>
 </head>
 <body class="">
