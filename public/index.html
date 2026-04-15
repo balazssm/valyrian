@@ -342,194 +342,113 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.25rem 
 
 #toast{position:fixed;bottom:1.6rem;left:50%;transform:translateX(-50%) translateY(11px);background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'Syne',sans-serif;font-size:10.5px;letter-spacing:0.09em;padding:0.5rem 1.3rem;border-radius:5px;opacity:0;transition:all 0.2s;pointer-events:none;z-index:999;text-transform:uppercase;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* ===== RESPONSIVE / MOBILE ===== */
-
-@media (max-width:1100px){
-  .nav-search-item{display:none;}
-}
-
-@media (max-width:768px){
-  /* Nav */
-  .nav-links{display:none;}
-  .nav-hamburger{display:flex;}
-  nav{padding:0 1rem;}
-
-  /* Hero */
-  .hero{padding:5rem 1.2rem 3rem;}
-  .hero-title{font-size:clamp(2.8rem,16vw,5rem);}
-  .hero-sub{font-size:0.92rem;}
-  .status-pill{flex-direction:column;gap:0.6rem;padding:0.9rem 1.2rem;width:100%;max-width:340px;}
-  .ssep{width:80%;height:1px;}
-  .ip-row{max-width:100%;}
-  .hero-btns{flex-direction:column;width:100%;max-width:340px;margin:0 auto;}
-  .btn-p,.btn-d{width:100%;justify-content:center;min-height:48px;font-size:12px;}
-
-  /* Sections */
-  section{padding:3.5rem 1.2rem;}
-  .sec-title{font-size:clamp(1.4rem,6vw,1.9rem);}
-
-  /* Grids → 1 col */
-  .about-grid,.wl-box,.settings-grid{grid-template-columns:1fr;gap:1.5rem;}
-  .ranks-grid,.feat-grid,.steps-grid{grid-template-columns:1fr;}
-  .team-grid{grid-template-columns:1fr 1fr;}
-
-  /* Whitelist box */
-  .wl-box{padding:1.5rem 1.2rem;}
-
-  /* Profile */
-  #profile-page{padding-top:58px;}
-  .profile-header{padding:1.8rem 1.2rem 0;}
-  .profile-header-inner{flex-direction:column;align-items:flex-start;gap:1rem;}
-  .profile-header-inner>div:last-child{margin-left:0;}
-  .profile-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .profile-body{padding:1.4rem 1.2rem;}
-  .stats-grid{grid-template-columns:repeat(2,1fr);}
-  .profile-username{font-size:1.5rem;}
-
-  /* Modal */
-  .modal{padding:1.6rem 1.2rem;}
-
-  /* Footer */
-  footer{padding:1.8rem 1.2rem;}
-  .footer-links a{padding:0.38rem 0.45rem;font-size:9px;}
-}
-
-@media (max-width:480px){
-  .hero-title{font-size:clamp(2.4rem,18vw,4rem);}
-  .team-grid{grid-template-columns:1fr;}
-  .stats-grid{grid-template-columns:1fr 1fr;}
-  .stats-quad{grid-template-columns:1fr 1fr;}
-  .rank-card{padding:1.4rem 1.2rem;}
-  .profile-username{font-size:1.3rem;}
-  .wl-box{padding:1.2rem 1rem;}
-}
-  /* RESPONSIVE FIXES */
-@media (max-width: 1024px) {
-  .about-grid, .wl-box {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-  .hero-title {
-    font-size: clamp(2.5rem, 8vw, 4.5rem);
-  }
-}
-
-@media (max-width: 768px) {
-  nav {
-    padding: 0 1.2rem;
-  }
-  .nav-links, .nav-search-item, .nav-auth-btn, .nav-user-area {
-    display: none; /* Elrejtjük az asztali menüt */
-  }
-  .nav-hamburger {
-    display: flex; /* Megjelenik a mobil menü gomb */
-  }
-  .ranks-grid {
-    grid-template-columns: 1fr; /* A rangok egymás alá kerülnek */
-  }
-  .hero {
-    padding-top: 7rem;
-  }
-  .hero-btns {
-    flex-direction: column;
-    width: 100%;
-    max-width: 300px;
-  }
-  .btn-p, .btn-d {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-title {
-    font-size: 3rem;
-  }
-  .status-pill {
-    gap: 0.5rem;
-    padding: 0.5rem;
-  }
-  .ssep {
-    display: none; /* Kis mobilon elrejtjük az elválasztókat a helyhiány miatt */
-  }
-}
-/* ===== FINAL FIX (EZ AZ IGAZI MEGOLDÁS) ===== */
-
-/* ne tudjon semmi kilógni */
+/* ===== RESET & BIZTONSÁG ===== */
 html, body {
-  overflow-x: hidden;
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
-/* minden elem biztonság */
-* {
-  min-width: 0;
-  max-width: 100%;
+*, *::before, *::after {
+    box-sizing: border-box; /* Ez kulcsfontosságú, hogy a padding ne tolja szét a szélességet */
 }
 
-/* képek */
 img {
-  max-width: 100%;
-  height: auto;
+    max-width: 100%;
+    height: auto;
+    display: block;
 }
 
-/* NAV */
-nav {
-  flex-wrap: wrap;
+/* ===== GRID RENDSZER (Modern megközelítés) ===== */
+.ranks-grid, .feat-grid, .steps-grid, .about-grid, .settings-grid, .wl-box {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
 }
 
-/* HERO */
-.hero,
-.hero-content {
-  max-width: 100%;
-  overflow-x: hidden;
+/* ===== RESPONSIVE STRATÉGIA ===== */
+
+/* Tablet & Kicsi Desktop (1100px alatt) */
+@media (max-width: 1100px) {
+    .nav-search-item { display: none; }
 }
 
-/* GRID FIX (EZ VOLT A FŐ BAJ) */
-.ranks-grid {
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
-}
-
-.about-grid,
-.settings-grid,
-.wl-box {
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
-}
-
-/* MOBILE */
+/* Mobil & Tablet (768px alatt) */
 @media (max-width: 768px) {
-  .ranks-grid,
-  .feat-grid,
-  .steps-grid {
-    grid-template-columns: 1fr !important;
-  }
+    /* Navigáció */
+    .nav-links, .nav-auth-btn, .nav-user-area { display: none !important; }
+    .nav-hamburger { display: flex !important; }
+    nav { padding: 0 1.2rem; height: 60px; }
 
-  .team-grid {
-    grid-template-columns: 1fr 1fr;
-  }
+    /* Hero szekció */
+    .hero { 
+        padding: 7rem 1rem 3rem; 
+        text-align: center;
+    }
+    .hero-title { 
+        font-size: clamp(2.2rem, 10vw, 3.5rem); 
+        line-height: 1.1;
+    }
+    
+    /* Gombok - Egymás alá rendezve */
+    .hero-btns {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+        max-width: 320px;
+        margin: 2rem auto 0;
+    }
+    .btn-p, .btn-d {
+        width: 100%;
+        margin: 0;
+        justify-content: center;
+        padding: 1rem;
+    }
 
-  .hero {
-    padding-top: 6.5rem;
-  }
+    /* Status Pill (IP box) javítása */
+    .status-pill {
+        flex-direction: column;
+        padding: 1rem;
+        gap: 0.8rem;
+        margin: 0 auto;
+    }
+    .ssep { display: none; } /* Vonal elrejtése mobilon */
 
-  .hero-btns {
-    flex-direction: column;
-    width: 100%;
-    max-width: 320px;
-    margin: auto;
-  }
+    /* Gridek kényszerítése 1 oszlopra */
+    .about-grid, .ranks-grid, .feat-grid, .steps-grid, .settings-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .team-grid {
+        grid-template-columns: 1fr 1fr; /* Csapat marad 2 oszlopos */
+        gap: 1rem;
+    }
 
-  .btn-p,
-  .btn-d {
-    width: 100%;
-    justify-content: center;
-  }
+    /* Profil és táblázatok */
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .profile-header-inner {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
 }
 
+/* Extra kicsi mobil (480px alatt) */
 @media (max-width: 480px) {
-  .team-grid {
-    grid-template-columns: 1fr;
-  }
+    .team-grid { grid-template-columns: 1fr !important; }
+    .stats-grid { grid-template-columns: 1fr !important; }
+    
+    .hero-title { font-size: 2rem; }
+    
+    .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
 }
 </style>
 </head>
