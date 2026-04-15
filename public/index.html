@@ -877,22 +877,6 @@ function toggleDropdown(e) { e.stopPropagation(); document.getElementById('nav-d
 function goProfile(e) { if(e) e.stopPropagation(); document.getElementById('nav-dropdown').classList.remove('open'); showPage('profile'); loadProfile(); }
 function goSettings(e) { if(e) e.stopPropagation(); document.getElementById('nav-dropdown').classList.remove('open'); showPage('profile'); loadProfile(); setTimeout(() => openProfileTab('settings'), 50); }
 function showToast(msg) { var t = document.getElementById('toast'); if(!t) return; t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2100); }
-function copyIP() {
-    const ipAddress = "play.valyrian.hu";
-    navigator.clipboard.writeText(ipAddress).then(() => {
-        
-        // 3. Handle the Toast notification
-        const toast = document.getElementById("toast");
-        toast.style.display = "block"; 
-        
-        setTimeout(() => {
-            toast.style.display = "none";
-        }, 2000);
-        
-    }).catch(err => {
-        console.error('Could not copy text: ', err);
-    });
-}
 function rankLabel(r) { 
     const labels = { 
         owner: 'Tulajdonos', 
