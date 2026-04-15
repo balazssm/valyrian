@@ -454,39 +454,38 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.25rem 
     display: none; /* Kis mobilon elrejtjük az elválasztókat a helyhiány miatt */
   }
 }
-  /* ===== FIX PACK (NE TÖRÖLD A RÉGIT, EZ FELÜLÍRJA) ===== */
+/* ===== FINAL FIX (EZ AZ IGAZI MEGOLDÁS) ===== */
 
-* {
-  min-width: 0;
+/* ne tudjon semmi kilógni */
+html, body {
+  overflow-x: hidden;
 }
 
+/* minden elem biztonság */
+* {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* képek */
 img {
   max-width: 100%;
   height: auto;
 }
 
-/* NAV stabilizálás */
+/* NAV */
 nav {
   flex-wrap: wrap;
 }
 
-.nav-links {
-  flex-wrap: wrap;
-  max-width: 100%;
-}
-
-.nav-user-area {
-  min-width: 0;
-}
-
-/* HERO overflow fix */
+/* HERO */
 .hero,
 .hero-content {
   max-width: 100%;
   overflow-x: hidden;
 }
 
-/* GRID FIX (LEGFONTOSABB) */
+/* GRID FIX (EZ VOLT A FŐ BAJ) */
 .ranks-grid {
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
 }
@@ -494,36 +493,43 @@ nav {
 .about-grid,
 .settings-grid,
 .wl-box {
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
 }
 
-/* MOBILE DRAWER FIX */
-.mobile-drawer {
-  width: 85% !important;
-  max-width: 320px;
+/* MOBILE */
+@media (max-width: 768px) {
+  .ranks-grid,
+  .feat-grid,
+  .steps-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .team-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hero {
+    padding-top: 6.5rem;
+  }
+
+  .hero-btns {
+    flex-direction: column;
+    width: 100%;
+    max-width: 320px;
+    margin: auto;
+  }
+
+  .btn-p,
+  .btn-d {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
-/* STATUS PILL ne törjön szét */
-.status-pill {
-  width: 100%;
-  max-width: 420px;
-}
-
-/* IP ROW FIX */
-.ip-row {
-  width: 100%;
-  max-width: 420px;
-}
-
-/* PROFILE FIX */
-.profile-header-inner {
-  flex-wrap: wrap;
-}
-
-/* SAFE CONTAINER */
-.container {
-  padding-left: 1rem;
-  padding-right: 1rem;
+@media (max-width: 480px) {
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
