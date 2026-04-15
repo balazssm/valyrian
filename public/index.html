@@ -404,6 +404,56 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:2.25rem 
   .profile-username{font-size:1.3rem;}
   .wl-box{padding:1.2rem 1rem;}
 }
+  /* RESPONSIVE FIXES */
+@media (max-width: 1024px) {
+  .about-grid, .wl-box {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .hero-title {
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+  }
+}
+
+@media (max-width: 768px) {
+  nav {
+    padding: 0 1.2rem;
+  }
+  .nav-links, .nav-search-item, .nav-auth-btn, .nav-user-area {
+    display: none; /* Elrejtjük az asztali menüt */
+  }
+  .nav-hamburger {
+    display: flex; /* Megjelenik a mobil menü gomb */
+  }
+  .ranks-grid {
+    grid-template-columns: 1fr; /* A rangok egymás alá kerülnek */
+  }
+  .hero {
+    padding-top: 7rem;
+  }
+  .hero-btns {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+  }
+  .btn-p, .btn-d {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 3rem;
+  }
+  .status-pill {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+  .ssep {
+    display: none; /* Kis mobilon elrejtjük az elválasztókat a helyhiány miatt */
+  }
+}
 </style>
 </head>
 <body class="">
